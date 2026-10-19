@@ -1,0 +1,929 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String                  @id @default(cuid())
+  email                 String                  @unique
+  passwordHash          String
+  fullName              String?
+  phone                 String?
+  regionId              String?
+  districtId            String?
+  isActive              Boolean                 @default(true)
+  avatarUrl             String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  lastLoginAt           DateTime?
+  name                  String                  @default("")
+  roleEnum              RoleName                @default(STUDENT)
+  roleId                String?
+  status                String                  @default("ACTIVE")
+
+  AuditLog              AuditLog[]
+  Bus                   Bus?
+  DocumentVault         DocumentVault[]
+  EquipmentMovement     EquipmentMovement[]
+  EventsOnCommunicator  EventsOnCommunicator[]
+  FeedbackRecord        FeedbackRecord[]
+  OperationalExpense    OperationalExpense[]
+  ProcurementRequest    ProcurementRequest[]
+  RouteAssignment       RouteAssignment[]
+  sessions              Session[]
+  StaffTravelAssignment StaffTravelAssignment[]
+  Student               Student?
+  Teacher               Teacher?
+  Trip                  Trip[]
+  ReportedIssues        OperationalIssue[] @relation("IssueReporter")
+  AssignedIssues        OperationalIssue[] @relation("IssueResolver")
+  InventoryTransactions InventoryTransaction[]
+
+  District              District?               @relation(fields: [districtId], references: [id])
+  Region                Region?                 @relation(fields: [regionId], references: [id])
+  role                  Role?                   @relation(fields: [roleId], references: [id])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  permissions RolePermission[]
+  users       User[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime
+
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  assignedAt   DateTime   @default(now())
+
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Session {
+  id             String    @id @default(cuid())
+  userId         String
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+  lastActivityAt DateTime  @default(now())
+  revokedAt      DateTime?
+  ipAddress      String?
+  userAgent      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityId    String?
+  ipAddress   String?
+  metadata    Json?
+  timestamp   DateTime @default(now())
+  actorUserId String?
+  entity      String?
+  userAgent   String?
+
+  User        User?    @relation(fields: [actorUserId], references: [id])
+
+  @@index([action])
+  @@index([actorUserId])
+}
+
+model EquipmentMaster {
+  id             String      @id @default(cuid())
+  name           String      @unique
+  category       String
+  unit           String      @default("piece")
+  trackable      Boolean     @default(true)
+  qrRequired     Boolean     @default(false)
+  minimumStock   Int         @default(0)
+  description    String?
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  equipment      Equipment[]
+}
+
+model CurriculumNode {
+  id          String              @id @default(cuid())
+  name        String
+  type        CurriculumNodeType
+  parentId    String?
+  description String?
+  orderIndex  Int                 @default(0)
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  parent      CurriculumNode?    @relation("CurriculumTree", fields: [parentId], references: [id])
+  children    CurriculumNode[]   @relation("CurriculumTree")
+
+  @@index([parentId])
+  @@index([type])
+}
+
+model OperationalIssue {
+  id                 String       @id @default(cuid())
+  category           IssueCategory
+  description        String
+  location           String?
+  timestamp          DateTime     @default(now())
+  evidenceUrl        String?
+  status             IssueStatus  @default(OPEN)
+  assignedResolverId String?
+  resolution         String?
+  reportedById       String
+  regionId           String?
+  busId              String?
+  schoolId           String?
+  eventId            String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  reporter           User         @relation("IssueReporter", fields: [reportedById], references: [id])
+  resolver           User?        @relation("IssueResolver", fields: [assignedResolverId], references: [id])
+  region             Region?      @relation(fields: [regionId], references: [id])
+  bus                Bus?         @relation(fields: [busId], references: [id])
+  school             School?      @relation(fields: [schoolId], references: [id])
+  event              Event?       @relation(fields: [eventId], references: [id])
+
+  @@index([status])
+  @@index([regionId])
+  @@index([reportedById])
+}
+
+model InventoryTransaction {
+  id             String                 @id @default(cuid())
+  consumableId   String
+  busId          String?
+  quantity       Int
+  type           InventoryTransactionType
+  referenceType  String?
+  referenceId    String?
+  performedById  String?
+  notes          String?
+  timestamp      DateTime               @default(now())
+
+  consumable     Consumable             @relation(fields: [consumableId], references: [id])
+  bus            Bus?                   @relation(fields: [busId], references: [id])
+  performedBy    User?                  @relation(fields: [performedById], references: [id])
+
+  @@index([consumableId])
+  @@index([timestamp])
+}
+
+model AIPrioritizationModel {
+  id                  String   @id
+  schoolId            String
+  labAbsenceScore     Float
+  remoteLocationScore Float
+  studentCountScore   Float
+  finalCalculatedRank Int
+  generatedAt         DateTime @default(now())
+}
+
+model Announcement {
+  id          String     @id
+  title       String
+  content     String
+  targetRoles RoleName[]
+  publishedAt DateTime   @default(now())
+}
+
+model Block {
+  id         String   @id
+  districtId String
+  name       String
+
+  District District @relation(fields: [districtId], references: [id])
+  School   School[]
+}
+
+model Bus {
+  id                   String                 @id
+  busCode              String?                @unique
+  registrationNumber   String                 @unique
+  regionId             String
+  driverId             String?                @unique
+  seatingCapacity      Int                    @default(4)
+  status               BusStatus              @default(AVAILABLE)
+  currentLat           Float?
+  currentLng           Float?
+  lastGpsUpdate        DateTime?
+  insuranceExpiry      DateTime
+  fitnessExpiry        DateTime
+  serviceDate          DateTime?
+
+  User                 User?                  @relation(fields: [driverId], references: [id])
+  Region               Region                 @relation(fields: [regionId], references: [id])
+  BusMaintenanceRecord BusMaintenanceRecord[]
+  Equipment            Equipment[]
+  Event                Event[]
+  GPSPosition          GPSPosition[]
+  GpsDevice            GpsDevice?
+  RouteAssignment      RouteAssignment[]
+  Trip                 Trip[]
+  InventoryTransactions InventoryTransaction[]
+  OperationalIssues    OperationalIssue[]
+}
+
+model BusMaintenanceRecord {
+  id          String          @id
+  busId       String
+  serviceType MaintenanceType @default(GENERAL_SERVICING)
+  costAmount  Float
+  serviceDate DateTime
+  nextDueDate DateTime
+  remarks     String?
+
+  Bus Bus @relation(fields: [busId], references: [id])
+}
+
+model Consumable {
+  id              String            @id
+  name            String
+  category        String
+  currentStock    Int
+  minimumStock    Int
+  unitMetric      String
+  expiryDate      DateTime?
+  ConsumableUsage       ConsumableUsage[]
+  InventoryTransaction  InventoryTransaction[]
+}
+
+model ConsumableUsage {
+  id           String     @id
+  consumableId String
+  eventId      String?
+  qtyUsed      Int
+  usedAt       DateTime   @default(now())
+
+  Consumable Consumable @relation(fields: [consumableId], references: [id])
+  Event      Event?     @relation(fields: [eventId], references: [id])
+}
+
+model DigitalCertificate {
+  id              String   @id
+  certificateCode String   @unique
+  studentId       String
+  programName     String
+  issueDate       DateTime @default(now())
+  qrCodeUrl       String
+
+  Student Student @relation(fields: [studentId], references: [id])
+}
+
+model District {
+  id       String   @id
+  regionId String
+  name     String
+
+  Block  Block[]
+  Region Region @relation(fields: [regionId], references: [id])
+  School School[]
+  User   User[]
+}
+
+model DocumentVault {
+  id           String   @id
+  title        String
+  docType      DocType  @default(MISC)
+  fileUrl      String
+  uploadedById String
+  uploadedAt   DateTime @default(now())
+
+  User User @relation(fields: [uploadedById], references: [id])
+}
+
+model Equipment {
+  id                    String                  @id
+  assetTag              String                  @unique
+  name                  String
+  category              String
+  status                EquipmentStatus         @default(AVAILABLE)
+  busId                 String?
+  storageUnit           String?
+  purchaseDate          DateTime
+  cost                  Float
+
+  Bus                   Bus?                    @relation(fields: [busId], references: [id])
+  EquipmentMovement     EquipmentMovement[]
+  ExperimentRequirement ExperimentRequirement[]
+  equipmentMasterId     String?
+  equipmentMaster       EquipmentMaster? @relation(fields: [equipmentMasterId], references: [id])
+}
+
+model EquipmentMovement {
+  id           String    @id
+  equipmentId  String
+  fromLocation String
+  toLocation   String
+  movedById    String
+  timestamp    DateTime  @default(now())
+
+  Equipment Equipment @relation(fields: [equipmentId], references: [id])
+  User      User      @relation(fields: [movedById], references: [id])
+}
+
+model Event {
+  id                   String                 @id
+  eventCode            String                 @unique
+  schoolId             String
+  busId                String
+  eventDate            DateTime
+  startTime            String
+  endTime              String
+  expectedStudentCount Int
+  status               EventStatus            @default(SCHEDULED)
+  readinessPercentage  Float                  @default(0.0)
+
+  ConsumableUsage      ConsumableUsage[]
+  Bus                  Bus                    @relation(fields: [busId], references: [id])
+  School               School                 @relation(fields: [schoolId], references: [id])
+  EventAttendance      EventAttendance[]
+  EventReadinessCheck  EventReadinessCheck?
+  EventsOnCommunicator EventsOnCommunicator[]
+  ExperimentSession    ExperimentSession[]
+  FeedbackRecord      FeedbackRecord[]
+  OperationalIssues   OperationalIssue[]
+}
+
+model EventAttendance {
+  id        String   @id
+  eventId   String
+  studentId String
+  isPresent Boolean  @default(true)
+  markedAt  DateTime @default(now())
+
+  Event   Event   @relation(fields: [eventId], references: [id])
+  Student Student @relation(fields: [studentId], references: [id])
+}
+
+model EventReadinessCheck {
+  id                    String   @id
+  eventId               String   @unique
+  isSchoolConfirmed     Boolean  @default(false)
+  isRouteConfirmed      Boolean  @default(false)
+  isDriverAssigned      Boolean  @default(false)
+  isEquipmentLoaded     Boolean  @default(false)
+  isConsumablesVerified Boolean  @default(false)
+  isSafetyKitChecked    Boolean  @default(false)
+  verifiedAt            DateTime
+
+  Event Event @relation(fields: [eventId], references: [id])
+}
+
+model EventsOnCommunicator {
+  eventId String
+  userId  String
+
+  Event Event @relation(fields: [eventId], references: [id])
+  User  User  @relation(fields: [userId], references: [id])
+
+  @@id([eventId, userId])
+}
+
+model Experiment {
+  id                    String                  @id
+  title                 String
+  subject               String
+  targetGradeRange      String
+  durationMinutes       Int
+  difficultyLevel       String
+  description           String
+  safetyInstructions    String
+  riskLevel             RiskLevel               @default(LOW)
+
+  ExperimentRequirement ExperimentRequirement[]
+  ExperimentSession     ExperimentSession[]
+  Quiz                  Quiz[]
+}
+
+model ExperimentRequirement {
+  id            String     @id
+  experimentId  String
+  equipmentId   String?
+  equipmentName String
+  requiredQty   Int
+  isConsumable  Boolean    @default(false)
+
+  Equipment     Equipment? @relation(fields: [equipmentId], references: [id])
+  Experiment    Experiment @relation(fields: [experimentId], references: [id])
+}
+
+model ExperimentSession {
+  id                   String     @id
+  eventId              String
+  experimentId         String
+  studentsParticipated Int
+  conductedBy          String
+  durationMinutes      Int
+  remarks              String?
+
+  Event      Event      @relation(fields: [eventId], references: [id])
+  Experiment Experiment @relation(fields: [experimentId], references: [id])
+}
+
+model FeedbackRecord {
+  id       String   @id
+  eventId  String
+  userId   String
+  userRole RoleName
+  rating   Int
+  comments String
+
+  Event Event @relation(fields: [eventId], references: [id])
+  User  User  @relation(fields: [userId], references: [id])
+}
+
+model GPSPosition {
+  id          String     @id
+  busId       String
+  gpsDeviceId String?
+  tripId      String?
+  latitude    Float
+  longitude   Float
+  speedKmH    Float?
+  heading     Float?
+  recordedAt  DateTime
+  isLive      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+
+  Bus       Bus        @relation(fields: [busId], references: [id])
+  GpsDevice GpsDevice? @relation(fields: [gpsDeviceId], references: [id])
+  Trip      Trip?      @relation(fields: [tripId], references: [id])
+}
+
+model GeographicCoverageRecord {
+  id                 String   @id
+  districtName       String
+  totalSchools       Int
+  schoolsCovered     Int
+  coveragePercentage Float
+  lastUpdated        DateTime
+}
+
+model GpsDevice {
+  id           String          @id
+  imeiNumber   String          @unique
+  busId        String?         @unique
+  providerName String          @default("STANDARD_TELEMETRY")
+  status       GpsDeviceStatus @default(ACTIVE)
+  installedAt  DateTime        @default(now())
+  lastSeenAt   DateTime?
+
+  GPSPosition GPSPosition[]
+  Bus         Bus?          @relation(fields: [busId], references: [id])
+}
+
+model LearningResource {
+  id           String       @id
+  title        String
+  resourceType ResourceType @default(PDF)
+  fileUrl      String
+  subject      String
+  targetGrade  String
+  createdAt    DateTime     @default(now())
+}
+
+model OperationalExpense {
+  id            String          @id
+  category      ExpenseCategory @default(MISC)
+  amount        Float
+  expenseDate   DateTime
+  receiptUrl    String?
+  description   String
+  submittedById String
+
+  User User @relation(fields: [submittedById], references: [id])
+}
+
+model ProcurementRequest {
+  id            String            @id
+  itemName      String
+  quantity      Int
+  estimatedCost Float
+  requestedById String
+  status        ProcurementStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+
+  User User @relation(fields: [requestedById], references: [id])
+}
+
+model Quiz {
+  id           String         @id
+  experimentId String
+  title        String
+  totalMarks   Int
+
+  Experiment   Experiment     @relation(fields: [experimentId], references: [id])
+  QuizAttempt  QuizAttempt[]
+  QuizQuestion QuizQuestion[]
+}
+
+model QuizAttempt {
+  id          String   @id
+  quizId      String
+  studentId   String
+  score       Int
+  maxScore    Int
+  accuracy    Float
+  attemptedAt DateTime @default(now())
+
+  Quiz    Quiz    @relation(fields: [quizId], references: [id])
+  Student Student @relation(fields: [studentId], references: [id])
+}
+
+model QuizQuestion {
+  id            String   @id
+  quizId        String
+  questionText  String
+  options       String[]
+  correctOption Int
+  explanation   String?
+
+  Quiz Quiz @relation(fields: [quizId], references: [id])
+}
+
+model Region {
+  id                    String                  @id
+  stateId               String
+  name                  String
+
+  Bus                   Bus[]
+  District              District[]
+  State                 State                   @relation(fields: [stateId], references: [id])
+  Route                 Route[]
+  School                School[]
+  StaffTravelAssignment StaffTravelAssignment[]
+  User                  User[]
+  OperationalIssues     OperationalIssue[]
+}
+
+model Route {
+  id                       String            @id
+  routeCode                String            @unique
+  routeName                String
+  regionId                 String?
+  status                   RouteStatus       @default(DRAFT)
+  startLocation            String
+  endLocation              String
+  totalDistanceKm          Float             @default(0.0)
+  estimatedDurationMinutes Int               @default(0)
+  waypointsJson            Json?
+  routeGeometryJson        Json?
+  optimizationScore        Float?            @default(0.0)
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime
+
+  Region          Region?           @relation(fields: [regionId], references: [id])
+  RouteAssignment RouteAssignment[]
+  RouteStop       RouteStop[]
+  Trip            Trip[]
+}
+
+model RouteAssignment {
+  id         String   @id
+  routeId    String
+  busId      String
+  driverId   String
+  assignedAt DateTime @default(now())
+  status     String   @default("ACTIVE")
+
+  Bus  Bus    @relation(fields: [busId], references: [id])
+  User User   @relation(fields: [driverId], references: [id])
+  Route Route  @relation(fields: [routeId], references: [id])
+}
+
+model RouteStop {
+  id               String     @id
+  routeId          String
+  schoolId         String?
+  stopOrder        Int
+  stopName         String
+  latitude         Float
+  longitude        Float
+  plannedArrival   DateTime?
+  plannedDeparture DateTime?
+  actualArrival    DateTime?
+  actualDeparture  DateTime?
+  status           StopStatus @default(PENDING)
+  notes            String?
+
+  Route  Route   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  School School? @relation(fields: [schoolId], references: [id])
+}
+
+model School {
+  id                 String               @id
+  udiseCode          String               @unique
+  name               String
+  address            String
+  regionId           String
+  districtId         String
+  blockId            String
+  latitude            Float
+  longitude           Float
+  locationSource     String?              @default("GEOCODED")
+  locationVerified   Boolean              @default(true)
+  principalName      String?
+  contactPhone       String
+  totalStudents      Int
+  hasScienceLab      Boolean              @default(false)
+  hasElectricity     Boolean              @default(true)
+  hasInternet        Boolean              @default(false)
+  priorityScore      Float                @default(0.0)
+  priorityCategory   PriorityCategory     @default(STANDARD)
+  createdAt          DateTime             @default(now())
+
+  Event              Event[]
+  RouteStop          RouteStop[]
+  Block              Block                @relation(fields: [blockId], references: [id])
+  District           District             @relation(fields: [districtId], references: [id])
+  Region             Region               @relation(fields: [regionId], references: [id])
+  SchoolRegistration SchoolRegistration[]
+  Student            Student[]
+  Teacher            Teacher[]
+  OperationalIssues  OperationalIssue[]
+}
+
+model SchoolRegistration {
+  id                   String    @id
+  schoolId             String
+  preferredDate        DateTime
+  alternativeDate      DateTime?
+  expectedStudentCount Int
+  topicsRequested      String[]
+  status               String    @default("PENDING")
+  remarks              String?
+  createdAt            DateTime  @default(now())
+
+  School School @relation(fields: [schoolId], references: [id])
+}
+
+model StaffTravelAssignment {
+  id          String   @id
+  userId      String
+  regionId    String
+  destination String
+  startDate   DateTime
+  endDate     DateTime
+  purpose     String
+
+  Region Region @relation(fields: [regionId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
+}
+
+model State {
+  id     String   @id
+  name   String   @unique
+  code   String   @unique
+
+  Region Region[]
+}
+
+model Student {
+  id                 String               @id
+  userId             String?              @unique
+  schoolId           String
+  name               String
+  gradeClass         String
+  section            String?
+  rollNumber         String?
+  totalPoints        Int                  @default(0)
+
+  DigitalCertificate DigitalCertificate[]
+  EventAttendance    EventAttendance[]
+  QuizAttempt        QuizAttempt[]
+  School             School               @relation(fields: [schoolId], references: [id])
+  User               User?                @relation(fields: [userId], references: [id])
+  StudentBadge       StudentBadge[]
+}
+
+model StudentBadge {
+  id        String   @id
+  studentId String
+  badgeName String
+  iconUrl   String
+  earnedAt  DateTime @default(now())
+
+  Student Student @relation(fields: [studentId], references: [id])
+}
+
+model SystemConfig {
+  id          String   @id
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime
+}
+
+model Teacher {
+  id            String @id
+  userId        String @unique
+  schoolId      String
+  subjectTaught String
+  phone         String
+
+  School School @relation(fields: [schoolId], references: [id])
+  User   User   @relation(fields: [userId], references: [id])
+}
+
+model Trip {
+  id            String     @id
+  tripCode      String     @unique
+  routeId       String
+  busId         String
+  driverId      String
+  status        TripStatus @default(PLANNED)
+  scheduledDate DateTime
+  startedAt     DateTime?
+  completedAt   DateTime?
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime
+
+  GPSPosition GPSPosition[]
+  Bus         Bus           @relation(fields: [busId], references: [id])
+  User        User          @relation(fields: [driverId], references: [id])
+  Route       Route         @relation(fields: [routeId], references: [id])
+}
+
+enum BusStatus {
+  AVAILABLE
+  ON_ROUTE
+  AT_SCHOOL
+  UNDER_MAINTENANCE
+  EMERGENCY
+}
+
+enum DocType {
+  VEHICLE_FITNESS
+  CONSENT_FORM
+  INVOICE
+  DRIVER_LICENSE
+  PERMIT
+  MISC
+}
+
+enum EquipmentStatus {
+  AVAILABLE
+  ASSIGNED_TO_BUS
+  IN_MAINTENANCE
+  DAMAGED
+  MISSING
+}
+
+enum EventStatus {
+  SCHEDULED
+  READINESS_VERIFIED
+  IN_TRANSIT
+  ON_SITE
+  COMPLETED
+  CANCELLED
+}
+
+enum ExpenseCategory {
+  FUEL
+  MAINTENANCE
+  FOOD
+  ACCOMMODATION
+  TOLL_PERMIT
+  MISC
+}
+
+enum GpsDeviceStatus {
+  ACTIVE
+  OFFLINE
+  FAULTY
+  UNASSOCIATED
+}
+
+enum MaintenanceType {
+  TYRE
+  BATTERY
+  ENGINE
+  GPS
+  GENERAL_SERVICING
+}
+
+enum PriorityCategory {
+  HIGH_OUTREACH
+  MEDIUM_PRIORITY
+  STANDARD
+}
+
+enum ProcurementStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PURCHASED
+  DELIVERED
+}
+
+enum ResourceType {
+  PDF
+  VIDEO
+  WORKSHEET
+  PRESENTATION
+}
+
+enum CurriculumNodeType {
+  CLASS
+  SUBJECT
+  CHAPTER
+  TOPIC
+  LEARNING_OBJECTIVE
+}
+
+enum IssueCategory {
+  EQUIPMENT
+  INVENTORY
+  VEHICLE
+  SAFETY
+  TECHNICAL
+  SCHOOL_VISIT
+  OTHER
+}
+
+enum IssueStatus {
+  OPEN
+  ACKNOWLEDGED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum InventoryTransactionType {
+  RECEIPT
+  ISSUE
+  RETURN
+  TRANSFER
+  ADJUSTMENT
+  DAMAGE
+  LOSS
+  CONSUMPTION
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RoleName {
+  SUPER_ADMIN
+  REGIONAL_ADMIN
+  SCIENCE_COMMUNICATOR
+  DRIVER
+  TEACHER
+  STUDENT
+}
+
+enum RouteStatus {
+  DRAFT
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum StopStatus {
+  PENDING
+  ARRIVED
+  DEPARTED
+  SKIPPED
+}
+
+enum TripStatus {
+  PLANNED
+  STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  EMERGENCY
+}
