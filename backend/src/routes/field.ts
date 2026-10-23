@@ -71,7 +71,28 @@ fieldRouter.get("/dashboard", async (_req,res)=>{
     });
   }
 
+<<<<<<< HEAD
   return res.status(403).json({message:"Field dashboard is only available to Science Communicators"});
+=======
+  if (r==="DRIVER") {
+    const trips=await prisma.trip.findMany({
+      where:{driverId:uid},
+      include:{Bus:true,Route:{include:{RouteStop:{include:{School:true},orderBy:{stopOrder:"asc"}}}}},
+      orderBy:{scheduledDate:"asc"},take:100
+    });
+    const todayTrips=trips.filter(t=>t.scheduledDate>=today && t.scheduledDate<tomorrow);
+    const upcoming=trips.filter(t=>t.scheduledDate>=today);
+    const bus=await prisma.bus.findUnique({where:{driverId:uid}});
+    const issues=await prisma.operationalIssue.findMany({where:{reportedById:uid},orderBy:{createdAt:"desc"},take:10});
+    return res.json({
+      role:r,user:{id:uid,name:res.locals.user.name,email:res.locals.user.email,regionId:res.locals.user.regionId},
+      kpis:{todayTrips:todayTrips.length,upcomingTrips:upcoming.length,openIssues:issues.filter((x:any)=>!["RESOLVED","CLOSED"].includes(x.status)).length},
+      todayTrips,upcomingTrips:upcoming,bus,issues
+    });
+  }
+
+  return res.status(403).json({message:"Field dashboard is only available to Instructor / Driver"});
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 });
 
 fieldRouter.get("/events", async (_req,res)=>{
@@ -84,6 +105,7 @@ fieldRouter.get("/events", async (_req,res)=>{
   res.json({rows});
 });
 
+<<<<<<< HEAD
 fieldRouter.get("/lab", async (_req,res)=>{
   if(!allow(res,["SCIENCE_COMMUNICATOR"],"field.lab.view")) return;
   const uid=actor(res);
@@ -94,6 +116,39 @@ fieldRouter.get("/lab", async (_req,res)=>{
   if(!event)return res.json({lab:null});
   const bus=await prisma.bus.findUnique({where:{id:event.busId},include:{Equipment:true,BusMaintenanceRecord:true,GpsDevice:true}});
   return res.json({lab:bus});
+=======
+fieldRouter.get("/trips", async (_req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.view")) return;
+  const rows=await prisma.trip.findMany({
+    where:{driverId:actor(res)},
+    include:{Bus:true,Route:{include:{RouteStop:{include:{School:true},orderBy:{stopOrder:"asc"}}}}},
+    orderBy:{scheduledDate:"desc"},take:200
+  });
+  res.json({rows});
+});
+
+fieldRouter.get("/lab", async (_req,res)=>{
+  if(!allow(res,["SCIENCE_COMMUNICATOR","DRIVER"],"field.lab.view")) return;
+  const uid=actor(res);
+  if(role(res)==="DRIVER") {
+    const bus=await prisma.bus.findUnique({
+      where:{driverId:uid},
+      include:{Equipment:true,BusMaintenanceRecord:true,GpsDevice:true}
+    });
+    if(!bus)return res.json({lab:null});
+    return res.json({lab:bus});
+  }
+  if(role(res)==="SCIENCE_COMMUNICATOR") {
+    const event=await prisma.event.findFirst({
+      where:{EventsOnCommunicator:{some:{userId:uid}},eventDate:{gte:new Date()}},
+      orderBy:{eventDate:"asc"}
+    });
+    if(!event)return res.json({lab:null});
+    const bus=await prisma.bus.findUnique({where:{id:event.busId},include:{Equipment:true,BusMaintenanceRecord:true,GpsDevice:true}});
+    return res.json({lab:bus});
+  }
+  return res.status(403).json({message:"Forbidden"});
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 });
 
 fieldRouter.post("/events/:id/arrival", async (req,res)=>{
@@ -160,15 +215,108 @@ fieldRouter.post("/consumption", async (req,res)=>{
 });
 
 fieldRouter.post("/issues", async(req,res)=>{
+<<<<<<< HEAD
   if(!allow(res,["SCIENCE_COMMUNICATOR"],"field.issue.report"))return;
+=======
+  if(!allow(res,["SCIENCE_COMMUNICATOR","DRIVER"],"field.issue.report"))return;
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   const parsed=z.object({
     category:z.enum(["EQUIPMENT","INVENTORY","VEHICLE","SAFETY","TECHNICAL","SCHOOL_VISIT","OTHER"]),
     description:z.string().min(1),location:z.string().optional(),schoolId:z.string().optional(),busId:z.string().optional()
   }).safeParse(req.body);
   if(!parsed.success)return res.status(400).json({message:"Invalid issue payload"});
+<<<<<<< HEAD
   const row=await prisma.operationalIssue.create({data:{id:newId(),...parsed.data,reportedById:actor(res),regionId:res.locals.user.regionId||undefined}});
+=======
+  const row=await prisma.operationalIssue.create({
+    data:{
+      id:newId(),
+      category:parsed.data.category,
+      description:parsed.data.description,
+      location:parsed.data.location||undefined,
+      schoolId:parsed.data.schoolId||undefined,
+      busId:parsed.data.busId||undefined,
+      reportedById:actor(res),
+      regionId:res.locals.user.regionId||undefined
+    }
+  });
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   await audit(req,res,"FIELD_ISSUE_REPORTED","OperationalIssue",row.id,{category:parsed.data.category});
   res.status(201).json(row);
 });
 
+<<<<<<< HEAD
+=======
+fieldRouter.post("/trips/:id/start", async(req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.execute"))return;
+  const trip=await prisma.trip.findFirst({where:{id:req.params.id,driverId:actor(res)}});
+  if(!trip)return res.status(404).json({message:"Assigned trip not found"});
+  const row=await prisma.trip.update({where:{id:trip.id},data:{status:"STARTED",startedAt:new Date()}});
+  await prisma.bus.update({where:{id:trip.busId},data:{status:"ON_ROUTE"}});
+  await audit(req,res,"TRIP_STARTED","Trip",row.id);
+  res.json(row);
+});
+
+fieldRouter.post("/trips/:id/status", async(req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.execute"))return;
+  const parsed=z.object({status:z.enum(["PLANNED","STARTED","IN_PROGRESS","COMPLETED","CANCELLED","EMERGENCY"])}).safeParse(req.body);
+  if(!parsed.success)return res.status(400).json({message:"Invalid trip status"});
+  const trip=await prisma.trip.findFirst({where:{id:req.params.id,driverId:actor(res)}});
+  if(!trip)return res.status(404).json({message:"Assigned trip not found"});
+  const data:any={status:parsed.data.status};
+  if(parsed.data.status==="COMPLETED")data.completedAt=new Date();
+  const row=await prisma.trip.update({where:{id:trip.id},data});
+  if(parsed.data.status==="COMPLETED")await prisma.bus.update({where:{id:trip.busId},data:{status:"AVAILABLE"}});
+  if(parsed.data.status==="EMERGENCY")await prisma.bus.update({where:{id:trip.busId},data:{status:"EMERGENCY"}});
+  await audit(req,res,"TRIP_STATUS_UPDATED","Trip",row.id,{status:parsed.data.status});
+  res.json(row);
+});
+
+fieldRouter.post("/trips/:id/gps", async(req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.execute"))return;
+  const parsed=z.object({latitude:z.number(),longitude:z.number(),speedKmH:z.number().optional(),heading:z.number().optional()}).safeParse(req.body);
+  if(!parsed.success)return res.status(400).json({message:"Invalid GPS payload"});
+  const trip=await prisma.trip.findFirst({where:{id:req.params.id,driverId:actor(res)}});
+  if(!trip)return res.status(404).json({message:"Assigned trip not found"});
+  const row=await prisma.gPSPosition.create({data:{id:newId(),busId:trip.busId,tripId:trip.id,latitude:parsed.data.latitude,longitude:parsed.data.longitude,speedKmH:parsed.data.speedKmH,heading:parsed.data.heading,recordedAt:new Date(),isLive:true}});
+  await prisma.bus.update({where:{id:trip.busId},data:{currentLat:parsed.data.latitude,currentLng:parsed.data.longitude,lastGpsUpdate:new Date(),status:"ON_ROUTE"}});
+  res.status(201).json(row);
+});
+
+fieldRouter.post("/trips/:id/arrival", async(req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.execute"))return;
+  const trip=await prisma.trip.findFirst({where:{id:req.params.id,driverId:actor(res)}});
+  if(!trip)return res.status(404).json({message:"Assigned trip not found"});
+  const stop=await prisma.routeStop.findFirst({where:{routeId:trip.routeId,status:"PENDING"},orderBy:{stopOrder:"asc"}});
+  if(!stop)return res.status(400).json({message:"No pending stop"});
+  const row=await prisma.routeStop.update({where:{id:stop.id},data:{status:"ARRIVED",actualArrival:new Date()}});
+  await prisma.bus.update({where:{id:trip.busId},data:{status:"AT_SCHOOL"}});
+  await audit(req,res,"SCHOOL_ARRIVAL","RouteStop",row.id);
+  res.json(row);
+});
+
+fieldRouter.post("/trips/:id/departure", async(req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.execute"))return;
+  const trip=await prisma.trip.findFirst({where:{id:req.params.id,driverId:actor(res)}});
+  if(!trip)return res.status(404).json({message:"Assigned trip not found"});
+  const stop=await prisma.routeStop.findFirst({where:{routeId:trip.routeId,status:"ARRIVED"},orderBy:{stopOrder:"asc"}});
+  if(!stop)return res.status(400).json({message:"No arrived stop"});
+  const row=await prisma.routeStop.update({where:{id:stop.id},data:{status:"DEPARTED",actualDeparture:new Date()}});
+  await prisma.bus.update({where:{id:trip.busId},data:{status:"ON_ROUTE"}});
+  await audit(req,res,"SCHOOL_DEPARTURE","RouteStop",row.id);
+  res.json(row);
+});
+
+fieldRouter.post("/trips/:id/emergency", async(req,res)=>{
+  if(!allow(res,["DRIVER"],"field.trip.execute"))return;
+  const trip=await prisma.trip.findFirst({where:{id:req.params.id,driverId:actor(res)}});
+  if(!trip)return res.status(404).json({message:"Assigned trip not found"});
+  const issue=await prisma.operationalIssue.create({data:{id:newId(),category:"VEHICLE",description:String(req.body?.description||"Driver reported an emergency"),reportedById:actor(res),regionId:res.locals.user.regionId,busId:trip.busId}});
+  await prisma.trip.update({where:{id:trip.id},data:{status:"EMERGENCY"}});
+  await prisma.bus.update({where:{id:trip.busId},data:{status:"EMERGENCY"}});
+  await audit(req,res,"EMERGENCY_REPORTED","Trip",trip.id,{issueId:issue.id});
+  res.status(201).json({issue});
+});
+
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 export default fieldRouter;

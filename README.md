@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Science on Wheels — Unified Three-Role Platform
+=======
+# Science on Wheels — Unified Four-Role Platform
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
 This package is the merged Science on Wheels application.
 
@@ -7,15 +11,26 @@ This package is the merged Science on Wheels application.
 One application:
 - one React/Vite frontend
 - one Express/TypeScript backend
+<<<<<<< HEAD
 - one PostgreSQL (Supabase) / Prisma database
 - one database-backed HttpOnly session
 - one login page
 - three role-specific portals
+=======
+- one PostgreSQL/Prisma database
+- one database-backed HttpOnly session
+- one login page
+- four role-specific portals
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
 Login routing:
 - `SUPER_ADMIN` → `/super-admin`
 - `REGIONAL_ADMIN` → `/regional-admin`
 - `SCIENCE_COMMUNICATOR` → `/instructor`
+<<<<<<< HEAD
+=======
+- `DRIVER` → `/driver`
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
 ## RBAC
 
@@ -57,6 +72,21 @@ Field execution:
 - field issues
 - session/visit records
 
+<<<<<<< HEAD
+=======
+### Driver
+Transportation execution:
+- assigned trips
+- assigned route/stops
+- mobile laboratory/vehicle
+- pre-trip/vehicle checks
+- trip start/status/end
+- school arrival/departure
+- GPS updates
+- emergency reporting
+- trip records
+
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 ## Security
 
 - Argon2id password hashing
@@ -97,8 +127,12 @@ Backend: `http://localhost:5000`
 Copy `backend/.env.example` to `backend/.env`.
 
 Required:
+<<<<<<< HEAD
 - `DATABASE_URL` (Supabase connection pooler URL, port 6543)
 - `DIRECT_URL` (Supabase direct database URL, port 5432, for Prisma migrations)
+=======
+- `DATABASE_URL`
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 - `SESSION_SECRET` (32+ characters and separate from the database password)
 - `FRONTEND_URL`
 - bootstrap Super Admin credentials
@@ -116,7 +150,11 @@ npx prisma generate
 npx prisma migrate dev --name <descriptive_name>
 ```
 
+<<<<<<< HEAD
 The Super Admin creates Regional Admin and Science Communicator accounts through the existing People & Access user workflow. The same login page then routes each account to its role-specific dashboard.
+=======
+The Super Admin creates Regional Admin, Science Communicator and Driver accounts through the existing People & Access user workflow. The same login page then routes each account to its role-specific dashboard.
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
 ## Frontend visual direction
 

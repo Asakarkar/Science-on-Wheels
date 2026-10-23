@@ -4,7 +4,14 @@ import { z } from "zod";
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(5000),
+<<<<<<< HEAD
   FRONTEND_URL: z.string().url(),
+=======
+  FRONTEND_URL: z.string().default("http://localhost:5173"),
+  COOKIE_SAME_SITE: z.enum(["lax", "strict", "none"]).optional(),
+  COOKIE_SECURE: z.coerce.boolean().optional(),
+  COOKIE_DOMAIN: z.string().optional(),
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   DATABASE_URL: z.string().min(1),
   SESSION_SECRET: z.string().min(32),
   BOOTSTRAP_ADMIN_NAME: z.string().min(2),
@@ -13,10 +20,13 @@ const schema = z.object({
   RESEND_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
+<<<<<<< HEAD
   SUPABASE_URL: z.string().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
   NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
+=======
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   // Optional integration configuration. These values do not enable a feature
   // unless the corresponding service integration is implemented and deployed.
   REDIS_URL: z.string().optional(),
@@ -48,3 +58,12 @@ const schema = z.object({
 });
 
 export const env = schema.parse(process.env);
+<<<<<<< HEAD
+=======
+
+export function getAllowedOrigins(): string[] {
+  return env.FRONTEND_URL.split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+}
+>>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
