@@ -30,7 +30,6 @@ async function main() {
   console.log("Starting Science on Wheels database seed...");
 
   // --------------------------------------------------
-<<<<<<< HEAD
   // 1. Create permissions (parallel)
   // --------------------------------------------------
   await Promise.all(
@@ -45,26 +44,6 @@ async function main() {
 
   // --------------------------------------------------
   // 2. Create roles (parallel)
-=======
-  // 1. Create permissions
-  // --------------------------------------------------
-  for (const key of permissionKeys) {
-    await prisma.permission.upsert({
-      where: { key },
-      update: {
-        description: key,
-      },
-      create: {
-        key,
-        description: key,
-        updatedAt: new Date(),
-      },
-    });
-  }
-
-  // --------------------------------------------------
-  // 2. Create roles
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   // --------------------------------------------------
   const roles = [
     {
@@ -79,7 +58,6 @@ async function main() {
       name: "SCIENCE_COMMUNICATOR",
       description: "Science Communicator / Instructor",
     },
-<<<<<<< HEAD
   ] as const;
 
   await Promise.all(
@@ -98,28 +76,6 @@ async function main() {
 
   const allRoles = await prisma.role.findMany();
   const roleMap = new Map(allRoles.map((r) => [r.name, r.id]));
-=======
-    {
-      name: "DRIVER",
-      description: "Mobile Laboratory Driver",
-    },
-  ] as const;
-
-  for (const role of roles) {
-    await prisma.role.upsert({
-      where: {
-        name: role.name,
-      },
-      update: {
-        description: role.description,
-      },
-      create: {
-        name: role.name,
-        description: role.description,
-      },
-    });
-  }
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
   const rolePermissionMap: Record<string, string[]> = {
     SUPER_ADMIN: permissionKeys,
@@ -135,7 +91,6 @@ async function main() {
       "field.route.execute","field.visit.view","field.visit.execute",
       "field.session.view","field.session.execute","field.inventory.view",
       "field.inventory.record","field.issue.report","field.records.view"
-<<<<<<< HEAD
     ]
   };
 
@@ -191,40 +146,10 @@ async function main() {
       id: "district-pune",
       name: "Pune",
       regionId: region.id,
-=======
-    ],
-    DRIVER: [
-      "dashboard.view","field.schedule.view","field.lab.view","field.route.view",
-      "field.route.execute","field.visit.view","field.visit.execute",
-      "field.issue.report","field.trip.view","field.trip.execute",
-      "field.safety.record","field.records.view"
-    ]
-  };
-
-  for (const [roleName, keys] of Object.entries(rolePermissionMap)) {
-    const role = await prisma.role.findUniqueOrThrow({ where: { name: roleName } });
-    for (const key of keys) {
-      const permission = await prisma.permission.findUniqueOrThrow({ where: { key } });
-      await prisma.rolePermission.upsert({
-        where: { roleId_permissionId: { roleId: role.id, permissionId: permission.id } },
-        update: {},
-        create: { roleId: role.id, permissionId: permission.id }
-      });
-    }
-  }
-
-  // --------------------------------------------------
-  // 3. Get Super Admin role
-  // --------------------------------------------------
-  const adminRole = await prisma.role.findUniqueOrThrow({
-    where: {
-      name: "SUPER_ADMIN",
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
     },
   });
 
   // --------------------------------------------------
-<<<<<<< HEAD
   // 6. Get other roles
   // --------------------------------------------------
   const regionalRole = await prisma.role.findUniqueOrThrow({
@@ -237,34 +162,6 @@ async function main() {
 
   // --------------------------------------------------
   // 7. Create / update bootstrap Super Admin
-=======
-  // 4. Give Super Admin all current permissions
-  // --------------------------------------------------
-  for (const key of permissionKeys) {
-    const permission = await prisma.permission.findUniqueOrThrow({
-      where: {
-        key,
-      },
-    });
-
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: adminRole.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: adminRole.id,
-        permissionId: permission.id,
-      },
-    });
-  }
-
-  // --------------------------------------------------
-  // 5. Create / update bootstrap Super Admin
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   // --------------------------------------------------
   const email = env.BOOTSTRAP_ADMIN_EMAIL.toLowerCase();
   const passwordHash = await hashPassword(
@@ -311,7 +208,6 @@ async function main() {
     console.log(`Super Admin created: ${admin.email}`);
   }
 
-<<<<<<< HEAD
   // --------------------------------------------------
   // 8. Create / update Regional Administrator
   // --------------------------------------------------
@@ -401,15 +297,6 @@ async function main() {
   console.log(`1. Super Admin: ${admin.email} (password: ${env.BOOTSTRAP_ADMIN_PASSWORD})`);
   console.log(`2. Regional Admin: ${regionalAdmin.email} (password: RegionalAdmin@123456)`);
   console.log(`3. Field Operator: ${fieldOperator.email} (password: FieldOperator@123456)`);
-=======
-  console.log("");
-  console.log("========================================");
-  console.log("Science on Wheels bootstrap complete");
-  console.log("========================================");
-  console.log(`Super Admin: ${admin.email}`);
-  console.log(`Role: ${admin.roleEnum}`);
-  console.log(`Status: ${admin.status}`);
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   console.log("========================================");
 }
 

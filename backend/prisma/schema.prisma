@@ -3,14 +3,9 @@ generator client {
 }
 
 datasource db {
-<<<<<<< HEAD
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-=======
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 }
 
 model User {
@@ -905,10 +900,6 @@ enum RoleName {
   SUPER_ADMIN
   REGIONAL_ADMIN
   SCIENCE_COMMUNICATOR
-<<<<<<< HEAD
-=======
-  DRIVER
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   TEACHER
   STUDENT
 }

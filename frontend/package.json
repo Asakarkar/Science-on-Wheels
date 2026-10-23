@@ -1,20 +1,11 @@
 {
-<<<<<<< HEAD
-=======
-  "name": "science-on-wheels-frontend",
-  "private": true,
-  "type": "module",
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@supabase/supabase-js": "^2.118.0",
-=======
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest"
@@ -26,8 +17,4 @@
     "typescript": "latest",
     "vite": "latest"
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5

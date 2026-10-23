@@ -125,11 +125,7 @@ regionalAdminRouter.get("/overview", async (_req: AuthenticatedRequest, res, nex
       prisma.user.count({
         where: {
           regionId,
-<<<<<<< HEAD
           roleEnum: "SCIENCE_COMMUNICATOR",
-=======
-          roleEnum: { in: ["SCIENCE_COMMUNICATOR", "DRIVER"] },
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
           isActive: true,
           status: "ACTIVE",
         },
@@ -283,20 +279,12 @@ regionalAdminRouter.get("/overview", async (_req: AuthenticatedRequest, res, nex
 /**
  * Generic region-scoped resource listing.
  */
-<<<<<<< HEAD
 regionalAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, next) => {
-=======
-regionalAdminRouter.get("/resource/:resource", async (req, res) => {
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   const resource = req.params.resource;
   const delegateName = resourceMap[resource];
 
   if (!delegateName) {
-<<<<<<< HEAD
     return next();
-=======
-    return res.status(404).json({ message: "Unknown regional resource" });
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   }
 
   const take = Math.min(Math.max(Number(req.query.limit) || 100, 1), 500);
@@ -426,11 +414,7 @@ regionalAdminRouter.get("/reports/summary", async (_req, res, next) => {
       prisma.user.count({
         where: {
           regionId,
-<<<<<<< HEAD
           roleEnum: "SCIENCE_COMMUNICATOR",
-=======
-          roleEnum: { in: ["SCIENCE_COMMUNICATOR", "DRIVER"] },
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
         },
       }),
       prisma.event.count({ where: { School: { regionId } } }),
@@ -488,24 +472,16 @@ regionalAdminRouter.get("/reports/:resource.csv", async (req, res) => {
     labs: { regionId },
     staff: { regionId },
     visits: { School: { regionId } },
-<<<<<<< HEAD
-=======
-    sessions: { Event: { School: { regionId } } },
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
     issues: { regionId },
     students: { School: { regionId } },
     equipment: { Bus: { regionId } },
     routes: { regionId },
     inventory: { bus: { regionId } },
-<<<<<<< HEAD
     consumables: {
       InventoryTransaction: {
         some: { bus: { regionId } },
       },
     },
-=======
-    attendance: { Event: { School: { regionId } } },
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   };
 
   try {
@@ -736,11 +712,7 @@ regionalAdminRouter.post(
         where: {
           id: parsed.data.userId,
           regionId,
-<<<<<<< HEAD
           roleEnum: "SCIENCE_COMMUNICATOR",
-=======
-          roleEnum: { in: ["SCIENCE_COMMUNICATOR", "DRIVER"] },
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
         },
       }),
     ]);

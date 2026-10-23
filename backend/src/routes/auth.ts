@@ -2,11 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { verifyPassword } from "../lib/password";
-<<<<<<< HEAD
 import { createSession, deleteSession, SESSION_COOKIE } from "../lib/session";
-=======
-import { createSession, deleteSession, SESSION_COOKIE, getSessionCookieOptions, getClearSessionCookieOptions } from "../lib/session";
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 import { requireAuth } from "../middleware/auth";
 
 export const authRouter = Router();
@@ -62,7 +58,6 @@ authRouter.post("/login", async (req, res) => {
   await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
   await audit(user.id, "LOGIN_SUCCESS", "User", user.id, req);
 
-<<<<<<< HEAD
   res.cookie(SESSION_COOKIE, session.rawToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -70,9 +65,6 @@ authRouter.post("/login", async (req, res) => {
     expires: session.expiresAt,
     path: "/"
   });
-=======
-  res.cookie(SESSION_COOKIE, session.rawToken, getSessionCookieOptions(session.expiresAt));
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
   return res.json({ user: serializeUser(user) });
 });
@@ -81,10 +73,6 @@ authRouter.post("/logout", requireAuth, async (req, res) => {
   const user = res.locals.user;
   await deleteSession(req.cookies?.[SESSION_COOKIE]);
   await audit(user.id, "LOGOUT", "User", user.id, req);
-<<<<<<< HEAD
   res.clearCookie(SESSION_COOKIE, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" });
-=======
-  res.clearCookie(SESSION_COOKIE, getClearSessionCookieOptions());
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   res.status(204).send();
 });

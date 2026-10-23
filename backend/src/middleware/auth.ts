@@ -1,16 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
-<<<<<<< HEAD
 import { getSessionUser, SESSION_COOKIE, SESSION_TTL_MS } from "../lib/session";
-=======
-import { getSessionUser, SESSION_COOKIE, getSessionCookieOptions } from "../lib/session";
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.cookies?.[SESSION_COOKIE];
     const user = await getSessionUser(token);
     if (!user) return res.status(401).json({ message: "Authentication required" });
-<<<<<<< HEAD
     res.cookie(SESSION_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -19,11 +14,6 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       path: "/",
     });
     res.locals.user = user;
-=======
-    res.cookie(SESSION_COOKIE, token, getSessionCookieOptions());
-    res.locals.user = user;
-    (req as any).userId = user.id;
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
     next();
   } catch (error) {
     console.error("Authentication error", error);

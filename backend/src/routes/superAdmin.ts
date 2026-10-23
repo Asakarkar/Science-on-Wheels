@@ -1,9 +1,5 @@
 import { Router } from "express";
 import crypto from "node:crypto";
-<<<<<<< HEAD
-=======
-import { z } from "zod";
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
 import { prisma } from "../lib/prisma";
 import { requireAuth, requirePermission, requireSuperAdmin } from "../middleware/auth";
 import { hashPassword } from "../lib/password";
@@ -56,15 +52,7 @@ function normalizePayload(input: any) {
   const data = { ...(input || {}) };
   delete data.id;
   for (const key of Object.keys(data)) {
-<<<<<<< HEAD
     if (dateFields.has(key) && data[key]) data[key] = new Date(data[key]);
-=======
-    if (data[key] === "") {
-      data[key] = null;
-    } else if (dateFields.has(key) && data[key]) {
-      data[key] = new Date(data[key]);
-    }
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   }
   return data;
 }
@@ -93,11 +81,7 @@ superAdminRouter.get("/overview", requirePermission("dashboard.view"), async (_r
   const [regions, labs, fieldStaff, schools, students, completed, pending, consumables, buses] = await Promise.all([
     prisma.region.count(),
     prisma.bus.count({ where: { status: { not: "UNDER_MAINTENANCE" } } }),
-<<<<<<< HEAD
     prisma.user.count({ where: { roleEnum: "SCIENCE_COMMUNICATOR", isActive: true } }),
-=======
-    prisma.user.count({ where: { roleEnum: { in: ["SCIENCE_COMMUNICATOR", "DRIVER"] }, isActive: true } }),
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
     prisma.school.count(),
     prisma.student.count(),
     prisma.event.count({ where: { status: "COMPLETED" } }),
@@ -134,15 +118,9 @@ superAdminRouter.get("/health", requirePermission("security.view"), async (_req,
   res.json({ api: "healthy", database, responseMs: Date.now() - started, uptimeSeconds: process.uptime(), node: process.version });
 });
 
-<<<<<<< HEAD
 superAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, next) => {
   const delegateName = resourceMap[req.params.resource];
   if (!delegateName) return next();
-=======
-superAdminRouter.get("/resource/:resource", async (req, res) => {
-  const delegateName = resourceMap[req.params.resource];
-  if (!delegateName) return res.status(404).json({ message: "Unknown resource" });
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   const prismaAny = prisma as any;
   const delegate = prismaAny[delegateName];
   const take = Math.min(Number(req.query.limit) || 100, 500);
@@ -173,17 +151,10 @@ superAdminRouter.get("/resource/:resource", async (req, res) => {
   res.json({ rows: safe });
 });
 
-<<<<<<< HEAD
 superAdminRouter.post(["/resource/:resource", "/:resource"], async (req, res, next) => {
   const resource = req.params.resource;
   const delegateName = resourceMap[resource];
   if (!delegateName || !idModels.has(resource)) return next();
-=======
-superAdminRouter.post("/resource/:resource", async (req, res) => {
-  const resource = req.params.resource;
-  const delegateName = resourceMap[resource];
-  if (!delegateName || !idModels.has(resource)) return res.status(404).json({ message: "Unknown resource" });
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   const delegate = (prisma as any)[delegateName];
   const data = normalizePayload(req.body);
   if (!data.id) data.id = newId();
@@ -230,17 +201,10 @@ superAdminRouter.post("/resource/:resource", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 superAdminRouter.patch(["/resource/:resource/:id", "/:resource/:id"], async (req, res, next) => {
   const resource = req.params.resource;
   const delegateName = resourceMap[resource];
   if (!delegateName) return next();
-=======
-superAdminRouter.patch("/resource/:resource/:id", async (req, res) => {
-  const resource = req.params.resource;
-  const delegateName = resourceMap[resource];
-  if (!delegateName) return res.status(404).json({ message: "Unknown resource" });
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   const delegate = (prisma as any)[delegateName];
   const data = normalizePayload(req.body);
   delete data.id;
@@ -264,17 +228,10 @@ superAdminRouter.patch("/resource/:resource/:id", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 superAdminRouter.delete(["/resource/:resource/:id", "/:resource/:id"], async (req, res, next) => {
   const resource = req.params.resource;
   const delegateName = resourceMap[resource];
   if (!delegateName) return next();
-=======
-superAdminRouter.delete("/resource/:resource/:id", async (req, res) => {
-  const resource = req.params.resource;
-  const delegateName = resourceMap[resource];
-  if (!delegateName) return res.status(404).json({ message: "Unknown resource" });
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   try {
     const row = await (prisma as any)[delegateName].delete({ where: { id: req.params.id } });
     await audit(req, "DELETE", resource, row.id);
@@ -310,22 +267,9 @@ superAdminRouter.get("/reports/:resource.csv", requirePermission("analytics.view
   if (!delegateName) return res.status(404).send("Unknown resource");
   const rows = await (prisma as any)[delegateName].findMany({ take: 1000 });
   const keys: string[] = Array.from(new Set<string>(rows.flatMap((r: any) => Object.keys(r).filter((k: string) => k !== "passwordHash"))));
-<<<<<<< HEAD
   const csv = [keys.join(","), ...rows.map((r: any) => keys.map((k: string) => JSON.stringify(r[k] ?? "")).join(","))].join("\n");
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename=${resource}.csv`);
-=======
-
-  const escapeCsv = (value: unknown) => {
-    if (value === null || value === undefined) return '""';
-    const text = value instanceof Date ? value.toISOString() : typeof value === "object" ? JSON.stringify(value) : String(value);
-    return `"${text.replace(/"/g, '""')}"`;
-  };
-
-  const csv = [keys.map(escapeCsv).join(","), ...rows.map((r: any) => keys.map((k: string) => escapeCsv(r[k])).join(","))].join("\r\n");
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", `attachment; filename="${resource}.csv"`);
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   res.send(csv);
 });
 

@@ -1,9 +1,4 @@
 {
-<<<<<<< HEAD
-=======
-  "name": "science-on-wheels-backend",
-  "private": true,
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
   "scripts": {
     "dev": "tsx src/server.ts",
     "build": "tsc",
@@ -14,10 +9,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
-<<<<<<< HEAD
     "@supabase/supabase-js": "^2.118.0",
-=======
->>>>>>> 8f0ccb838a88357dc8593492829f7083907564e5
     "argon2": "latest",
     "cookie-parser": "latest",
     "cors": "latest",
