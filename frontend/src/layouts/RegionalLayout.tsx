@@ -37,32 +37,13 @@ export function RegionalLayout() {
                 className="inline-block h-2 w-2 rounded-xs"
                 style={{ backgroundColor: "#3D6B52" }}
               />
-              <span className="tracking-tight">SOW // REGIONAL OPERATIONS</span>
+              <span className="tracking-tight">REGIONAL OPERATIONS</span>
             </div>
-            <span className="text-stone">|</span>
-            <span className="hidden uppercase tracking-wider text-[11px] text-charcoal-subtle sm:inline">
-              Regional Node: R-01 (ACTIVE)
-            </span>
           </div>
 
           <div className="flex items-center space-x-4 text-charcoal-muted">
-            <span className="flex items-center gap-2">
-              <span
-                className="inline-block h-2 w-2 rounded-full animate-pulse"
-                style={{
-                  backgroundColor: "rgb(5, 150, 105)",
-                  boxShadow: "rgba(5, 150, 105, 0.25) 0px 0px 0px 2px",
-                }}
-              />
-              <span
-                className="font-medium text-[11px] tracking-wide"
-                style={{ color: "rgb(5, 150, 105)" }}
-              >
-                REGION DATA: LIVE & ISOLATED
-              </span>
-            </span>
             <span className="hidden border-l border-stone pl-3 text-[11px] text-charcoal-subtle md:inline">
-              BUILD 4.19.2
+              Version 1.26.1
             </span>
           </div>
         </div>
