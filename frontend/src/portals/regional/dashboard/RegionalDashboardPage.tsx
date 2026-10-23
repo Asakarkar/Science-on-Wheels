@@ -44,27 +44,44 @@ function Stat({ label, value, accent = "cyan" }: { label: string; value: any; ac
 export function RegionalDashboardPage() {
   const [overview, setOverview] = useState<RegionalOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await apiClient<RegionalOverview>("/regional-admin/overview");
-        setOverview(data);
-      } catch (err) {
-        console.error("Unable to load regional overview", err);
-      } finally {
-        setLoading(false);
-      }
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiClient<RegionalOverview>("/regional-admin/overview");
+      setOverview(data);
+    } catch (err: any) {
+      console.error("Unable to load regional overview", err);
+      setError(err?.message || "Failed to load regional overview data");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     void load();
   }, []);
 
-  if (loading || !overview) {
+  if (loading) {
     return (
       <div className="loading-state">
         <div className="loader-ring" />
         Loading regional command center…
+      </div>
+    );
+  }
+
+  if (error || !overview) {
+    return (
+      <div className="error-state">
+        <div className="surface" style={{ maxWidth: 480, margin: "2rem auto", textAlign: "center" }}>
+          <h3 style={{ color: "var(--crimson)", marginBottom: 8 }}>Unable to Load Regional Command Center</h3>
+          <p style={{ color: "var(--charcoal-muted)", fontSize: 13, marginBottom: 16 }}>{error || "An unexpected error occurred while fetching regional data."}</p>
+          <button className="primary" onClick={() => void load()}>Retry loading</button>
+        </div>
       </div>
     );
   }
@@ -177,7 +194,7 @@ export function RegionalDashboardPage() {
         </section>
       </div>
 
-      <section className="surface" style={{ marginTop: "1.5rem" }}>
+      <section className="surface" style={{ marginTop: "1rem" }}>
         <div className="module-head">
           <div>
             <div className="section-kicker">LIVE LABS</div>

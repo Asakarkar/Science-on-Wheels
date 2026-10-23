@@ -8,27 +8,44 @@ import type { Overview } from "../../../shared/types/admin";
 export function DashboardPage() {
   const [overview, setOverview] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await apiClient<Overview>("/super-admin/overview");
-        setOverview(data);
-      } catch (err) {
-        console.error("Unable to load overview", err);
-      } finally {
-        setLoading(false);
-      }
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await apiClient<Overview>("/super-admin/overview");
+      setOverview(data);
+    } catch (err: any) {
+      console.error("Unable to load overview", err);
+      setError(err?.message || "Failed to load command center overview");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     void load();
   }, []);
 
-  if (loading || !overview) {
+  if (loading) {
     return (
       <div className="loading-state">
         <div className="loader-ring" />
         Loading command center…
+      </div>
+    );
+  }
+
+  if (error || !overview) {
+    return (
+      <div className="error-state">
+        <div className="surface" style={{ maxWidth: 480, margin: "2rem auto", textAlign: "center" }}>
+          <h3 style={{ color: "var(--crimson)", marginBottom: 8 }}>Unable to Load Command Center</h3>
+          <p style={{ color: "var(--charcoal-muted)", fontSize: 13, marginBottom: 16 }}>{error || "An unexpected error occurred while fetching system metrics."}</p>
+          <button className="primary" onClick={() => void load()}>Retry loading</button>
+        </div>
       </div>
     );
   }

@@ -45,11 +45,23 @@ export function FieldDashboardPage() {
     }
   }
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <div className="loading-state">
         <div className="loader-ring" />
         Loading field dashboard…
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="error-state">
+        <div className="surface" style={{ maxWidth: 480, margin: "2rem auto", textAlign: "center" }}>
+          <h3 style={{ color: "var(--crimson)", marginBottom: 8 }}>Unable to Load Field Dashboard</h3>
+          <p style={{ color: "var(--charcoal-muted)", fontSize: 13, marginBottom: 16 }}>{message || "Could not retrieve field assignments."}</p>
+          <button className="primary" onClick={() => void load()}>Retry loading</button>
+        </div>
       </div>
     );
   }

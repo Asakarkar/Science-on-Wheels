@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 /* =========================================================
-   SCIMOVE DESIGN SYSTEM TOKENS — UNDERSTATED INDUSTRIAL
+   SCIENCE ON WHEELS DESIGN SYSTEM TOKENS — UNDERSTATED INDUSTRIAL
    ========================================================= */
 :root {
   color-scheme: light;
@@ -114,7 +114,7 @@ button:disabled {
   background-color: rgba(250, 248, 245, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 10px 24px;
+  padding: 5px 20px;
   z-index: 30;
 }
 
@@ -132,7 +132,7 @@ button:disabled {
    AUTHENTICATION / LOGIN PAGE SPECIFICS
    ========================================================= */
 
-/* SciMove login layout */
+/* Science on Wheels login layout */
 .sow-login-main {
   flex: 1 0 auto;
   display: flex;
@@ -504,29 +504,42 @@ button:disabled {
    ========================================================= */
 .admin-shell,
 .field-shell {
-  min-height: 100vh;
-  min-height: 100svh;
+  height: 100vh;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   position: relative;
   background-color: var(--bg-canvas);
   color: var(--charcoal);
+  overflow: hidden;
+}
+
+.portal-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
 }
 
 /* Sidebar navigation */
 .admin-sidebar,
 .field-sidebar {
-  position: fixed;
-  inset: 42px auto 0 0;
   width: 260px;
+  flex-shrink: 0;
+  height: 100%;
   z-index: 20;
+  position: relative;
   background: var(--paper-card);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-right: 1px solid var(--stone);
-  padding: 18px 12px 14px;
+  padding: 16px 12px 14px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-brand,
@@ -798,24 +811,28 @@ button:disabled {
    ========================================================= */
 .admin-main,
 .field-main {
-  margin-left: 260px;
-  width: calc(100% - 260px);
+  flex: 1;
   min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   z-index: 10;
   display: flex;
   flex-direction: column;
+  margin-left: 0;
+  width: auto;
 }
 
 .admin-topbar,
 .field-top {
-  height: 56px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 clamp(16px, 2.5vw, 34px);
+  padding: 0 clamp(12px, 1.8vw, 20px);
   border-bottom: 1px solid var(--stone);
-  background: rgba(250, 248, 245, 0.92);
+  background: rgba(250, 248, 245, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   position: sticky;
@@ -919,7 +936,7 @@ button:disabled {
 
 .page-content,
 .field-content {
-  padding: clamp(22px, 2.5vw, 34px) clamp(16px, 2.5vw, 38px) 64px;
+  padding: 8px clamp(12px, 1.8vw, 20px) 24px;
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
@@ -935,7 +952,7 @@ button:disabled {
   background: var(--paper-card);
   border: 1px solid var(--stone);
   border-radius: 12px;
-  padding: clamp(18px, 2vw, 26px);
+  padding: clamp(14px, 1.8vw, 22px);
   box-shadow: 0 1px 3px rgba(43, 48, 50, 0.04), 0 8px 24px rgba(43, 48, 50, 0.04);
 }
 
@@ -946,8 +963,8 @@ button:disabled {
   align-items: flex-start;
   gap: 12px;
   border-bottom: 1px solid var(--stone-light);
-  padding-bottom: 14px;
-  margin-bottom: 16px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .section-kicker,
@@ -955,20 +972,20 @@ button:disabled {
 .field-kicker,
 .field-section-title span {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--terracotta-dark);
   text-transform: uppercase;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .surface h3,
 .feature-card h2,
 .field-card h2 {
   font-family: var(--sans);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--charcoal);
   letter-spacing: -0.025em;
@@ -981,8 +998,8 @@ button:disabled {
 .field-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin: 16px 0 20px;
+  gap: 8px;
+  margin: 0 0 10px;
 }
 
 .metric-card,
@@ -992,8 +1009,8 @@ button:disabled {
 .health-card {
   background: var(--paper-card);
   border: 1px solid var(--stone);
-  border-radius: 10px;
-  padding: 16px;
+  border-radius: 8px;
+  padding: 8px 12px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(43, 48, 50, 0.03), 0 4px 12px rgba(43, 48, 50, 0.03);
@@ -1011,7 +1028,7 @@ button:disabled {
 .kpi-card span,
 .field-stat span {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--charcoal-muted);
   letter-spacing: 0.05em;
@@ -1023,11 +1040,11 @@ button:disabled {
 .field-stat strong {
   display: block;
   font-family: var(--sans);
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: var(--charcoal);
-  margin-top: 6px;
+  margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1635,7 +1652,7 @@ tbody tr:hover {
 
   .page-content,
   .field-content {
-    padding: 16px 14px 48px;
+    padding: 8px 12px 32px;
   }
 
   .form-grid {
@@ -1649,23 +1666,24 @@ tbody tr:hover {
 }
 
 /* =========================================================
-   COMMAND HERO & VISUAL SCHEMATICS
+   COMMAND HERO & VISUAL SCHEMATICS (COMPACT)
    ========================================================= */
 .command-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr);
-  min-height: 220px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(180px, 0.7fr);
+  min-height: 80px;
+  max-height: 105px;
   border: 1px solid var(--stone);
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--paper-card);
-  box-shadow: 0 1px 3px rgba(43, 48, 50, 0.04), 0 8px 24px rgba(43, 48, 50, 0.04);
+  box-shadow: 0 1px 3px rgba(43, 48, 50, 0.04), 0 4px 14px rgba(43, 48, 50, 0.03);
   overflow: hidden;
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-.command-hero>div:first-child {
-  padding: clamp(22px, 2.5vw, 32px);
+.command-hero > div:first-child {
+  padding: 8px 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1673,37 +1691,138 @@ tbody tr:hover {
 
 .command-hero h2 {
   font-family: var(--sans);
-  font-size: clamp(24px, 2.5vw, 32px);
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: var(--charcoal);
-  margin: 6px 0 8px;
-  line-height: 1.15;
+  margin: 1px 0 2px;
+  line-height: 1.2;
 }
 
 .command-hero p {
   max-width: 650px;
   color: var(--charcoal-muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 11.5px;
+  line-height: 1.35;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Specific Compact Styling for Regional Admin Hero Banner */
+.command-hero.regional-hero {
+  min-height: 64px;
+  max-height: 78px;
+  grid-template-columns: minmax(0, 1fr) 130px;
+  margin-bottom: 10px;
+}
+
+.command-hero.regional-hero > div:first-child {
+  padding: 6px 14px;
+}
+
+.command-hero.regional-hero h2 {
+  font-size: 16px;
+  margin: 1px 0;
+}
+
+.command-hero.regional-hero p {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.command-hero.regional-hero .hero-meta {
+  margin-top: 3px;
+  gap: 6px;
+}
+
+.command-hero.regional-hero .hero-meta span {
+  font-size: 9px;
+  padding: 1px 6px;
+}
+
+.command-hero.regional-hero .hero-visual {
+  min-height: 64px;
+  height: 100%;
+}
+
+.command-hero.regional-hero .hero-orbit.one {
+  width: 105px;
+  height: 42px;
+}
+
+.command-hero.regional-hero .hero-orbit.two {
+  width: 125px;
+  height: 54px;
+}
+
+.command-hero.regional-hero .hero-core {
+  width: 32px;
+  height: 32px;
+}
+
+.command-hero.regional-hero .hero-core svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 768px) {
+  .command-hero.regional-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    max-height: none;
+  }
+  .command-hero.regional-hero .hero-visual {
+    display: none;
+  }
+}
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.hero-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--charcoal-muted);
+  background: var(--paper-soft);
+  border: 1px solid var(--stone);
+  padding: 1.5px 7px;
+  border-radius: 4px;
+  line-height: 1.3;
 }
 
 .hero-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 6px;
   flex-wrap: wrap;
+}
+
+.hero-actions button {
+  padding: 4px 11px;
+  font-size: 11px;
+  border-radius: 6px;
 }
 
 .hero-visual {
   position: relative;
-  min-height: 200px;
+  min-height: 90px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--paper-soft);
   border-left: 1px solid var(--stone-light);
+  overflow: hidden;
 }
 
 .hero-orbit {
@@ -1716,13 +1835,13 @@ tbody tr:hover {
 }
 
 .hero-orbit.one {
-  width: 240px;
-  height: 110px;
+  width: 140px;
+  height: 56px;
 }
 
 .hero-orbit.two {
-  width: 300px;
-  height: 140px;
+  width: 170px;
+  height: 72px;
   transform: translate(-50%, -50%) rotate(25deg);
 }
 
@@ -1731,25 +1850,30 @@ tbody tr:hover {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 64px;
-  height: 64px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: var(--charcoal-dark);
   border: 1px solid var(--charcoal);
   color: var(--white);
-  box-shadow: 0 4px 16px rgba(30, 36, 43, 0.2);
+  box-shadow: 0 2px 8px rgba(30, 36, 43, 0.2);
   z-index: 2;
+}
+
+.hero-core svg {
+  width: 18px;
+  height: 18px;
 }
 
 .hero-node {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--terracotta);
-  box-shadow: 0 0 0 4px rgba(190, 117, 95, 0.2);
+  box-shadow: 0 0 0 3px rgba(190, 117, 95, 0.2);
 }
 
 .node-a {
@@ -2141,4 +2265,204 @@ tbody tr:hover {
 
 .bg-porcelain {
   background-color: var(--paper);
+}
+
+/* =========================================================
+   DASHBOARD CARDS, LABS, GRIDS & REGIONAL EXTENSIONS
+   ========================================================= */
+
+/* Regional Dashboard Lab Grid & Telemetry Cards */
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.lab-card {
+  background: var(--paper-card);
+  border: 1px solid var(--stone);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(43, 48, 50, 0.03);
+  transition: all 0.15s ease;
+}
+
+.lab-card:hover {
+  border-color: var(--stone-dark);
+  box-shadow: 0 4px 12px rgba(43, 48, 50, 0.06);
+  transform: translateY(-1px);
+}
+
+.lab-card h3 {
+  font-family: var(--sans);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.lab-card p {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--charcoal-subtle);
+  margin: 0;
+}
+
+.lab-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--charcoal-muted);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.available,
+.status-dot.active {
+  background: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+.status-dot.on_route,
+.status-dot.moving {
+  background: #1E40AF;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+}
+
+.status-dot.at_school {
+  background: #6E8075;
+  box-shadow: 0 0 0 3px rgba(110, 128, 117, 0.2);
+}
+
+.status-dot.under_maintenance,
+.status-dot.maintenance {
+  background: #B45309;
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.2);
+}
+
+.lab-coords {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--stone);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--charcoal-subtle);
+}
+
+/* Regional Mini Grid */
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mini-grid > div {
+  background: var(--paper);
+  border: 1px solid var(--stone);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.mini-grid strong {
+  display: block;
+  font-family: var(--sans);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--charcoal);
+  font-variant-numeric: tabular-nums;
+}
+
+.mini-grid span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--charcoal-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+}
+
+/* Field Grid 2 & Field Cards */
+.field-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.field-message {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--terracotta-soft);
+  border: 1px solid var(--terracotta);
+  color: var(--terracotta-dark);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+/* Accent variants for KPI cards */
+.kpi-card.warning,
+.metric-card.alert {
+  border-left: 3px solid #B45309;
+}
+
+.kpi-card.coral,
+.metric-card.coral {
+  border-left: 3px solid #BE755F;
+}
+
+.kpi-card.cyan,
+.metric-card.cyan {
+  border-left: 3px solid #0891B2;
+}
+
+.kpi-card.violet,
+.metric-card.violet {
+  border-left: 3px solid #6366F1;
+}
+
+/* Loading & Error States */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 32px 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--charcoal-muted);
+  gap: 14px;
+  text-align: center;
+}
+
+.loader-ring {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--stone);
+  border-top-color: var(--terracotta);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

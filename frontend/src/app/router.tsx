@@ -57,7 +57,7 @@ function RootRedirect() {
     return (
       <div className="loading-state" style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
         <div className="loader-ring" />
-        Loading SciMove…
+        Loading Science on Wheels…
       </div>
     );
   }

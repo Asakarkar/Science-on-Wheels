@@ -111,7 +111,7 @@ regionalAdminRouter.get("/overview", async (_req: AuthenticatedRequest, res, nex
         select: {
           id: true,
           name: true,
-          state: { select: { name: true, code: true } },
+          State: { select: { name: true, code: true } },
         },
       }),
       prisma.district.count({ where: { regionId } }),
@@ -250,8 +250,17 @@ regionalAdminRouter.get("/overview", async (_req: AuthenticatedRequest, res, nex
         : []),
     ];
 
+    const regionPayload = region
+      ? {
+          id: region.id,
+          name: region.name,
+          state: (region as any).State,
+          State: (region as any).State,
+        }
+      : null;
+
     res.json({
-      region,
+      region: regionPayload,
       kpis: {
         districts,
         blocks,

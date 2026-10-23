@@ -1,4 +1,4 @@
-# SciMove Frontend Architecture Migration Map & Status
+# Science on Wheels Frontend Architecture Migration Map & Status
 
 ## Overview
 All legacy monolithic components have been migrated to the role-based, modular architecture (`portal → module → page`) and dead code has been safely pruned.

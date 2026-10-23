@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/providers/AuthProvider";
 import { BrandLogo } from "../shared/components/BrandLogo";
-import { ScienceBackground } from "../shared/components/ScienceBackground";
 import { FIELD_NAVIGATION } from "../shared/constants/navigation";
 
 export function FieldLayout() {
@@ -28,10 +27,9 @@ export function FieldLayout() {
 
   return (
     <div className="field-shell instructor-shell bg-grid-warm">
-      <ScienceBackground variant="field" />
 
       {/* Top System Status Bar matching login aesthetic */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-2.5 backdrop-blur-md sm:px-6 lg:px-8">
+      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
         <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 font-semibold text-charcoal">
@@ -70,7 +68,15 @@ export function FieldLayout() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="portal-body flex flex-1 overflow-hidden relative">
+        {/* Mobile backdrop */}
+        {mobileNav && (
+          <div
+            className="sidebar-backdrop fixed inset-0 z-40 bg-charcoal/40 backdrop-blur-xs lg:hidden"
+            onClick={() => setMobileNav(false)}
+          />
+        )}
+
         {/* Field Operations Sidebar */}
         <aside className={`field-sidebar ${mobileNav ? "open" : ""}`}>
           <div className="field-brand">
@@ -78,7 +84,7 @@ export function FieldLayout() {
               <BrandLogo />
             </div>
             <div>
-              <strong className="font-sans text-sm font-bold text-charcoal">SciMove</strong>
+              <strong className="font-sans text-sm font-bold text-charcoal">Science on Wheels</strong>
               <span className="font-mono text-[10px] text-charcoal-muted uppercase tracking-wider">
                 Field Operations
               </span>
@@ -147,7 +153,7 @@ export function FieldLayout() {
               ☰
             </button>
             <div className="breadcrumbs font-mono text-xs">
-              <span>SciMove</span>
+              <span>Science on Wheels</span>
               <b className="text-stone">›</b>
               <strong className="text-charcoal font-semibold">{activeNav?.label}</strong>
             </div>

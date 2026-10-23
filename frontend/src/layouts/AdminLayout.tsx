@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/providers/AuthProvider";
 import { BrandLogo } from "../shared/components/BrandLogo";
-import { ScienceBackground } from "../shared/components/ScienceBackground";
 import { ADMIN_NAVIGATION } from "../shared/constants/navigation";
 
 export function AdminLayout() {
@@ -28,10 +27,9 @@ export function AdminLayout() {
 
   return (
     <div className="admin-shell bg-grid-warm">
-      <ScienceBackground variant="admin" />
 
       {/* Top System Status Bar matching login aesthetic */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-2.5 backdrop-blur-md sm:px-6 lg:px-8">
+      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
         <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 font-semibold text-charcoal">
@@ -39,38 +37,27 @@ export function AdminLayout() {
                 className="inline-block h-2 w-2 rounded-xs"
                 style={{ backgroundColor: "#BE755F" }}
               />
-              <span className="tracking-tight">SOW // CENTRAL COMMAND</span>
+              <span className="tracking-tight">CENTRAL COMMAND</span>
             </div>
-            <span className="text-stone">|</span>
-            <span className="hidden uppercase tracking-wider text-[11px] text-charcoal-subtle sm:inline">
-              System Node: US-EAST-01
-            </span>
           </div>
 
           <div className="flex items-center space-x-4 text-charcoal-muted">
-            <span className="flex items-center gap-2">
-              <span
-                className="inline-block h-2 w-2 rounded-full animate-pulse"
-                style={{
-                  backgroundColor: "rgb(5, 150, 105)",
-                  boxShadow: "rgba(5, 150, 105, 0.25) 0px 0px 0px 2px",
-                }}
-              />
-              <span
-                className="font-medium text-[11px] tracking-wide"
-                style={{ color: "rgb(5, 150, 105)" }}
-              >
-                CORE TELEMETRY: NOMINAL
-              </span>
-            </span>
             <span className="hidden border-l border-stone pl-3 text-[11px] text-charcoal-subtle md:inline">
-              BUILD 4.19.2
+              Version 1.26.1
             </span>
           </div>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="portal-body flex flex-1 overflow-hidden relative">
+        {/* Mobile backdrop */}
+        {mobileNav && (
+          <div
+            className="sidebar-backdrop fixed inset-0 z-40 bg-charcoal/40 backdrop-blur-xs lg:hidden"
+            onClick={() => setMobileNav(false)}
+          />
+        )}
+
         {/* Sidebar */}
         <aside className={`admin-sidebar ${mobileNav ? "open" : ""}`}>
           <div className="sidebar-brand">
@@ -78,7 +65,7 @@ export function AdminLayout() {
               <BrandLogo />
             </div>
             <div>
-              <strong className="font-sans text-sm font-bold text-charcoal">SciMove</strong>
+              <strong className="font-sans text-sm font-bold text-charcoal">Science on Wheels</strong>
               <span className="font-mono text-[10px] text-charcoal-muted uppercase tracking-wider">
                 Super Administrator
               </span>
@@ -149,7 +136,7 @@ export function AdminLayout() {
               ☰
             </button>
             <div className="breadcrumbs font-mono text-xs">
-              <span>SciMove</span>
+              <span>Science on Wheels</span>
               <b className="text-stone">›</b>
               <strong className="text-charcoal font-semibold">{activeNav?.label}</strong>
             </div>
