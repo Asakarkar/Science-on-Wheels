@@ -97,7 +97,7 @@ export function ResourceView({
           <button className="ghost" onClick={csvDownload}>
             Export CSV
           </button>
-          {config.fields.length > 0 && (
+          {!config.readOnly && config.fields.length > 0 && (
             <button
               className="primary"
               onClick={() => {
@@ -135,7 +135,7 @@ export function ResourceView({
                 {config.columns.map((c) => (
                   <th key={c}>{c.replace(/([A-Z])/g, " $1")}</th>
                 ))}
-                <th>Actions</th>
+                {!config.readOnly && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -144,28 +144,30 @@ export function ResourceView({
                   {config.columns.map((c) => (
                     <td key={c}>{formatValue(row[c])}</td>
                   ))}
-                  <td>
-                    <div className="row-actions">
-                      <button
-                        onClick={() => {
-                          setEditing(row);
-                          setShowForm(true);
-                        }}
-                      >
-                        Edit
-                      </button>
-                      {config.key !== "auditLogs" && (
-                        <button className="danger-link" onClick={() => remove(row.id)}>
-                          Delete
+                  {!config.readOnly && (
+                    <td>
+                      <div className="row-actions">
+                        <button
+                          onClick={() => {
+                            setEditing(row);
+                            setShowForm(true);
+                          }}
+                        >
+                          Edit
                         </button>
-                      )}
-                    </div>
-                  </td>
+                        {config.key !== "auditLogs" && (
+                          <button className="danger-link" onClick={() => remove(row.id)}>
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={config.columns.length + 1}>
+                  <td colSpan={config.columns.length + (config.readOnly ? 0 : 1)}>
                     <div className="empty-table">
                       <span>∅</span>
                       <strong>No records yet</strong>

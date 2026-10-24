@@ -6,9 +6,17 @@ interface RegionalDataTableProps {
   resource: string;
   title: string;
   description?: string;
+  refreshTrigger?: number;
+  onEdit?: (record: any) => void;
 }
 
-export function RegionalDataTable({ resource, title, description }: RegionalDataTableProps) {
+export function RegionalDataTable({
+  resource,
+  title,
+  description,
+  refreshTrigger,
+  onEdit,
+}: RegionalDataTableProps) {
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -31,7 +39,7 @@ export function RegionalDataTable({ resource, title, description }: RegionalData
 
   useEffect(() => {
     void load();
-  }, [resource]);
+  }, [resource, refreshTrigger]);
 
   const columns = useMemo(() => {
     const preferred: Record<string, string[]> = {
@@ -103,6 +111,7 @@ export function RegionalDataTable({ resource, title, description }: RegionalData
                 {columns.map((c) => (
                   <th key={c}>{c.replace(/([A-Z])/g, " $1")}</th>
                 ))}
+                {onEdit && <th style={{ textAlign: "right" }}>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -111,11 +120,40 @@ export function RegionalDataTable({ resource, title, description }: RegionalData
                   {columns.map((c) => (
                     <td key={c}>{formatValue(row[c])}</td>
                   ))}
+                  {onEdit && (
+                    <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+                      <button
+                        type="button"
+                        onClick={() => onEdit(row)}
+                        style={{
+                          padding: "3px 10px",
+                          fontSize: "11px",
+                          borderRadius: "4px",
+                          background: "rgba(190, 117, 95, 0.15)",
+                          color: "#be755f",
+                          border: "1px solid rgba(190, 117, 95, 0.35)",
+                          cursor: "pointer",
+                          fontWeight: 600,
+                          transition: "all 0.15s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#be755f";
+                          e.currentTarget.style.color = "#fff";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "rgba(190, 117, 95, 0.15)";
+                          e.currentTarget.style.color = "#be755f";
+                        }}
+                      >
+                        ✎ Edit
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
               {!rows.length && (
                 <tr>
-                  <td colSpan={Math.max(columns.length, 1)}>
+                  <td colSpan={Math.max(columns.length + (onEdit ? 1 : 0), 1)}>
                     <div className="empty-state">No records found.</div>
                   </td>
                 </tr>

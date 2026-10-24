@@ -38,9 +38,18 @@ export function requireSuperAdmin(_req: Request, res: Response, next: NextFuncti
 }
 
 
-export function requireRegionalAdmin(_req: Request, res: Response, next: NextFunction) {
+import { prisma } from "../lib/prisma";
+
+export async function requireRegionalAdmin(req: Request, res: Response, next: NextFunction) {
   const user = res.locals.user;
   const role = user?.role?.name ?? user?.roleEnum;
+  if (role === "SUPER_ADMIN") {
+    if (!user.regionId) {
+      const firstRegion = await prisma.region.findFirst({ select: { id: true } });
+      user.regionId = (req.query.regionId as string) || firstRegion?.id || null;
+    }
+    return next();
+  }
   if (role !== "REGIONAL_ADMIN") return res.status(403).json({ message: "Regional Admin access required" });
   if (!user?.regionId) return res.status(403).json({ message: "Regional Admin has no assigned region" });
   next();

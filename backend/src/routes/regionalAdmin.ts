@@ -289,11 +289,44 @@ regionalAdminRouter.get("/overview", async (_req: AuthenticatedRequest, res, nex
  * Generic region-scoped resource listing.
  */
 regionalAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, next) => {
-  const resource = req.params.resource;
+  const resource = String(req.params.resource);
   const delegateName = resourceMap[resource];
 
   if (!delegateName) {
     return next();
+  }
+
+  // RBAC Permission Check
+  const regionalPermissions: Record<string, string> = {
+    schools: "schools.view",
+    registrations: "schools.view",
+    students: "schools.view",
+    teachers: "schools.view",
+    staff: "people.view",
+    labs: "labs.view",
+    maintenance: "labs.view",
+    equipment: "resources.view",
+    consumables: "resources.view",
+    inventory: "resources.view",
+    routes: "operations.view",
+    routeStops: "operations.view",
+    schedules: "operations.view",
+    visits: "operations.view",
+    sessions: "operations.view",
+    attendance: "operations.view",
+    reports: "analytics.view",
+  };
+
+  const user = res.locals.user;
+  const userRole = user?.role?.name ?? user?.roleEnum;
+  if (userRole !== "SUPER_ADMIN") {
+    const requiredPerm = regionalPermissions[resource];
+    if (requiredPerm) {
+      const hasPerm = user?.role?.permissions?.some((p: any) => p.permission.key === requiredPerm);
+      if (!hasPerm) {
+        return res.status(403).json({ message: `Access denied: your role lacks the '${requiredPerm}' permission.` });
+      }
+    }
   }
 
   const take = Math.min(Math.max(Number(req.query.limit) || 100, 1), 500);
@@ -355,7 +388,7 @@ regionalAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, 
       where.AND = [
         ...(Array.isArray(where.AND) ? where.AND : []),
         {
-          OR: fields.map((field) => ({
+          OR: fields.map((field: string) => ({
             [field]: { contains: search, mode: "insensitive" },
           })),
         },
@@ -765,6 +798,524 @@ regionalAdminRouter.post(
         .json({ message: error?.message || "Unable to assign staff" });
     }
   },
+);
+
+/**
+ * Record an Inventory Transaction for a regional laboratory bus.
+ */
+regionalAdminRouter.post(
+  ["/inventory", "/resource/inventory"],
+  async (req: AuthenticatedRequest, res) => {
+    const regionId = getRegionId(res);
+    const schema = z.object({
+      consumableId: z.string().min(1),
+      busId: z.string().min(1),
+      quantity: z.coerce.number().positive(),
+      type: z
+        .enum([
+          "RECEIPT",
+          "ISSUE",
+          "RETURN",
+          "TRANSFER",
+          "ADJUSTMENT",
+          "DAMAGE",
+          "LOSS",
+          "CONSUMPTION",
+        ])
+        .default("RECEIPT"),
+      notes: z.string().optional(),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message:
+          "Invalid transaction data: " +
+          parsed.error.issues.map((i) => i.message).join(", "),
+      });
+    }
+
+    const { consumableId, busId, quantity, type, notes } = parsed.data;
+
+    // Verify the lab bus belongs to the caller's region
+    const bus = await prisma.bus.findFirst({
+      where: { id: busId, regionId },
+    });
+    if (!bus) {
+      return res.status(403).json({
+        message: "Laboratory vehicle must belong to your assigned region",
+      });
+    }
+
+    const consumable = await prisma.consumable.findUnique({
+      where: { id: consumableId },
+    });
+    if (!consumable) {
+      return res.status(404).json({ message: "Consumable item not found" });
+    }
+
+    const deltaByType: Record<string, number> = {
+      RECEIPT: 1,
+      RETURN: 1,
+      ADJUSTMENT: 1,
+      ISSUE: -1,
+      DAMAGE: -1,
+      LOSS: -1,
+      CONSUMPTION: -1,
+      TRANSFER: 0,
+    };
+
+    const delta = (deltaByType[type] ?? 0) * quantity;
+
+    if (delta < 0 && consumable.currentStock + delta < 0) {
+      return res.status(400).json({
+        message: `Insufficient stock for ${consumable.name}. Current stock: ${consumable.currentStock} ${consumable.unitMetric}`,
+      });
+    }
+
+    try {
+      const transaction = await prisma.$transaction(async (tx) => {
+        const row = await tx.inventoryTransaction.create({
+          data: {
+            consumableId,
+            busId,
+            quantity,
+            type,
+            notes,
+            performedById: req.userId,
+          },
+          include: {
+            consumable: true,
+            bus: {
+              select: { id: true, busCode: true, registrationNumber: true },
+            },
+          },
+        });
+
+        if (delta !== 0) {
+          await tx.consumable.update({
+            where: { id: consumableId },
+            data: { currentStock: { increment: delta } },
+          });
+        }
+
+        return row;
+      });
+
+      await writeAudit(
+        req,
+        "INVENTORY_TRANSACTION",
+        "inventoryTransaction",
+        transaction.id,
+        {
+          consumableId,
+          busId,
+          type,
+          quantity,
+          regionId,
+        },
+      );
+
+      return res.status(201).json(transaction);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({ message: error?.message || "Unable to record transaction" });
+    }
+  },
+);
+
+/**
+ * Add a consumable item for regional laboratories.
+ */
+regionalAdminRouter.post(
+  ["/consumables", "/resource/consumables"],
+  async (req: AuthenticatedRequest, res) => {
+    const regionId = getRegionId(res);
+    const schema = z.object({
+      name: z.string().min(1),
+      category: z.string().min(1),
+      currentStock: z.coerce.number().min(0).default(0),
+      minimumStock: z.coerce.number().min(0).default(10),
+      unitMetric: z.string().min(1).default("units"),
+      expiryDate: z.string().optional().nullable(),
+      busId: z.string().optional(),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message:
+          "Invalid consumable data: " +
+          parsed.error.issues.map((i) => i.message).join(", "),
+      });
+    }
+
+    const {
+      name,
+      category,
+      currentStock,
+      minimumStock,
+      unitMetric,
+      expiryDate,
+      busId,
+    } = parsed.data;
+
+    let targetBusId = busId;
+    if (targetBusId) {
+      const bus = await prisma.bus.findFirst({
+        where: { id: targetBusId, regionId },
+      });
+      if (!bus)
+        return res
+          .status(403)
+          .json({ message: "Selected lab must belong to your region" });
+    } else {
+      const firstBus = await prisma.bus.findFirst({ where: { regionId } });
+      targetBusId = firstBus?.id;
+    }
+
+    try {
+      const consumableId = "con-" + crypto.randomUUID().slice(0, 8);
+      const consumable = await prisma.consumable.create({
+        data: {
+          id: consumableId,
+          name,
+          category,
+          currentStock,
+          minimumStock,
+          unitMetric,
+          expiryDate: expiryDate ? new Date(expiryDate) : null,
+        },
+      });
+
+      if (currentStock > 0 && targetBusId) {
+        await prisma.inventoryTransaction.create({
+          data: {
+            consumableId: consumable.id,
+            busId: targetBusId,
+            quantity: currentStock,
+            type: "RECEIPT",
+            notes: "Initial regional stock registration",
+            performedById: req.userId,
+          },
+        });
+      }
+
+      await writeAudit(
+        req,
+        "CONSUMABLE_CREATED",
+        "consumable",
+        consumable.id,
+        {
+          name,
+          category,
+          regionId,
+        },
+      );
+
+      return res.status(201).json(consumable);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({ message: error?.message || "Unable to create consumable" });
+    }
+  },
+);
+
+/**
+ * Add an equipment asset assigned to a regional mobile lab.
+ */
+regionalAdminRouter.post(
+  ["/equipment", "/resource/equipment"],
+  async (req: AuthenticatedRequest, res) => {
+    const regionId = getRegionId(res);
+    const schema = z.object({
+      assetTag: z.string().min(1),
+      name: z.string().min(1),
+      category: z.string().min(1),
+      busId: z.string().min(1),
+      cost: z.coerce.number().min(0).default(0),
+      purchaseDate: z.string().optional(),
+      status: z
+        .enum([
+          "AVAILABLE",
+          "ASSIGNED_TO_BUS",
+          "IN_MAINTENANCE",
+          "DAMAGED",
+          "MISSING",
+        ])
+        .default("ASSIGNED_TO_BUS"),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message:
+          "Invalid equipment data: " +
+          parsed.error.issues.map((i) => i.message).join(", "),
+      });
+    }
+
+    const { assetTag, name, category, busId, cost, purchaseDate, status } =
+      parsed.data;
+
+    const bus = await prisma.bus.findFirst({ where: { id: busId, regionId } });
+    if (!bus) {
+      return res
+        .status(403)
+        .json({ message: "Selected lab must belong to your region" });
+    }
+
+    try {
+      const equipment = await prisma.equipment.create({
+        data: {
+          id: "eq-" + crypto.randomUUID().slice(0, 8),
+          assetTag,
+          name,
+          category,
+          busId,
+          cost,
+          purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
+          status,
+        },
+      });
+
+      await writeAudit(
+        req,
+        "EQUIPMENT_CREATED",
+        "equipment",
+        equipment.id,
+        {
+          assetTag,
+          name,
+          busId,
+          regionId,
+        },
+      );
+
+      return res.status(201).json(equipment);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({ message: error?.message || "Unable to create equipment" });
+    }
+  },
+);
+
+/**
+ * Update a consumable record (stock, limits, name, unit, expiry).
+ */
+regionalAdminRouter.patch(
+  ["/consumables/:id", "/resource/consumables/:id"],
+  async (req: AuthenticatedRequest, res) => {
+    const id = String(req.params.id);
+    const regionId = getRegionId(res);
+
+    const schema = z.object({
+      name: z.string().min(1).optional(),
+      category: z.string().min(1).optional(),
+      currentStock: z.coerce.number().min(0).optional(),
+      minimumStock: z.coerce.number().min(0).optional(),
+      unitMetric: z.string().min(1).optional(),
+      expiryDate: z.string().optional().nullable(),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Invalid consumable data: " + parsed.error.issues.map((i) => i.message).join(", "),
+      });
+    }
+
+    const consumable = await prisma.consumable.findUnique({
+      where: { id },
+      include: {
+        InventoryTransaction: {
+          select: { bus: { select: { regionId: true } } },
+        },
+      },
+    });
+
+    if (!consumable) {
+      return res.status(404).json({ message: "Consumable record not found" });
+    }
+
+    const userRole = res.locals.user?.role?.name ?? res.locals.user?.roleEnum;
+    if (userRole !== "SUPER_ADMIN" && regionId) {
+      const hasRegionalLink = consumable.InventoryTransaction.some(
+        (tx) => tx.bus?.regionId === regionId
+      );
+      if (!hasRegionalLink) {
+        return res.status(403).json({ message: "Consumable is not associated with your region" });
+      }
+    }
+
+    const dataToUpdate: any = {};
+    if (parsed.data.name !== undefined) dataToUpdate.name = parsed.data.name;
+    if (parsed.data.category !== undefined) dataToUpdate.category = parsed.data.category;
+    if (parsed.data.currentStock !== undefined) dataToUpdate.currentStock = parsed.data.currentStock;
+    if (parsed.data.minimumStock !== undefined) dataToUpdate.minimumStock = parsed.data.minimumStock;
+    if (parsed.data.unitMetric !== undefined) dataToUpdate.unitMetric = parsed.data.unitMetric;
+    if (parsed.data.expiryDate !== undefined) {
+      dataToUpdate.expiryDate = parsed.data.expiryDate ? new Date(parsed.data.expiryDate) : null;
+    }
+
+    try {
+      const updated = await prisma.consumable.update({
+        where: { id },
+        data: dataToUpdate,
+      });
+
+      await writeAudit(req, "CONSUMABLE_UPDATED", "consumable", id, {
+        updatedFields: Object.keys(dataToUpdate),
+        regionId,
+      });
+
+      return res.json(updated);
+    } catch (error: any) {
+      return res.status(400).json({ message: error?.message || "Failed to update consumable" });
+    }
+  }
+);
+
+/**
+ * Update an equipment asset record (name, category, status, bus assignment, cost).
+ */
+regionalAdminRouter.patch(
+  ["/equipment/:id", "/resource/equipment/:id"],
+  async (req: AuthenticatedRequest, res) => {
+    const id = String(req.params.id);
+    const regionId = getRegionId(res);
+
+    const schema = z.object({
+      name: z.string().min(1).optional(),
+      category: z.string().min(1).optional(),
+      status: z.enum([
+        "AVAILABLE",
+        "ASSIGNED_TO_BUS",
+        "IN_MAINTENANCE",
+        "DAMAGED",
+        "MISSING",
+      ]).optional(),
+      busId: z.string().optional().nullable(),
+      cost: z.coerce.number().min(0).optional(),
+      purchaseDate: z.string().optional(),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Invalid equipment data: " + parsed.error.issues.map((i) => i.message).join(", "),
+      });
+    }
+
+    const eq = await prisma.equipment.findUnique({
+      where: { id },
+      include: { Bus: true },
+    });
+
+    if (!eq) {
+      return res.status(404).json({ message: "Equipment asset not found" });
+    }
+
+    const userRole = res.locals.user?.role?.name ?? res.locals.user?.roleEnum;
+    if (userRole !== "SUPER_ADMIN" && regionId && eq.Bus && eq.Bus.regionId !== regionId) {
+      return res.status(403).json({ message: "Equipment is assigned to another region" });
+    }
+
+    if (parsed.data.busId) {
+      const targetBus = await prisma.bus.findFirst({
+        where: { id: parsed.data.busId, ...(userRole === "SUPER_ADMIN" ? {} : { regionId }) },
+      });
+      if (!targetBus) {
+        return res.status(403).json({ message: "Selected lab does not belong to your region" });
+      }
+    }
+
+    const dataToUpdate: any = {};
+    if (parsed.data.name !== undefined) dataToUpdate.name = parsed.data.name;
+    if (parsed.data.category !== undefined) dataToUpdate.category = parsed.data.category;
+    if (parsed.data.status !== undefined) dataToUpdate.status = parsed.data.status;
+    if (parsed.data.busId !== undefined) dataToUpdate.busId = parsed.data.busId;
+    if (parsed.data.cost !== undefined) dataToUpdate.cost = parsed.data.cost;
+    if (parsed.data.purchaseDate !== undefined) {
+      dataToUpdate.purchaseDate = new Date(parsed.data.purchaseDate);
+    }
+
+    try {
+      const updated = await prisma.equipment.update({
+        where: { id },
+        data: dataToUpdate,
+      });
+
+      await writeAudit(req, "EQUIPMENT_UPDATED", "equipment", id, {
+        updatedFields: Object.keys(dataToUpdate),
+        regionId,
+      });
+
+      return res.json(updated);
+    } catch (error: any) {
+      return res.status(400).json({ message: error?.message || "Failed to update equipment" });
+    }
+  }
+);
+
+/**
+ * Update an inventory transaction record (notes, quantity).
+ */
+regionalAdminRouter.patch(
+  ["/inventory/:id", "/resource/inventory/:id"],
+  async (req: AuthenticatedRequest, res) => {
+    const id = String(req.params.id);
+    const regionId = getRegionId(res);
+
+    const schema = z.object({
+      notes: z.string().optional(),
+      quantity: z.coerce.number().positive().optional(),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Invalid transaction data: " + parsed.error.issues.map((i) => i.message).join(", "),
+      });
+    }
+
+    const tx = await prisma.inventoryTransaction.findUnique({
+      where: { id },
+      include: { bus: true },
+    });
+
+    if (!tx) {
+      return res.status(404).json({ message: "Transaction record not found" });
+    }
+
+    const userRole = res.locals.user?.role?.name ?? res.locals.user?.roleEnum;
+    if (userRole !== "SUPER_ADMIN" && regionId && tx.bus && tx.bus.regionId !== regionId) {
+      return res.status(403).json({ message: "Transaction does not belong to your region" });
+    }
+
+    const dataToUpdate: any = {};
+    if (parsed.data.notes !== undefined) dataToUpdate.notes = parsed.data.notes;
+    if (parsed.data.quantity !== undefined) dataToUpdate.quantity = parsed.data.quantity;
+
+    try {
+      const updated = await prisma.inventoryTransaction.update({
+        where: { id },
+        data: dataToUpdate,
+      });
+
+      await writeAudit(req, "INVENTORY_TX_UPDATED", "inventoryTransaction", id, {
+        updatedFields: Object.keys(dataToUpdate),
+        regionId,
+      });
+
+      return res.json(updated);
+    } catch (error: any) {
+      return res.status(400).json({ message: error?.message || "Failed to update transaction" });
+    }
+  }
 );
 
 export default regionalAdminRouter;

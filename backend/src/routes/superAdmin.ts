@@ -18,6 +18,8 @@ const resourceMap: Record<string, string> = {
   labs: "bus",
   maintenance: "busMaintenanceRecord",
   schools: "school",
+  schoolScheduleEntries: "importedSchoolSchedule",
+  inventoryInvoiceLines: "importedInventoryLine",
   registrations: "schoolRegistration",
   experiments: "experiment",
   equipment: "equipment",
@@ -41,7 +43,7 @@ const resourceMap: Record<string, string> = {
 
 const idModels = new Set(Object.keys(resourceMap));
 const dateFields = new Set([
-  "createdAt", "updatedAt", "lastLoginAt", "expiresAt", "lastActivityAt", "timestamp", "eventDate",
+  "createdAt", "updatedAt", "lastLoginAt", "expiresAt", "lastActivityAt", "timestamp", "eventDate", "invoiceDate",
   "purchaseDate", "serviceDate", "nextDueDate", "expiryDate", "preferredDate", "alternativeDate", "publishedAt", "scheduledDate",
   "startedAt", "completedAt", "assignedAt", "installedAt", "lastSeenAt", "issueDate", "usedAt", "expenseDate", "recordedAt",
   "plannedArrival", "plannedDeparture", "actualArrival", "actualDeparture", "verifiedAt"
@@ -119,11 +121,13 @@ superAdminRouter.get("/health", requirePermission("security.view"), async (_req,
 });
 
 superAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, next) => {
-  const delegateName = resourceMap[req.params.resource];
+  const resource = String(req.params.resource);
+  const delegateName = resourceMap[resource];
   if (!delegateName) return next();
   const prismaAny = prisma as any;
   const delegate = prismaAny[delegateName];
-  const take = Math.min(Number(req.query.limit) || 100, 500);
+  const defaultLimit = ["schoolScheduleEntries", "inventoryInvoiceLines"].includes(resource) ? 500 : 100;
+  const take = Math.min(Number(req.query.limit) || defaultLimit, 500);
   const search = String(req.query.search || "").trim();
   const where: any = {};
 
@@ -132,11 +136,13 @@ superAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, nex
       states: ["name", "code"], regions: ["name"], districts: ["name"], blocks: ["name"],
       users: ["name", "email", "status"], roles: ["name"], permissions: ["key"], labs: ["busCode", "registrationNumber", "status"],
       schools: ["name", "udiseCode", "principalName"], experiments: ["title", "subject", "difficultyLevel"], equipment: ["assetTag", "name", "category"],
+      schoolScheduleEntries: ["schoolCollegeName", "district", "regionSection", "dateOrDateRange"],
+      inventoryInvoiceLines: ["invoiceNo", "supplierName", "buyerName", "labCategory", "itemName", "hsnCode"],
       consumables: ["name", "category"], events: ["eventCode", "status"], routes: ["routeCode", "routeName", "status"], trips: ["tripCode", "status"],
       procurement: ["itemName", "status"], expenses: ["category", "description"], announcements: ["title"], students: ["name", "gradeClass"], teachers: ["subjectTaught"],
       gpsDevices: ["imeiNumber", "status"], auditLogs: ["action", "entity"], systemConfig: ["key", "description"]
     };
-    const fields = searchable[req.params.resource] || [];
+    const fields = searchable[resource] || [];
     if (fields.length) where.OR = fields.map((field) => ({ [field]: { contains: search, mode: "insensitive" } }));
   }
 
@@ -146,13 +152,113 @@ superAdminRouter.get(["/resource/:resource", "/:resource"], async (req, res, nex
   if (req.query.roleEnum) where.roleEnum = String(req.query.roleEnum);
   if (req.query.action) where.action = String(req.query.action);
 
-  const rows = await delegate.findMany({ where, take, orderBy: { createdAt: "desc" } }).catch(async () => delegate.findMany({ where, take }));
-  const safe = req.params.resource === "users" ? rows.map((u: any) => ({ ...u, passwordHash: undefined })) : rows;
+  let rows: any[];
+  if (resource === "roles") {
+    rows = await prisma.role.findMany({
+      where,
+      take,
+      orderBy: { name: "asc" },
+      include: {
+        permissions: { include: { permission: true } },
+        _count: { select: { users: true } },
+      },
+    });
+    rows = rows.map((r: any) => ({
+      ...r,
+      permissionKeys: r.permissions.map((p: any) => p.permission.key),
+      userCount: r._count?.users ?? 0,
+    }));
+  } else {
+    const orderBy = ["schoolScheduleEntries", "inventoryInvoiceLines"].includes(resource) ? { sourceRow: "asc" } : { createdAt: "desc" };
+    rows = await delegate.findMany({ where, take, orderBy }).catch(async () => delegate.findMany({ where, take }));
+  }
+
+  const safe = resource === "users" ? rows.map((u: any) => ({ ...u, passwordHash: undefined })) : rows;
   res.json({ rows: safe });
 });
 
+superAdminRouter.get(["/roles/:id/permissions", "/resource/roles/:id/permissions"], async (req, res) => {
+  const roleId = String(req.params.id);
+  const role: any = await prisma.role.findUnique({
+    where: { id: roleId },
+    include: {
+      permissions: { include: { permission: true } },
+      _count: { select: { users: true } },
+    },
+  });
+  if (!role) return res.status(404).json({ message: "Role not found" });
+
+  const allPermissions = await prisma.permission.findMany({
+    orderBy: { key: "asc" },
+  });
+
+  const assignedKeys = (role.permissions || []).map((p: any) => p.permission.key);
+
+  return res.json({
+    role: {
+      id: role.id,
+      name: role.name,
+      description: role.description,
+      userCount: role._count?.users ?? 0,
+    },
+    assignedKeys,
+    allPermissions,
+  });
+});
+
+superAdminRouter.put(["/roles/:id/permissions", "/resource/roles/:id/permissions"], async (req, res) => {
+  const roleId = String(req.params.id);
+  const { permissionKeys } = req.body;
+  if (!Array.isArray(permissionKeys)) {
+    return res.status(400).json({ message: "permissionKeys must be an array of string keys" });
+  }
+
+  const role = await prisma.role.findUnique({ where: { id: roleId } });
+  if (!role) return res.status(404).json({ message: "Role not found" });
+
+  const matchingPermissions = await prisma.permission.findMany({
+    where: { key: { in: permissionKeys } },
+  });
+
+  await prisma.$transaction(async (tx) => {
+    await tx.rolePermission.deleteMany({ where: { roleId } });
+    if (matchingPermissions.length > 0) {
+      await tx.rolePermission.createMany({
+        data: matchingPermissions.map((p) => ({
+          roleId,
+          permissionId: p.id,
+        })),
+      });
+    }
+  });
+
+  await audit(req, "PERMISSION_CHANGE", "Role", roleId, {
+    roleName: role.name,
+    permissionsCount: matchingPermissions.length,
+    keys: permissionKeys,
+  });
+
+  const updated: any = await prisma.role.findUnique({
+    where: { id: roleId },
+    include: {
+      permissions: { include: { permission: true } },
+      _count: { select: { users: true } },
+    },
+  });
+
+  return res.json({
+    message: "Role permissions updated successfully",
+    role: {
+      ...updated,
+      permissionKeys: (updated?.permissions || []).map((p: any) => p.permission.key),
+      userCount: updated?._count?.users ?? 0,
+    },
+  });
+});
+
 superAdminRouter.post(["/resource/:resource", "/:resource"], async (req, res, next) => {
-  const resource = req.params.resource;
+  const resource = String(req.params.resource);
+  if (resource === "inventoryInvoiceLines") return res.status(405).json({ message: "Imported invoice lines are read-only" });
   const delegateName = resourceMap[resource];
   if (!delegateName || !idModels.has(resource)) return next();
   const delegate = (prisma as any)[delegateName];
@@ -175,7 +281,10 @@ superAdminRouter.post(["/resource/:resource", "/:resource"], async (req, res, ne
   if (resource === "systemConfig") data.updatedAt = new Date();
   if (resource === "announcements" && !data.targetRoles) data.targetRoles = ["SUPER_ADMIN"];
   if (resource === "roles" && !data.name) return res.status(400).json({ message: "Role name is required" });
-  if (resource === "permissions" && !data.key) return res.status(400).json({ message: "Permission key is required" });
+  if (resource === "permissions") {
+    if (!data.key) return res.status(400).json({ message: "Permission key is required" });
+    data.updatedAt = new Date();
+  }
 
   try {
     if (resource === "inventoryTransactions") {
@@ -193,6 +302,16 @@ superAdminRouter.post(["/resource/:resource", "/:resource"], async (req, res, ne
     }
 
     const row = await delegate.create({ data });
+
+    if (resource === "roles" && Array.isArray(req.body.permissionKeys) && req.body.permissionKeys.length > 0) {
+      const matched = await prisma.permission.findMany({ where: { key: { in: req.body.permissionKeys } } });
+      if (matched.length > 0) {
+        await prisma.rolePermission.createMany({
+          data: matched.map((p) => ({ roleId: row.id, permissionId: p.id })),
+        });
+      }
+    }
+
     await audit(req, "CREATE", resource, row.id, { fields: Object.keys(data).filter((x) => x !== "passwordHash") });
     const safe = resource === "users" ? { ...row, passwordHash: undefined } : row;
     res.status(201).json(safe);
@@ -202,7 +321,8 @@ superAdminRouter.post(["/resource/:resource", "/:resource"], async (req, res, ne
 });
 
 superAdminRouter.patch(["/resource/:resource/:id", "/:resource/:id"], async (req, res, next) => {
-  const resource = req.params.resource;
+  const resource = String(req.params.resource);
+  if (resource === "inventoryInvoiceLines") return res.status(405).json({ message: "Imported invoice lines are read-only" });
   const delegateName = resourceMap[resource];
   if (!delegateName) return next();
   const delegate = (prisma as any)[delegateName];
@@ -229,7 +349,8 @@ superAdminRouter.patch(["/resource/:resource/:id", "/:resource/:id"], async (req
 });
 
 superAdminRouter.delete(["/resource/:resource/:id", "/:resource/:id"], async (req, res, next) => {
-  const resource = req.params.resource;
+  const resource = String(req.params.resource);
+  if (resource === "inventoryInvoiceLines") return res.status(405).json({ message: "Imported invoice lines are read-only" });
   const delegateName = resourceMap[resource];
   if (!delegateName) return next();
   try {

@@ -290,6 +290,469 @@ async function main() {
     console.log(`Field Operator created: ${fieldOperator.email}`);
   }
 
+  // --------------------------------------------------
+  // 10. Seed Blocks in Pune District
+  // --------------------------------------------------
+  const blocks = [
+    { id: "block-haveli", name: "Haveli", districtId: "district-pune" },
+    { id: "block-pune-city", name: "Pune City", districtId: "district-pune" },
+    { id: "block-baramati", name: "Baramati", districtId: "district-pune" },
+    { id: "block-shirur", name: "Shirur", districtId: "district-pune" },
+  ];
+
+  for (const b of blocks) {
+    await prisma.block.upsert({
+      where: { id: b.id },
+      update: { name: b.name, districtId: b.districtId },
+      create: b,
+    });
+  }
+  console.log(`Blocks seeded: ${blocks.length}`);
+
+  // --------------------------------------------------
+  // 11. Seed Mobile Laboratories (Buses)
+  // --------------------------------------------------
+  const buses = [
+    {
+      id: "bus-pune-01",
+      busCode: "MH-12-SOW-01",
+      registrationNumber: "MH12SA1001",
+      regionId: region.id,
+      status: "AVAILABLE" as const,
+      seatingCapacity: 4,
+      currentLat: 18.5204,
+      currentLng: 73.8567,
+      lastGpsUpdate: new Date(),
+      insuranceExpiry: new Date(Date.now() + 300 * 24 * 3600 * 1000),
+      fitnessExpiry: new Date(Date.now() + 300 * 24 * 3600 * 1000),
+      serviceDate: new Date(Date.now() - 30 * 24 * 3600 * 1000),
+    },
+    {
+      id: "bus-pune-02",
+      busCode: "MH-12-SOW-02",
+      registrationNumber: "MH12SA1002",
+      regionId: region.id,
+      status: "AVAILABLE" as const,
+      seatingCapacity: 4,
+      currentLat: 18.5314,
+      currentLng: 73.8446,
+      lastGpsUpdate: new Date(),
+      insuranceExpiry: new Date(Date.now() + 250 * 24 * 3600 * 1000),
+      fitnessExpiry: new Date(Date.now() + 250 * 24 * 3600 * 1000),
+      serviceDate: new Date(Date.now() - 15 * 24 * 3600 * 1000),
+    },
+  ];
+
+  for (const bus of buses) {
+    await prisma.bus.upsert({
+      where: { id: bus.id },
+      update: bus,
+      create: bus,
+    });
+  }
+  console.log(`Mobile Labs seeded: ${buses.length}`);
+
+  // --------------------------------------------------
+  // 12. Seed Schools across Blocks
+  // --------------------------------------------------
+  const schools = [
+    {
+      id: "school-zp-wagholi",
+      udiseCode: "27250100101",
+      name: "Zilla Parishad High School, Wagholi",
+      address: "Pune-Nagar Road, Wagholi, Pune 412207",
+      regionId: region.id,
+      districtId: "district-pune",
+      blockId: "block-haveli",
+      latitude: 18.5793,
+      longitude: 73.9814,
+      contactPhone: "+91 98220 11221",
+      totalStudents: 420,
+      hasScienceLab: false,
+      hasElectricity: true,
+      hasInternet: true,
+      priorityScore: 88.5,
+      priorityCategory: "HIGH_OUTREACH" as const,
+    },
+    {
+      id: "school-mg-baramati",
+      udiseCode: "27250200202",
+      name: "Mahatma Gandhi Secondary School, Baramati",
+      address: "Vidyanagari, MIDC Road, Baramati, Pune 413133",
+      regionId: region.id,
+      districtId: "district-pune",
+      blockId: "block-baramati",
+      latitude: 18.1519,
+      longitude: 74.5772,
+      contactPhone: "+91 98220 33442",
+      totalStudents: 680,
+      hasScienceLab: true,
+      hasElectricity: true,
+      hasInternet: true,
+      priorityScore: 65.0,
+      priorityCategory: "MEDIUM_PRIORITY" as const,
+    },
+    {
+      id: "school-kg-shirur",
+      udiseCode: "27250300303",
+      name: "Kasturba Gandhi Balika Vidyalaya, Shirur",
+      address: "Ghodnadi Campus, Taluka Shirur, Pune 412210",
+      regionId: region.id,
+      districtId: "district-pune",
+      blockId: "block-shirur",
+      latitude: 18.8256,
+      longitude: 74.3758,
+      contactPhone: "+91 98220 55663",
+      totalStudents: 310,
+      hasScienceLab: false,
+      hasElectricity: true,
+      hasInternet: false,
+      priorityScore: 94.0,
+      priorityCategory: "HIGH_OUTREACH" as const,
+    },
+    {
+      id: "school-sp-pune",
+      udiseCode: "27250400404",
+      name: "Savitribai Phule Secondary School, Pune",
+      address: "Shivaji Nagar, Pune 411005",
+      regionId: region.id,
+      districtId: "district-pune",
+      blockId: "block-pune-city",
+      latitude: 18.5308,
+      longitude: 73.8475,
+      contactPhone: "+91 98220 77884",
+      totalStudents: 850,
+      hasScienceLab: true,
+      hasElectricity: true,
+      hasInternet: true,
+      priorityScore: 45.0,
+      priorityCategory: "STANDARD" as const,
+    },
+    {
+      id: "school-zp-loni",
+      udiseCode: "27250500505",
+      name: "Zilla Parishad Madhyamik Shala, Loni Kalbhor",
+      address: "Solapur Highway, Loni Kalbhor, Haveli, Pune 412201",
+      regionId: region.id,
+      districtId: "district-pune",
+      blockId: "block-haveli",
+      latitude: 18.4907,
+      longitude: 74.0194,
+      contactPhone: "+91 98220 99005",
+      totalStudents: 390,
+      hasScienceLab: false,
+      hasElectricity: true,
+      hasInternet: false,
+      priorityScore: 82.0,
+      priorityCategory: "HIGH_OUTREACH" as const,
+    },
+  ];
+
+  for (const s of schools) {
+    await prisma.school.upsert({
+      where: { id: s.id },
+      update: s,
+      create: s,
+    });
+  }
+  console.log(`Schools seeded: ${schools.length}`);
+
+  // --------------------------------------------------
+  // 13. Seed Equipment Masters & Physical Equipment Assets
+  // --------------------------------------------------
+  const equipmentMasters = [
+    {
+      id: "eqm-microscope",
+      name: "Compound Optical Microscope (1000x)",
+      category: "Biology / Microscopy",
+      unit: "piece",
+      trackable: true,
+      minimumStock: 2,
+      description: "Binocular high-power laboratory microscope with LED illumination and oil immersion objective.",
+    },
+    {
+      id: "eqm-telescope",
+      name: "Refractor Astronomical Telescope (70mm)",
+      category: "Astronomy",
+      unit: "piece",
+      trackable: true,
+      minimumStock: 1,
+      description: "Portable astronomical refractor telescope with azimuth mount for celestial observation.",
+    },
+    {
+      id: "eqm-vandegraaff",
+      name: "Van de Graaff Electrostatic Generator",
+      category: "Physics / Electrostatics",
+      unit: "piece",
+      trackable: true,
+      minimumStock: 1,
+      description: "Demonstration generator producing up to 250kV for electrostatics, spark and charge experiments.",
+    },
+    {
+      id: "eqm-spectroscope",
+      name: "Direct Vision Diffraction Spectroscope",
+      category: "Physics / Optics",
+      unit: "piece",
+      trackable: true,
+      minimumStock: 2,
+      description: "Handheld optical spectroscope with wavelength scale for emission spectra identification.",
+    },
+    {
+      id: "eqm-digital-balance",
+      name: "Precision Electronic Balance (0.01g)",
+      category: "Chemistry / Lab Tools",
+      unit: "piece",
+      trackable: true,
+      minimumStock: 2,
+      description: "Digital laboratory scale for accurate reagent measurement and density experiments.",
+    },
+    {
+      id: "eqm-ray-optics",
+      name: "Laser Ray Optics Demonstration Kit",
+      category: "Physics / Optics",
+      unit: "piece",
+      trackable: true,
+      minimumStock: 2,
+      description: "Magnetic multi-beam laser box with cylindrical lenses, prisms and mirrors for ray tracing.",
+    },
+  ];
+
+  for (const em of equipmentMasters) {
+    await prisma.equipmentMaster.upsert({
+      where: { name: em.name },
+      update: em,
+      create: em,
+    });
+  }
+  console.log(`Equipment Masters seeded: ${equipmentMasters.length}`);
+
+  const equipmentAssets = [
+    {
+      id: "eq-mic-01",
+      assetTag: "SOW-EQ-001",
+      name: "Compound Optical Microscope - Unit 1",
+      category: "Biology / Microscopy",
+      status: "ASSIGNED_TO_BUS" as const,
+      busId: "bus-pune-01",
+      purchaseDate: new Date("2025-06-15"),
+      cost: 14500,
+      equipmentMasterId: "eqm-microscope",
+    },
+    {
+      id: "eq-mic-02",
+      assetTag: "SOW-EQ-002",
+      name: "Compound Optical Microscope - Unit 2",
+      category: "Biology / Microscopy",
+      status: "ASSIGNED_TO_BUS" as const,
+      busId: "bus-pune-01",
+      purchaseDate: new Date("2025-06-15"),
+      cost: 14500,
+      equipmentMasterId: "eqm-microscope",
+    },
+    {
+      id: "eq-tel-01",
+      assetTag: "SOW-EQ-003",
+      name: "Astronomical Telescope (70mm) - Unit 1",
+      category: "Astronomy",
+      status: "ASSIGNED_TO_BUS" as const,
+      busId: "bus-pune-01",
+      purchaseDate: new Date("2025-07-10"),
+      cost: 26000,
+      equipmentMasterId: "eqm-telescope",
+    },
+    {
+      id: "eq-vdg-01",
+      assetTag: "SOW-EQ-004",
+      name: "Van de Graaff Generator 250kV",
+      category: "Physics / Electrostatics",
+      status: "ASSIGNED_TO_BUS" as const,
+      busId: "bus-pune-01",
+      purchaseDate: new Date("2025-08-01"),
+      cost: 19800,
+      equipmentMasterId: "eqm-vandegraaff",
+    },
+    {
+      id: "eq-bal-01",
+      assetTag: "SOW-EQ-005",
+      name: "Precision Electronic Balance - Unit 1",
+      category: "Chemistry / Lab Tools",
+      status: "ASSIGNED_TO_BUS" as const,
+      busId: "bus-pune-02",
+      purchaseDate: new Date("2025-08-20"),
+      cost: 7200,
+      equipmentMasterId: "eqm-digital-balance",
+    },
+    {
+      id: "eq-opt-01",
+      assetTag: "SOW-EQ-006",
+      name: "Laser Ray Optics Kit - Unit 1",
+      category: "Physics / Optics",
+      status: "ASSIGNED_TO_BUS" as const,
+      busId: "bus-pune-02",
+      purchaseDate: new Date("2025-09-05"),
+      cost: 9500,
+      equipmentMasterId: "eqm-ray-optics",
+    },
+  ];
+
+  for (const eq of equipmentAssets) {
+    await prisma.equipment.upsert({
+      where: { assetTag: eq.assetTag },
+      update: eq,
+      create: eq,
+    });
+  }
+  console.log(`Equipment Assets seeded: ${equipmentAssets.length}`);
+
+  // --------------------------------------------------
+  // 14. Seed Consumables & Stock Levels
+  // --------------------------------------------------
+  const consumables = [
+    {
+      id: "con-litmus",
+      name: "Litmus Paper Strips (Red & Blue)",
+      category: "Chemistry Reagents",
+      currentStock: 450,
+      minimumStock: 100,
+      unitMetric: "strips",
+      expiryDate: new Date("2027-12-31"),
+    },
+    {
+      id: "con-test-tubes",
+      name: "Borosilicate Test Tubes (15x125mm)",
+      category: "Glassware",
+      currentStock: 160,
+      minimumStock: 40,
+      unitMetric: "pieces",
+      expiryDate: null,
+    },
+    {
+      id: "con-copper-sulphate",
+      name: "Copper Sulphate Crystals (CuSO4·5H2O)",
+      category: "Chemical Reagents",
+      currentStock: 2800,
+      minimumStock: 500,
+      unitMetric: "grams",
+      expiryDate: new Date("2028-06-30"),
+    },
+    {
+      id: "con-magnesium-ribbon",
+      name: "Magnesium Ribbon (Pure)",
+      category: "Chemical Reagents",
+      currentStock: 35,
+      minimumStock: 10,
+      unitMetric: "meters",
+      expiryDate: new Date("2029-01-01"),
+    },
+    {
+      id: "con-glass-slides",
+      name: "Microscope Prepared Slides & Covers",
+      category: "Biology Supplies",
+      currentStock: 520,
+      minimumStock: 120,
+      unitMetric: "pieces",
+      expiryDate: null,
+    },
+    {
+      id: "con-alkaline-cells",
+      name: "9V Alkaline Demonstration Batteries",
+      category: "Physics & Electronics",
+      currentStock: 6,
+      minimumStock: 15,
+      unitMetric: "units",
+      expiryDate: new Date("2026-11-30"),
+    },
+  ];
+
+  for (const c of consumables) {
+    await prisma.consumable.upsert({
+      where: { id: c.id },
+      update: c,
+      create: c,
+    });
+  }
+  console.log(`Consumables seeded: ${consumables.length}`);
+
+  // --------------------------------------------------
+  // 15. Seed Inventory Transactions
+  // --------------------------------------------------
+  const transactions = [
+    {
+      id: "tx-init-01",
+      consumableId: "con-litmus",
+      busId: "bus-pune-01",
+      quantity: 150,
+      type: "RECEIPT" as const,
+      notes: "Initial stocking for Pune Mobile Lab 1",
+    },
+    {
+      id: "tx-init-02",
+      consumableId: "con-test-tubes",
+      busId: "bus-pune-01",
+      quantity: 80,
+      type: "RECEIPT" as const,
+      notes: "Glassware delivery from central supplier",
+    },
+    {
+      id: "tx-init-03",
+      consumableId: "con-copper-sulphate",
+      busId: "bus-pune-01",
+      quantity: 1000,
+      type: "RECEIPT" as const,
+      notes: "Chemistry crystals allocated for demonstrations",
+    },
+    {
+      id: "tx-init-04",
+      consumableId: "con-glass-slides",
+      busId: "bus-pune-02",
+      quantity: 200,
+      type: "RECEIPT" as const,
+      notes: "Biology slides kit allocated to Mobile Lab 2",
+    },
+  ];
+
+  for (const tx of transactions) {
+    await prisma.inventoryTransaction.upsert({
+      where: { id: tx.id },
+      update: tx,
+      create: tx,
+    });
+  }
+  console.log(`Inventory Transactions seeded: ${transactions.length}`);
+
+  // --------------------------------------------------
+  // 16. Seed School Registrations
+  // --------------------------------------------------
+  const registrations = [
+    {
+      id: "reg-wagholi-01",
+      schoolId: "school-zp-wagholi",
+      preferredDate: new Date(Date.now() + 14 * 24 * 3600 * 1000),
+      expectedStudentCount: 220,
+      topicsRequested: ["Optics", "Electrostatics", "Cell Structure"],
+      status: "APPROVED",
+      remarks: "High outreach priority rural school - readiness approved",
+    },
+    {
+      id: "reg-shirur-01",
+      schoolId: "school-kg-shirur",
+      preferredDate: new Date(Date.now() + 21 * 24 * 3600 * 1000),
+      expectedStudentCount: 180,
+      topicsRequested: ["Chemical Reactions", "Acids and Bases", "Astronomy"],
+      status: "PENDING",
+      remarks: "Awaiting communicator schedule assignment",
+    },
+  ];
+
+  for (const r of registrations) {
+    await prisma.schoolRegistration.upsert({
+      where: { id: r.id },
+      update: r,
+      create: r,
+    });
+  }
+  console.log(`School Registrations seeded: ${registrations.length}`);
+
   console.log("");
   console.log("========================================");
   console.log("Science on Wheels RBAC bootstrap complete");

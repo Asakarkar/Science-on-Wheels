@@ -54,6 +54,7 @@ export interface ResourceConfig {
   description: string;
   fields: FieldConfig[];
   columns: string[];
+  readOnly?: boolean;
   permission?: string;
   filterQuery?: string;
 }

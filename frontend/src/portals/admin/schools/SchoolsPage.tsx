@@ -10,10 +10,12 @@ export function SchoolsPage() {
     setSearchParams({ sub: newSub });
   }
 
-  const subOptions = ["School Directory", "Registration", "Priority"];
+  const subOptions = ["School Directory", "Imported Schedule", "Registration", "Priority"];
 
   let activeConfig = configs.schools;
-  if (sub === "Registration" || sub === "Verification") {
+  if (sub === "Imported Schedule") {
+    activeConfig = configs.schoolScheduleEntries;
+  } else if (sub === "Registration" || sub === "Verification") {
     activeConfig = configs.registrations;
   }
 

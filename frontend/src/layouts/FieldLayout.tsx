@@ -5,7 +5,7 @@ import { BrandLogo } from "../shared/components/BrandLogo";
 import { FIELD_NAVIGATION } from "../shared/constants/navigation";
 
 export function FieldLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileNav, setMobileNav] = useState(false);
@@ -14,11 +14,15 @@ export function FieldLayout() {
     experiments: true,
   });
 
+  const visibleNav = FIELD_NAVIGATION.filter(
+    (item) => !item.permission || hasPermission(item.permission)
+  );
+
   const currentPath = location.pathname;
   const activeNav =
-    FIELD_NAVIGATION.find(
+    visibleNav.find(
       (item) => currentPath === item.path || currentPath.startsWith(item.path + "/")
-    ) || FIELD_NAVIGATION[0];
+    ) || visibleNav[0];
 
   function handleSelect(path: string, childKey?: string) {
     navigate(childKey ? `${path}?sub=${encodeURIComponent(childKey)}` : path);
@@ -82,8 +86,8 @@ export function FieldLayout() {
           </div>
 
           <nav>
-            {FIELD_NAVIGATION.map((item) => {
-              const isActive = activeNav.key === item.key;
+            {visibleNav.map((item) => {
+              const isActive = activeNav?.key === item.key;
               return (
                 <div key={item.key} className="field-nav-group">
                   <button
@@ -129,25 +133,29 @@ export function FieldLayout() {
 
         {/* Main Content Area */}
         <main className="field-main">
-          <header className="field-top">
-            <button className="field-mobile" onClick={() => setMobileNav(!mobileNav)}>
-              ☰
-            </button>
-            <div className="breadcrumbs font-mono text-xs">
-              <span>Science on Wheels</span>
-              <b className="text-stone">›</b>
-              <strong className="text-charcoal font-semibold">{activeNav?.label}</strong>
+          <header className="field-top" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <button className="field-mobile" onClick={() => setMobileNav(!mobileNav)}>
+                ☰
+              </button>
+              <div className="breadcrumbs font-mono text-xs">
+                <span>Science on Wheels</span>
+                <b className="text-stone">›</b>
+                <strong className="text-charcoal font-semibold">{activeNav?.label}</strong>
+              </div>
             </div>
 
-            <div className="field-user">
-              <div className="avatar font-mono" style={{ backgroundColor: "#1E242B" }}>
-                {(user?.name || "SC").slice(0, 1).toUpperCase()}
-              </div>
-              <div>
-                <span className="text-xs text-charcoal font-medium">{user?.name || "Field User"}</span>
-                <small className="block font-mono text-[9px] text-charcoal-subtle">
-                  SCIENCE COMMUNICATOR
-                </small>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div className="field-user">
+                <div className="avatar font-mono" style={{ backgroundColor: "#1E242B" }}>
+                  {(user?.name || "SC").slice(0, 1).toUpperCase()}
+                </div>
+                <div>
+                  <span className="text-xs text-charcoal font-medium">{user?.name || "Field User"}</span>
+                  <small className="block font-mono text-[9px] text-charcoal-subtle">
+                    SCIENCE COMMUNICATOR
+                  </small>
+                </div>
               </div>
             </div>
           </header>

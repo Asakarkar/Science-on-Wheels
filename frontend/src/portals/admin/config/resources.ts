@@ -64,7 +64,7 @@ export const configs: Record<string, ResourceConfig> = {
       { key: "name", label: "Role name", required: true },
       { key: "description", label: "Description", type: "textarea" }
     ],
-    columns: ["name", "description"]
+    columns: ["name", "description", "userCount"]
   },
   permissions: {
     key: "permissions",
@@ -127,6 +127,19 @@ export const configs: Record<string, ResourceConfig> = {
       { key: "hasInternet", label: "Has internet", type: "boolean" }
     ],
     columns: ["name", "udiseCode", "regionId", "districtId", "totalStudents", "priorityCategory"]
+  },
+  schoolScheduleEntries: {
+    key: "schoolScheduleEntries",
+    title: "Imported School Schedule",
+    description: "Historical school visit schedule from School.csv. Imported values are preserved as provided and are not verified school master records.",
+    fields: [
+      { key: "sourceRow", label: "CSV row number", type: "number", required: true },
+      { key: "regionSection", label: "Region / section" },
+      { key: "dateOrDateRange", label: "Visit date or date range" },
+      { key: "schoolCollegeName", label: "School / college name", required: true },
+      { key: "district", label: "District", required: true }
+    ],
+    columns: ["sourceRow", "regionSection", "dateOrDateRange", "schoolCollegeName", "district"]
   },
   registrations: {
     key: "registrations",
@@ -377,6 +390,14 @@ export const configs: Record<string, ResourceConfig> = {
       { key: "notes", label: "Notes", type: "textarea" }
     ],
     columns: ["consumableId", "busId", "quantity", "type", "performedById", "timestamp"]
+  },
+  inventoryInvoiceLines: {
+    key: "inventoryInvoiceLines",
+    title: "Imported Invoice Lines",
+    description: "Purchase invoice details from Inventory.csv. Quantities are invoice amounts, not verified current stock on hand.",
+    fields: [],
+    columns: ["serialNo", "invoiceNo", "invoiceDate", "supplierName", "labCategory", "itemName", "hsnCode", "quantity", "unit", "unitRateInr", "gstPercent", "amountInr"],
+    readOnly: true
   },
   auditLogs: {
     key: "auditLogs",

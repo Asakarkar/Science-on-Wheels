@@ -10,11 +10,12 @@ export function InventoryPage() {
     setSearchParams({ sub: newSub });
   }
 
-  const subOptions = ["Equipment Master", "Consumables", "Transactions", "Procurement"];
+  const subOptions = ["Equipment Master", "Consumables", "Transactions", "Invoice Import", "Procurement"];
 
   let activeConfig = configs.equipmentMasters;
   if (sub === "Consumables") activeConfig = configs.consumables;
   else if (sub === "Transactions") activeConfig = configs.inventoryTransactions;
+  else if (sub === "Invoice Import") activeConfig = configs.inventoryInvoiceLines;
   else if (sub === "Procurement") activeConfig = configs.procurement;
 
   return (

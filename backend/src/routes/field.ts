@@ -13,7 +13,9 @@ function actor(res:any) { return res.locals.user.id as string; }
 function newId() { return crypto.randomUUID(); }
 
 function allow(res:any, roles:string[], permission?:string) {
-  if (!roles.includes(role(res))) {
+  const userRole = role(res);
+  if (userRole === "SUPER_ADMIN") return true;
+  if (!roles.includes(userRole)) {
     res.status(403).json({message:"This action is not available for your role"});
     return false;
   }
@@ -43,9 +45,10 @@ fieldRouter.get("/dashboard", async (_req,res)=>{
   const today=new Date(); today.setHours(0,0,0,0);
   const tomorrow=new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
 
-  if (r==="SCIENCE_COMMUNICATOR") {
+  if (r==="SCIENCE_COMMUNICATOR" || r==="SUPER_ADMIN") {
+    const eventsWhere = r === "SUPER_ADMIN" ? {} : {EventsOnCommunicator:{some:{userId:uid}}};
     const events=await prisma.event.findMany({
-      where:{EventsOnCommunicator:{some:{userId:uid}}},
+      where: eventsWhere,
       include:{
         School:true,
         Bus:true,
@@ -58,9 +61,9 @@ fieldRouter.get("/dashboard", async (_req,res)=>{
     const upcoming=events.filter(e=>e.eventDate>=today);
     const busIds=Array.from(new Set(events.map(e=>e.busId)));
     const [labs,issues,inventory]=await Promise.all([
-      prisma.bus.findMany({where:{id:{in:busIds}}}),
-      prisma.operationalIssue.findMany({where:{reportedById:uid},orderBy:{createdAt:"desc"},take:10}),
-      prisma.inventoryTransaction.findMany({where:{busId:{in:busIds}},include:{consumable:true},orderBy:{timestamp:"desc"},take:30})
+      prisma.bus.findMany({where: busIds.length > 0 ? {id:{in:busIds}} : {}}),
+      prisma.operationalIssue.findMany({where: r === "SUPER_ADMIN" ? {} : {reportedById:uid},orderBy:{createdAt:"desc"},take:10}),
+      prisma.inventoryTransaction.findMany({where: busIds.length > 0 ? {busId:{in:busIds}} : {},include:{consumable:true},orderBy:{timestamp:"desc"},take:30})
     ]);
     return res.json({
       role:r, user:{id:uid,name:res.locals.user.name,email:res.locals.user.email,regionId:res.locals.user.regionId},

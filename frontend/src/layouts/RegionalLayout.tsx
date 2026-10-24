@@ -5,7 +5,7 @@ import { BrandLogo } from "../shared/components/BrandLogo";
 import { REGIONAL_NAVIGATION } from "../shared/constants/navigation";
 
 export function RegionalLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileNav, setMobileNav] = useState(false);
@@ -14,11 +14,15 @@ export function RegionalLayout() {
     schedules: true,
   });
 
+  const visibleNav = REGIONAL_NAVIGATION.filter(
+    (item) => !item.permission || hasPermission(item.permission)
+  );
+
   const currentPath = location.pathname;
   const activeNav =
-    REGIONAL_NAVIGATION.find(
+    visibleNav.find(
       (item) => currentPath === item.path || currentPath.startsWith(item.path + "/")
-    ) || REGIONAL_NAVIGATION[0];
+    ) || visibleNav[0];
 
   function handleSelect(path: string, childKey?: string) {
     navigate(childKey ? `${path}?sub=${encodeURIComponent(childKey)}` : path);
@@ -82,8 +86,8 @@ export function RegionalLayout() {
           </div>
 
           <nav>
-            {REGIONAL_NAVIGATION.map((item) => {
-              const isActive = activeNav.key === item.key;
+            {visibleNav.map((item) => {
+              const isActive = activeNav?.key === item.key;
               return (
                 <div key={item.key} className="nav-group">
                   <button

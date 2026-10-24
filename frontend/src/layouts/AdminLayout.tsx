@@ -5,7 +5,7 @@ import { BrandLogo } from "../shared/components/BrandLogo";
 import { ADMIN_NAVIGATION } from "../shared/constants/navigation";
 
 export function AdminLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, hasPermission } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileNav, setMobileNav] = useState(false);
@@ -14,11 +14,15 @@ export function AdminLayout() {
     people: true,
   });
 
+  const visibleNav = ADMIN_NAVIGATION.filter(
+    (item) => !item.permission || hasPermission(item.permission)
+  );
+
   const currentPath = location.pathname;
   const activeNav =
-    ADMIN_NAVIGATION.find(
+    visibleNav.find(
       (item) => currentPath === item.path || currentPath.startsWith(item.path + "/")
-    ) || ADMIN_NAVIGATION[0];
+    ) || visibleNav[0];
 
   function handleSelect(path: string, childKey?: string) {
     navigate(childKey ? `${path}?sub=${encodeURIComponent(childKey)}` : path);
@@ -82,8 +86,8 @@ export function AdminLayout() {
           </div>
 
           <nav>
-            {ADMIN_NAVIGATION.map((item) => {
-              const isActive = activeNav.key === item.key;
+            {visibleNav.map((item) => {
+              const isActive = activeNav?.key === item.key;
               return (
                 <div key={item.key} className="nav-group">
                   <button
