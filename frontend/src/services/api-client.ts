@@ -8,16 +8,54 @@ export class ApiError extends Error {
   }
 }
 
+const TOKEN_KEY = "sow_session_token";
+
+export function getStoredSessionToken(): string | null {
+  try {
+    return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredSessionToken(token: string, remember: boolean = false): void {
+  try {
+    if (remember) {
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      sessionStorage.setItem(TOKEN_KEY, token);
+    }
+  } catch {
+    // Ignore storage errors in restricted contexts
+  }
+}
+
+export function clearStoredSessionToken(): void {
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // Ignore
+  }
+}
+
 export async function api<T>(
   path: string,
   init?: RequestInit
 ): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(init?.headers as Record<string, string> || {})
+  };
+
+  const token = getStoredSessionToken();
+  if (token && !headers["Authorization"]) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${baseUrl}${path}`, {
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers || {})
-    },
+    headers,
     ...init
   });
 

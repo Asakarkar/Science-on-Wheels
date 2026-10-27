@@ -14,23 +14,31 @@ export function RegionalMobileLabsPage() {
   return (
     <div className="portal-module">
       <div className="subnav-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-        {subOptions.map((opt) => (
-          <button
-            key={opt}
-            className={`ghost ${sub === opt ? "primary" : ""}`}
-            onClick={() => setSub(opt)}
-            style={{
-              padding: "0.4rem 0.8rem",
-              borderRadius: "4px",
-              background: sub === opt ? "var(--color-primary, #6366f1)" : "rgba(255,255,255,0.05)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.1)",
-              cursor: "pointer"
-            }}
-          >
-            {opt}
-          </button>
-        ))}
+        {subOptions.map((opt) => {
+          const isActive = sub === opt;
+          return (
+            <button
+              key={opt}
+              type="button"
+              className={`ghost ${isActive ? "primary" : ""}`}
+              onClick={() => setSub(opt)}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "6px",
+                background: isActive ? "#f1f5f9" : "#ffffff",
+                color: "#000000",
+                border: isActive ? "2px solid #000000" : "1px solid #cbd5e1",
+                fontWeight: isActive ? 700 : 600,
+                fontSize: "13px",
+                cursor: "pointer",
+                boxShadow: isActive ? "0 2px 4px rgba(0,0,0,0.08)" : "0 1px 2px rgba(0,0,0,0.04)",
+                transition: "all 0.15s ease",
+              }}
+            >
+              {opt}
+            </button>
+          );
+        })}
       </div>
       <RegionalDataTable
         resource="labs"

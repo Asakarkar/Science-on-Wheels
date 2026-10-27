@@ -66,7 +66,8 @@ function RootRedirect() {
   }
   if (user.role === "SUPER_ADMIN") return <Navigate to="/admin/dashboard" replace />;
   if (user.role === "REGIONAL_ADMIN") return <Navigate to="/regional/dashboard" replace />;
-  return <Navigate to="/field/dashboard" replace />;
+  if (user.role === "SCIENCE_COMMUNICATOR") return <Navigate to="/field/dashboard" replace />;
+  return <Navigate to="/login" replace />;
 }
 
 export const router = createBrowserRouter([

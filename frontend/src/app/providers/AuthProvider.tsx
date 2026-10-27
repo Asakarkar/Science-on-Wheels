@@ -7,7 +7,7 @@ export interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<AuthUser>;
+  login: (email: string, password: string, remember?: boolean) => Promise<AuthUser>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   hasRole: (roles: Role | Role[]) => boolean;
@@ -38,9 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void refreshUser();
   }, []);
 
-  async function login(email: string, password: string): Promise<AuthUser> {
+  async function login(email: string, password: string, remember: boolean = false): Promise<AuthUser> {
     setError(null);
-    const res = await authService.login(email, password);
+    const res = await authService.login(email, password, remember);
     setUser(res.user);
     return res.user;
   }

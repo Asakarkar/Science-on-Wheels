@@ -72,14 +72,14 @@ export function RegionalDataTable({
   }
 
   return (
-    <section className="surface">
+    <section className="surface" style={{ color: "#000000" }}>
       <div className="module-head">
         <div>
-          <div className="section-kicker">REGIONAL DATA</div>
-          <h2>{title}</h2>
-          <p>{description || "Every record is filtered by the authenticated Regional Admin's assigned region."}</p>
+          <div className="section-kicker" style={{ color: "#000000", fontWeight: 700 }}>REGIONAL DATA</div>
+          <h2 style={{ color: "#000000", fontWeight: 700 }}>{title}</h2>
+          <p style={{ color: "#1e242b", fontWeight: 500 }}>{description || "Every record is filtered by the authenticated Regional Admin's assigned region."}</p>
         </div>
-        <button className="ghost" onClick={csvExport}>
+        <button className="ghost" onClick={csvExport} style={{ color: "#000000", borderColor: "#cbd5e1", fontWeight: 600 }}>
           Export CSV
         </button>
       </div>
@@ -92,33 +92,34 @@ export function RegionalDataTable({
           onKeyDown={(e) => {
             if (e.key === "Enter") void load();
           }}
+          style={{ color: "#000000", background: "#ffffff", borderColor: "#cbd5e1", fontWeight: 500 }}
         />
-        <button onClick={() => void load()}>Search</button>
+        <button onClick={() => void load()} style={{ color: "#000000", fontWeight: 600 }}>Search</button>
       </div>
 
       {error && <div className="error banner">{error}</div>}
 
       {loading ? (
-        <div className="loading-state">
+        <div className="loading-state" style={{ color: "#000000" }}>
           <div className="loader-ring" />
           Loading regional data…
         </div>
       ) : (
         <div className="table-wrap">
-          <table>
+          <table style={{ color: "#000000" }}>
             <thead>
               <tr>
                 {columns.map((c) => (
-                  <th key={c}>{c.replace(/([A-Z])/g, " $1")}</th>
+                  <th key={c} style={{ color: "#000000", fontWeight: 700, fontSize: "11px" }}>{c.replace(/([A-Z])/g, " $1")}</th>
                 ))}
-                {onEdit && <th style={{ textAlign: "right" }}>Actions</th>}
+                {onEdit && <th style={{ textAlign: "right", color: "#000000", fontWeight: 700, fontSize: "11px" }}>Actions</th>}
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
                 <tr key={row.id || i}>
                   {columns.map((c) => (
-                    <td key={c}>{formatValue(row[c])}</td>
+                    <td key={c} style={{ color: "#000000", fontWeight: 500 }}>{formatValue(row[c])}</td>
                   ))}
                   {onEdit && (
                     <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
@@ -154,7 +155,7 @@ export function RegionalDataTable({
               {!rows.length && (
                 <tr>
                   <td colSpan={Math.max(columns.length + (onEdit ? 1 : 0), 1)}>
-                    <div className="empty-state">No records found.</div>
+                    <div className="empty-state" style={{ color: "#000000", fontWeight: 500 }}>No records found.</div>
                   </td>
                 </tr>
               )}

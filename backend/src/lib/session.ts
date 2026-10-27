@@ -85,35 +85,29 @@ export async function getSessionUser(rawToken?: string) {
   // Reject inactive/disabled users.
   if (
     !session.user.isActive ||
-    session.user.status !== "ACTIVE"
+    session.user.status?.toUpperCase() !== "ACTIVE"
   ) {
     return null;
   }
 
   /*
    * IMPORTANT:
-   *
-   * updateMany() is intentionally used instead of update().
-   *
-   * Multiple frontend requests can arrive at almost the same time.
-   * If another request deletes/revokes this session between the
-   * findUnique() above and this update, Prisma update() throws P2025.
-   *
-   * updateMany() simply returns count = 0 in that situation.
+   * Only update activity and expiration if more than 5 minutes have passed
+   * since lastActivityAt. This avoids high DB write contention on concurrent requests.
    */
-  const refreshed = await prisma.session.updateMany({
-    where: {
-      id: session.id,
-      revokedAt: null,
-    },
-    data: {
-      lastActivityAt: new Date(),
-      expiresAt: new Date(Date.now() + SESSION_TTL_MS),
-    },
-  });
-
-  if (refreshed.count === 0) {
-    return null;
+  const now = Date.now();
+  const lastActive = session.lastActivityAt ? new Date(session.lastActivityAt).getTime() : 0;
+  if (now - lastActive > 5 * 60 * 1000) {
+    await prisma.session.updateMany({
+      where: {
+        id: session.id,
+        revokedAt: null,
+      },
+      data: {
+        lastActivityAt: new Date(now),
+        expiresAt: new Date(now + SESSION_TTL_MS),
+      },
+    }).catch(() => undefined);
   }
 
   return session.user;

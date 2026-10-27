@@ -22,13 +22,20 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      const user = await login(email.trim(), password);
+      const user = await login(email.trim(), password, remember);
 
       const stateFrom = (
         location.state as { from?: { pathname: string } } | null
       )?.from?.pathname;
 
-      if (stateFrom && stateFrom !== "/login") {
+      const isAllowedStateFrom =
+        stateFrom &&
+        stateFrom !== "/login" &&
+        ((user.role === "SUPER_ADMIN" && stateFrom.startsWith("/admin")) ||
+          (user.role === "REGIONAL_ADMIN" && stateFrom.startsWith("/regional")) ||
+          (user.role === "SCIENCE_COMMUNICATOR" && stateFrom.startsWith("/field")));
+
+      if (isAllowedStateFrom) {
         navigate(stateFrom, { replace: true });
         return;
       }
@@ -38,7 +45,9 @@ export function LoginPage() {
           ? "/admin/dashboard"
           : user.role === "REGIONAL_ADMIN"
             ? "/regional/dashboard"
-            : "/field/dashboard";
+            : user.role === "SCIENCE_COMMUNICATOR"
+              ? "/field/dashboard"
+              : "/login";
 
       navigate(target, { replace: true });
     } catch (err) {

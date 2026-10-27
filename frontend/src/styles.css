@@ -1121,26 +1121,60 @@ thead {
 }
 
 th {
-  color: var(--charcoal-muted);
+  color: #000000;
   font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--stone);
+  border-bottom: 2px solid var(--stone);
 }
 
 td {
   padding: 12px 14px;
   border-bottom: 1px solid var(--stone-light);
-  font-size: 12px;
-  color: var(--charcoal);
+  font-size: 13px;
+  color: #000000;
+  font-weight: 500;
 }
 
 tbody tr:hover {
   background: var(--paper);
+}
+
+/* Subnav Tabs */
+.subnav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.subnav-tabs button {
+  color: #000000 !important;
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid var(--stone);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.subnav-tabs button:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #000000 !important;
+}
+
+.subnav-tabs button.primary {
+  background: #f1f5f9 !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* Module Header & Toolbar */
@@ -1158,12 +1192,12 @@ tbody tr:hover {
   font-weight: 700;
   letter-spacing: -0.03em;
   margin: 4px 0 0;
-  color: var(--charcoal);
+  color: #000000;
 }
 
 .module-head p {
-  color: var(--charcoal-muted);
-  font-size: 12px;
+  color: #1e242b;
+  font-size: 13px;
   line-height: 1.6;
   margin: 4px 0 0;
   max-width: 750px;

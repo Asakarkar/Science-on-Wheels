@@ -10,18 +10,22 @@ import { fieldRouter } from "./routes/field";
 
 export const app = express();
 
-const allowedOrigins = [
+const allowedOrigins = new Set([
   env.FRONTEND_URL,
   "http://localhost:5173",
   "http://localhost:5174",
+  "http://localhost:5175",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
-];
+  "http://127.0.0.1:5175",
+]);
+
+const localOriginRegex = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost:")) {
+      if (!origin || allowedOrigins.has(origin) || localOriginRegex.test(origin)) {
         return callback(null, true);
       }
       return callback(new Error("CORS origin not allowed: " + origin));
@@ -29,6 +33,15 @@ app.use(
     credentials: true,
   })
 );
+
+// Security headers
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 
@@ -41,5 +54,5 @@ app.use("/api/field", fieldRouter);
 
 app.use((err: any, _req: any, res: any, _next: any) => {
   console.error(err);
-  res.status(500).json({ message: "Internal server error" });
+  res.status(err.status || 500).json({ message: err.message || "Internal server error" });
 });

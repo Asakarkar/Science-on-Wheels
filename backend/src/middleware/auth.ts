@@ -3,16 +3,36 @@ import { getSessionUser, SESSION_COOKIE, SESSION_TTL_MS } from "../lib/session";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const token = req.cookies?.[SESSION_COOKIE];
+    const authHeader = req.headers.authorization;
+    const bearerToken = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice(7).trim()
+      : undefined;
+
+    const token =
+      req.cookies?.[SESSION_COOKIE] ||
+      bearerToken ||
+      (req.headers["x-session-token"] as string | undefined);
+
+    if (!token) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
     const user = await getSessionUser(token);
-    if (!user) return res.status(401).json({ message: "Authentication required" });
-    res.cookie(SESSION_COOKIE, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: SESSION_TTL_MS,
-      path: "/",
-    });
+    if (!user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    // Refresh session cookie on response
+    if (req.cookies?.[SESSION_COOKIE]) {
+      res.cookie(SESSION_COOKIE, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: SESSION_TTL_MS,
+        path: "/",
+      });
+    }
+
     res.locals.user = user;
     next();
   } catch (error) {
@@ -24,33 +44,57 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 export function requirePermission(permissionKey: string) {
   return (_req: Request, res: Response, next: NextFunction) => {
     const user = res.locals.user;
-    const allowed = user?.role?.permissions?.some((item: any) => item.permission.key === permissionKey) ?? false;
-    if (!allowed) return res.status(403).json({ message: "Forbidden" });
+    if (!user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const role = user?.role?.name ?? user?.roleEnum;
+    // Super Admin has unrestricted platform permissions
+    if (role === "SUPER_ADMIN") {
+      return next();
+    }
+
+    const allowed =
+      user?.role?.permissions?.some(
+        (item: any) => item.permission.key === permissionKey
+      ) ?? false;
+
+    if (!allowed) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     next();
   };
 }
 
 export function requireSuperAdmin(_req: Request, res: Response, next: NextFunction) {
   const user = res.locals.user;
+  if (!user) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
   const role = user?.role?.name ?? user?.roleEnum;
-  if (role !== "SUPER_ADMIN") return res.status(403).json({ message: "Super Admin access required" });
+  if (role !== "SUPER_ADMIN") {
+    return res.status(403).json({ message: "Super Admin access required" });
+  }
+
   next();
 }
 
-
-import { prisma } from "../lib/prisma";
-
-export async function requireRegionalAdmin(req: Request, res: Response, next: NextFunction) {
+export async function requireRegionalAdmin(_req: Request, res: Response, next: NextFunction) {
   const user = res.locals.user;
-  const role = user?.role?.name ?? user?.roleEnum;
-  if (role === "SUPER_ADMIN") {
-    if (!user.regionId) {
-      const firstRegion = await prisma.region.findFirst({ select: { id: true } });
-      user.regionId = (req.query.regionId as string) || firstRegion?.id || null;
-    }
-    return next();
+  if (!user) {
+    return res.status(401).json({ message: "Authentication required" });
   }
-  if (role !== "REGIONAL_ADMIN") return res.status(403).json({ message: "Regional Admin access required" });
-  if (!user?.regionId) return res.status(403).json({ message: "Regional Admin has no assigned region" });
+
+  const role = user?.role?.name ?? user?.roleEnum;
+  if (role !== "REGIONAL_ADMIN") {
+    return res.status(403).json({ message: "Regional Admin access required" });
+  }
+
+  if (!user?.regionId) {
+    return res.status(403).json({ message: "Regional Admin has no assigned region" });
+  }
+
   next();
 }

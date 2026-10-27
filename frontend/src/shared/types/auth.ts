@@ -1,7 +1,10 @@
 export type Role =
   | "SUPER_ADMIN"
   | "REGIONAL_ADMIN"
-  | "SCIENCE_COMMUNICATOR";
+  | "SCIENCE_COMMUNICATOR"
+  | "TEACHER"
+  | "STUDENT"
+  | "DRIVER";
 
 export interface AuthUser {
   id: string;

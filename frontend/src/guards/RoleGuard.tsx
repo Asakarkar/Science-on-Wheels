@@ -23,19 +23,18 @@ export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
     return <Navigate to="/login" replace />;
   }
 
-  // Super Admin has global platform oversight across all portals (Admin, Regional, Field)
-  if (user.role === "SUPER_ADMIN") {
-    return children ? <>{children}</> : <Outlet />;
-  }
-
   if (!allowedRoles.includes(user.role)) {
-    // Redirect to user's permitted portal
-    const fallbackPath =
-      user.role === "REGIONAL_ADMIN"
-        ? "/regional/dashboard"
-        : "/field/dashboard";
+    // Determine the safe destination portal for the user's role without infinite loops
+    let destination = "/login";
+    if (user.role === "SUPER_ADMIN") {
+      destination = "/admin/dashboard";
+    } else if (user.role === "REGIONAL_ADMIN") {
+      destination = "/regional/dashboard";
+    } else if (user.role === "SCIENCE_COMMUNICATOR") {
+      destination = "/field/dashboard";
+    }
 
-    return <Navigate to={fallbackPath} replace />;
+    return <Navigate to={destination} replace />;
   }
 
   return children ? <>{children}</> : <Outlet />;
