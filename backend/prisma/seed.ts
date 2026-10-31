@@ -1,6 +1,7 @@
 import { prisma } from "../src/lib/prisma";
 import { hashPassword } from "../src/lib/password";
 import { env } from "../src/config/env";
+import { seedInventoryFromCsv } from "../src/lib/inventoryImporter";
 
 const permissionKeys = [
   "dashboard.view",
@@ -291,6 +292,59 @@ async function main() {
   }
 
   // --------------------------------------------------
+  // 9b. Seed Second Regional Admin & Second Field Operator for Concurrency Testing
+  // --------------------------------------------------
+  const reg2Email = "regional2@scienceonwheels.com";
+  const reg2Hash = await hashPassword("RegionalAdmin2@123456");
+  await prisma.user.upsert({
+    where: { email: reg2Email },
+    update: {
+      name: "Regional Administrator Two",
+      roleEnum: "REGIONAL_ADMIN",
+      roleId: regionalRole.id,
+      regionId: region.id,
+      isActive: true,
+      status: "ACTIVE",
+      passwordHash: reg2Hash,
+    },
+    create: {
+      name: "Regional Administrator Two",
+      email: reg2Email,
+      passwordHash: reg2Hash,
+      roleEnum: "REGIONAL_ADMIN",
+      roleId: regionalRole.id,
+      regionId: region.id,
+      isActive: true,
+      status: "ACTIVE",
+    },
+  });
+
+  const field2Email = "field2@scienceonwheels.com";
+  const field2Hash = await hashPassword("FieldOperator2@123456");
+  await prisma.user.upsert({
+    where: { email: field2Email },
+    update: {
+      name: "Field Science Communicator Two",
+      roleEnum: "SCIENCE_COMMUNICATOR",
+      roleId: fieldRole.id,
+      regionId: region.id,
+      isActive: true,
+      status: "ACTIVE",
+      passwordHash: field2Hash,
+    },
+    create: {
+      name: "Field Science Communicator Two",
+      email: field2Email,
+      passwordHash: field2Hash,
+      roleEnum: "SCIENCE_COMMUNICATOR",
+      roleId: fieldRole.id,
+      regionId: region.id,
+      isActive: true,
+      status: "ACTIVE",
+    },
+  });
+
+  // --------------------------------------------------
   // 10. Seed Blocks in Pune District
   // --------------------------------------------------
   const blocks = [
@@ -458,267 +512,11 @@ async function main() {
   console.log(`Schools seeded: ${schools.length}`);
 
   // --------------------------------------------------
-  // 13. Seed Equipment Masters & Physical Equipment Assets
+  // 13. Seed Real Inventory Directly from Inventory.csv
+  // (Purges all dummy equipment, consumables, and transactions)
   // --------------------------------------------------
-  const equipmentMasters = [
-    {
-      id: "eqm-microscope",
-      name: "Compound Optical Microscope (1000x)",
-      category: "Biology / Microscopy",
-      unit: "piece",
-      trackable: true,
-      minimumStock: 2,
-      description: "Binocular high-power laboratory microscope with LED illumination and oil immersion objective.",
-    },
-    {
-      id: "eqm-telescope",
-      name: "Refractor Astronomical Telescope (70mm)",
-      category: "Astronomy",
-      unit: "piece",
-      trackable: true,
-      minimumStock: 1,
-      description: "Portable astronomical refractor telescope with azimuth mount for celestial observation.",
-    },
-    {
-      id: "eqm-vandegraaff",
-      name: "Van de Graaff Electrostatic Generator",
-      category: "Physics / Electrostatics",
-      unit: "piece",
-      trackable: true,
-      minimumStock: 1,
-      description: "Demonstration generator producing up to 250kV for electrostatics, spark and charge experiments.",
-    },
-    {
-      id: "eqm-spectroscope",
-      name: "Direct Vision Diffraction Spectroscope",
-      category: "Physics / Optics",
-      unit: "piece",
-      trackable: true,
-      minimumStock: 2,
-      description: "Handheld optical spectroscope with wavelength scale for emission spectra identification.",
-    },
-    {
-      id: "eqm-digital-balance",
-      name: "Precision Electronic Balance (0.01g)",
-      category: "Chemistry / Lab Tools",
-      unit: "piece",
-      trackable: true,
-      minimumStock: 2,
-      description: "Digital laboratory scale for accurate reagent measurement and density experiments.",
-    },
-    {
-      id: "eqm-ray-optics",
-      name: "Laser Ray Optics Demonstration Kit",
-      category: "Physics / Optics",
-      unit: "piece",
-      trackable: true,
-      minimumStock: 2,
-      description: "Magnetic multi-beam laser box with cylindrical lenses, prisms and mirrors for ray tracing.",
-    },
-  ];
-
-  for (const em of equipmentMasters) {
-    await prisma.equipmentMaster.upsert({
-      where: { name: em.name },
-      update: em,
-      create: em,
-    });
-  }
-  console.log(`Equipment Masters seeded: ${equipmentMasters.length}`);
-
-  const equipmentAssets = [
-    {
-      id: "eq-mic-01",
-      assetTag: "SOW-EQ-001",
-      name: "Compound Optical Microscope - Unit 1",
-      category: "Biology / Microscopy",
-      status: "ASSIGNED_TO_BUS" as const,
-      busId: "bus-pune-01",
-      purchaseDate: new Date("2025-06-15"),
-      cost: 14500,
-      equipmentMasterId: "eqm-microscope",
-    },
-    {
-      id: "eq-mic-02",
-      assetTag: "SOW-EQ-002",
-      name: "Compound Optical Microscope - Unit 2",
-      category: "Biology / Microscopy",
-      status: "ASSIGNED_TO_BUS" as const,
-      busId: "bus-pune-01",
-      purchaseDate: new Date("2025-06-15"),
-      cost: 14500,
-      equipmentMasterId: "eqm-microscope",
-    },
-    {
-      id: "eq-tel-01",
-      assetTag: "SOW-EQ-003",
-      name: "Astronomical Telescope (70mm) - Unit 1",
-      category: "Astronomy",
-      status: "ASSIGNED_TO_BUS" as const,
-      busId: "bus-pune-01",
-      purchaseDate: new Date("2025-07-10"),
-      cost: 26000,
-      equipmentMasterId: "eqm-telescope",
-    },
-    {
-      id: "eq-vdg-01",
-      assetTag: "SOW-EQ-004",
-      name: "Van de Graaff Generator 250kV",
-      category: "Physics / Electrostatics",
-      status: "ASSIGNED_TO_BUS" as const,
-      busId: "bus-pune-01",
-      purchaseDate: new Date("2025-08-01"),
-      cost: 19800,
-      equipmentMasterId: "eqm-vandegraaff",
-    },
-    {
-      id: "eq-bal-01",
-      assetTag: "SOW-EQ-005",
-      name: "Precision Electronic Balance - Unit 1",
-      category: "Chemistry / Lab Tools",
-      status: "ASSIGNED_TO_BUS" as const,
-      busId: "bus-pune-02",
-      purchaseDate: new Date("2025-08-20"),
-      cost: 7200,
-      equipmentMasterId: "eqm-digital-balance",
-    },
-    {
-      id: "eq-opt-01",
-      assetTag: "SOW-EQ-006",
-      name: "Laser Ray Optics Kit - Unit 1",
-      category: "Physics / Optics",
-      status: "ASSIGNED_TO_BUS" as const,
-      busId: "bus-pune-02",
-      purchaseDate: new Date("2025-09-05"),
-      cost: 9500,
-      equipmentMasterId: "eqm-ray-optics",
-    },
-  ];
-
-  for (const eq of equipmentAssets) {
-    await prisma.equipment.upsert({
-      where: { assetTag: eq.assetTag },
-      update: eq,
-      create: eq,
-    });
-  }
-  console.log(`Equipment Assets seeded: ${equipmentAssets.length}`);
-
-  // --------------------------------------------------
-  // 14. Seed Consumables & Stock Levels
-  // --------------------------------------------------
-  const consumables = [
-    {
-      id: "con-litmus",
-      name: "Litmus Paper Strips (Red & Blue)",
-      category: "Chemistry Reagents",
-      currentStock: 450,
-      minimumStock: 100,
-      unitMetric: "strips",
-      expiryDate: new Date("2027-12-31"),
-    },
-    {
-      id: "con-test-tubes",
-      name: "Borosilicate Test Tubes (15x125mm)",
-      category: "Glassware",
-      currentStock: 160,
-      minimumStock: 40,
-      unitMetric: "pieces",
-      expiryDate: null,
-    },
-    {
-      id: "con-copper-sulphate",
-      name: "Copper Sulphate Crystals (CuSO4·5H2O)",
-      category: "Chemical Reagents",
-      currentStock: 2800,
-      minimumStock: 500,
-      unitMetric: "grams",
-      expiryDate: new Date("2028-06-30"),
-    },
-    {
-      id: "con-magnesium-ribbon",
-      name: "Magnesium Ribbon (Pure)",
-      category: "Chemical Reagents",
-      currentStock: 35,
-      minimumStock: 10,
-      unitMetric: "meters",
-      expiryDate: new Date("2029-01-01"),
-    },
-    {
-      id: "con-glass-slides",
-      name: "Microscope Prepared Slides & Covers",
-      category: "Biology Supplies",
-      currentStock: 520,
-      minimumStock: 120,
-      unitMetric: "pieces",
-      expiryDate: null,
-    },
-    {
-      id: "con-alkaline-cells",
-      name: "9V Alkaline Demonstration Batteries",
-      category: "Physics & Electronics",
-      currentStock: 6,
-      minimumStock: 15,
-      unitMetric: "units",
-      expiryDate: new Date("2026-11-30"),
-    },
-  ];
-
-  for (const c of consumables) {
-    await prisma.consumable.upsert({
-      where: { id: c.id },
-      update: c,
-      create: c,
-    });
-  }
-  console.log(`Consumables seeded: ${consumables.length}`);
-
-  // --------------------------------------------------
-  // 15. Seed Inventory Transactions
-  // --------------------------------------------------
-  const transactions = [
-    {
-      id: "tx-init-01",
-      consumableId: "con-litmus",
-      busId: "bus-pune-01",
-      quantity: 150,
-      type: "RECEIPT" as const,
-      notes: "Initial stocking for Pune Mobile Lab 1",
-    },
-    {
-      id: "tx-init-02",
-      consumableId: "con-test-tubes",
-      busId: "bus-pune-01",
-      quantity: 80,
-      type: "RECEIPT" as const,
-      notes: "Glassware delivery from central supplier",
-    },
-    {
-      id: "tx-init-03",
-      consumableId: "con-copper-sulphate",
-      busId: "bus-pune-01",
-      quantity: 1000,
-      type: "RECEIPT" as const,
-      notes: "Chemistry crystals allocated for demonstrations",
-    },
-    {
-      id: "tx-init-04",
-      consumableId: "con-glass-slides",
-      busId: "bus-pune-02",
-      quantity: 200,
-      type: "RECEIPT" as const,
-      notes: "Biology slides kit allocated to Mobile Lab 2",
-    },
-  ];
-
-  for (const tx of transactions) {
-    await prisma.inventoryTransaction.upsert({
-      where: { id: tx.id },
-      update: tx,
-      create: tx,
-    });
-  }
-  console.log(`Inventory Transactions seeded: ${transactions.length}`);
+  const invSummary = await seedInventoryFromCsv({ removeDummy: true });
+  console.log(`Inventory CSV seed complete: ${invSummary.importedLinesUpserted} invoice lines, ${invSummary.consumablesUpserted} consumables, ${invSummary.equipmentAssetsUpserted} equipment assets, ${invSummary.transactionsUpserted} stock transactions.`);
 
   // --------------------------------------------------
   // 16. Seed School Registrations

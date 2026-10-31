@@ -2,7 +2,7 @@ import { Router, type Request } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { verifyPassword, dummyVerifyPassword } from "../lib/password";
-import { createSession, deleteSession, SESSION_COOKIE } from "../lib/session";
+import { createSession, deleteSession, refreshSession, SESSION_COOKIE } from "../lib/session";
 import { checkLoginRateLimit, recordFailedLogin, resetLoginRateLimit } from "../lib/rateLimiter";
 
 export const authRouter = Router();
@@ -12,10 +12,14 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const refreshSchema = z.object({
+  refreshToken: z.string().min(10, "Refresh token is required"),
+});
+
 function serializeUser(user: any, allSystemPermissions?: string[]) {
   const roleName = user.role?.name ?? user.roleEnum;
   let permissions: string[] =
-    user.role?.permissions?.map((item: any) => item.permission.key) ?? [];
+    user.role?.permissions?.map((item: any) => item.permission?.key || item.permissionKey) ?? [];
 
   // Super Admin inherently possesses all permissions across the platform
   if (roleName === "SUPER_ADMIN" && allSystemPermissions && allSystemPermissions.length > 0) {
@@ -145,16 +149,22 @@ authRouter.post("/login", async (req, res) => {
   resetLoginRateLimit(`ip:${clientIp}`);
   resetLoginRateLimit(`email:${email}`);
 
-  // Create session & update last login
-  const session = await createSession(user.id, clientIp, req.get("user-agent"));
+  // 6. Create independent user session with JWT access & refresh tokens
+  const session = await createSession(
+    user.id,
+    clientIp,
+    req.get("user-agent"),
+    user.role?.name || user.roleEnum
+  );
+
   await prisma.user.update({
     where: { id: user.id },
     data: { lastLoginAt: new Date() },
   });
   await audit(user.id, "LOGIN_SUCCESS", "User", user.id, req);
 
-  // Set secure HTTP-only session cookie
-  res.cookie(SESSION_COOKIE, session.rawToken, {
+  // Set secure HTTP-only session cookie for ambient fallback
+  res.cookie(SESSION_COOKIE, session.accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -173,14 +183,64 @@ authRouter.post("/login", async (req, res) => {
 
   return res.json({
     user: serialized,
-    token: session.rawToken,
+    token: session.accessToken,
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
+    sessionId: session.sessionId,
   });
 });
 
+/**
+ * Token Refresh Endpoint
+ * Rotates tokens within an isolated user session context.
+ */
+authRouter.post("/refresh", async (req, res) => {
+  const tokenFromHeader = req.headers.authorization?.replace(/^Bearer\s+/i, "");
+  const tokenFromCustomHeader = req.headers["x-refresh-token"] as string | undefined;
+  const tokenFromBody = req.body?.refreshToken;
+
+  const candidateToken = tokenFromBody || tokenFromCustomHeader || tokenFromHeader;
+
+  if (!candidateToken) {
+    return res.status(401).json({ message: "Refresh token is required" });
+  }
+
+  const result = await refreshSession(candidateToken);
+  if (!result) {
+    return res.status(401).json({ message: "Invalid or expired session" });
+  }
+
+  let allPermKeys: string[] | undefined;
+  if (result.user.role?.name === "SUPER_ADMIN" || result.user.roleEnum === "SUPER_ADMIN") {
+    const allPerms = await prisma.permission.findMany({ select: { key: true } });
+    allPermKeys = allPerms.map((p) => p.key);
+  }
+
+  const serialized = serializeUser(result.user, allPermKeys);
+
+  return res.json({
+    user: serialized,
+    token: result.accessToken,
+    accessToken: result.accessToken,
+    refreshToken: result.refreshToken,
+  });
+});
+
+/**
+ * Logout Endpoint
+ * Strictly invalidates ONLY the calling user's individual session.
+ */
 authRouter.post("/logout", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const bearerToken = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice(7).trim()
+    : undefined;
+
   const token =
-    req.cookies?.[SESSION_COOKIE] ||
-    req.headers.authorization?.replace(/^Bearer\s+/i, "");
+    bearerToken ||
+    (req.headers["x-session-token"] as string | undefined) ||
+    req.body?.refreshToken ||
+    req.cookies?.[SESSION_COOKIE];
 
   if (token) {
     await deleteSession(token);

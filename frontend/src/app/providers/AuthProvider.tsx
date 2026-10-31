@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { authService } from "../../services/auth.service";
+import { getStoredSessionToken } from "../../services/api-client";
 import { permissionsService } from "../../services/permissions.service";
 import type { AuthUser, Role } from "../../shared/types/auth";
 
@@ -22,6 +23,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   async function refreshUser() {
+    // Session Isolation: Only attempt profile fetch if this tab has an active session token.
+    // This prevents newly opened unauthenticated tabs from adopting ambient cookies belonging to other users.
+    const token = getStoredSessionToken();
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);

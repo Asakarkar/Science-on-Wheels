@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { prisma } from "../lib/prisma";
 import { requireAuth, requirePermission, requireSuperAdmin } from "../middleware/auth";
 import { hashPassword } from "../lib/password";
+import { seedInventoryFromCsv } from "../lib/inventoryImporter";
 
 export const superAdminRouter = Router();
 superAdminRouter.use(requireAuth, requireSuperAdmin);
@@ -392,6 +393,15 @@ superAdminRouter.get("/reports/:resource.csv", requirePermission("analytics.view
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename=${resource}.csv`);
   res.send(csv);
+});
+
+superAdminRouter.post("/inventory/seed-csv", async (_req, res) => {
+  try {
+    const summary = await seedInventoryFromCsv({ removeDummy: true });
+    res.json({ message: "Inventory CSV seeded successfully", summary });
+  } catch (error: any) {
+    res.status(500).json({ message: error?.message || "Failed to seed inventory from CSV" });
+  }
 });
 
 export default superAdminRouter;

@@ -1,6 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
 import { getSessionUser, SESSION_COOKIE, SESSION_TTL_MS } from "../lib/session";
 
+/**
+ * Authentication Middleware
+ * 
+ * Secure token extraction order:
+ * 1. Explicit Authorization header (`Bearer <token>`) - tab/client isolated
+ * 2. Explicit custom session header (`x-session-token`)
+ * 3. Ambient HttpOnly cookie (`sow_session`) - only as fallback for direct browser requests
+ * 
+ * Never allow ambient cookies to overwrite or override an explicit Bearer token.
+ * This guarantees complete multi-user tab and session isolation.
+ */
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
@@ -8,10 +19,13 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       ? authHeader.slice(7).trim()
       : undefined;
 
+    const xSessionToken = req.headers["x-session-token"] as string | undefined;
+
+    // Prioritize explicit request tokens over ambient shared cookies
     const token =
-      req.cookies?.[SESSION_COOKIE] ||
       bearerToken ||
-      (req.headers["x-session-token"] as string | undefined);
+      xSessionToken ||
+      req.cookies?.[SESSION_COOKIE];
 
     if (!token) {
       return res.status(401).json({ message: "Authentication required" });
@@ -22,8 +36,10 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       return res.status(401).json({ message: "Authentication required" });
     }
 
-    // Refresh session cookie on response
-    if (req.cookies?.[SESSION_COOKIE]) {
+    // Refresh ambient session cookie ONLY if the request authenticated via cookie.
+    // If the client sent an explicit Bearer token, do NOT inject or overwrite the ambient cookie
+    // to prevent cross-session contamination across browser tabs.
+    if (!bearerToken && !xSessionToken && req.cookies?.[SESSION_COOKIE]) {
       res.cookie(SESSION_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -34,13 +50,18 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     }
 
     res.locals.user = user;
+    res.locals.sessionId = (user as any).sessionId;
     next();
   } catch (error) {
-    console.error("Authentication error", error);
+    console.error("Authentication error:", error);
     return res.status(401).json({ message: "Authentication required" });
   }
 }
 
+/**
+ * Permission Authorization Guard
+ * Resolves permissions strictly from the authenticated database user identity.
+ */
 export function requirePermission(permissionKey: string) {
   return (_req: Request, res: Response, next: NextFunction) => {
     const user = res.locals.user;
@@ -49,14 +70,16 @@ export function requirePermission(permissionKey: string) {
     }
 
     const role = user?.role?.name ?? user?.roleEnum;
-    // Super Admin has unrestricted platform permissions
+    // Super Admin inherently holds platform-wide permission
     if (role === "SUPER_ADMIN") {
       return next();
     }
 
     const allowed =
       user?.role?.permissions?.some(
-        (item: any) => item.permission.key === permissionKey
+        (item: any) =>
+          item.permission?.key === permissionKey ||
+          item.permissionKey === permissionKey
       ) ?? false;
 
     if (!allowed) {
@@ -67,6 +90,9 @@ export function requirePermission(permissionKey: string) {
   };
 }
 
+/**
+ * Super Administrator Role Guard
+ */
 export function requireSuperAdmin(_req: Request, res: Response, next: NextFunction) {
   const user = res.locals.user;
   if (!user) {
@@ -81,6 +107,9 @@ export function requireSuperAdmin(_req: Request, res: Response, next: NextFuncti
   next();
 }
 
+/**
+ * Regional Administrator Role & Scope Guard
+ */
 export async function requireRegionalAdmin(_req: Request, res: Response, next: NextFunction) {
   const user = res.locals.user;
   if (!user) {

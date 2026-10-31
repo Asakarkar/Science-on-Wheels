@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../lib/api";
+import { api, setStoredSessionToken } from "../lib/api";
 import { BrandLogo } from "../components/BrandLogo";
 
 export function LoginPage() {
@@ -19,10 +19,18 @@ export function LoginPage() {
     try {
       const result = await api<{
         user: { role: string };
+        token?: string;
+        accessToken?: string;
+        refreshToken?: string;
       }>("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password })
       });
+
+      const token = result.accessToken || result.token;
+      if (token) {
+        setStoredSessionToken(token, result.refreshToken);
+      }
 
       const target =
         result.user.role === "SUPER_ADMIN"
