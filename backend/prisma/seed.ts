@@ -2,6 +2,7 @@ import { prisma } from "../src/lib/prisma";
 import { hashPassword } from "../src/lib/password";
 import { env } from "../src/config/env";
 import { seedInventoryFromCsv } from "../src/lib/inventoryImporter";
+import { seedSchoolsFromCsv } from "../src/lib/schoolImporter";
 
 const permissionKeys = [
   "dashboard.view",
@@ -407,109 +408,11 @@ async function main() {
   console.log(`Mobile Labs seeded: ${buses.length}`);
 
   // --------------------------------------------------
-  // 12. Seed Schools across Blocks
+  // 12. Seed Real Schools and Schedules from School.csv
+  // (Purges all dummy schools and registrations)
   // --------------------------------------------------
-  const schools = [
-    {
-      id: "school-zp-wagholi",
-      udiseCode: "27250100101",
-      name: "Zilla Parishad High School, Wagholi",
-      address: "Pune-Nagar Road, Wagholi, Pune 412207",
-      regionId: region.id,
-      districtId: "district-pune",
-      blockId: "block-haveli",
-      latitude: 18.5793,
-      longitude: 73.9814,
-      contactPhone: "+91 98220 11221",
-      totalStudents: 420,
-      hasScienceLab: false,
-      hasElectricity: true,
-      hasInternet: true,
-      priorityScore: 88.5,
-      priorityCategory: "HIGH_OUTREACH" as const,
-    },
-    {
-      id: "school-mg-baramati",
-      udiseCode: "27250200202",
-      name: "Mahatma Gandhi Secondary School, Baramati",
-      address: "Vidyanagari, MIDC Road, Baramati, Pune 413133",
-      regionId: region.id,
-      districtId: "district-pune",
-      blockId: "block-baramati",
-      latitude: 18.1519,
-      longitude: 74.5772,
-      contactPhone: "+91 98220 33442",
-      totalStudents: 680,
-      hasScienceLab: true,
-      hasElectricity: true,
-      hasInternet: true,
-      priorityScore: 65.0,
-      priorityCategory: "MEDIUM_PRIORITY" as const,
-    },
-    {
-      id: "school-kg-shirur",
-      udiseCode: "27250300303",
-      name: "Kasturba Gandhi Balika Vidyalaya, Shirur",
-      address: "Ghodnadi Campus, Taluka Shirur, Pune 412210",
-      regionId: region.id,
-      districtId: "district-pune",
-      blockId: "block-shirur",
-      latitude: 18.8256,
-      longitude: 74.3758,
-      contactPhone: "+91 98220 55663",
-      totalStudents: 310,
-      hasScienceLab: false,
-      hasElectricity: true,
-      hasInternet: false,
-      priorityScore: 94.0,
-      priorityCategory: "HIGH_OUTREACH" as const,
-    },
-    {
-      id: "school-sp-pune",
-      udiseCode: "27250400404",
-      name: "Savitribai Phule Secondary School, Pune",
-      address: "Shivaji Nagar, Pune 411005",
-      regionId: region.id,
-      districtId: "district-pune",
-      blockId: "block-pune-city",
-      latitude: 18.5308,
-      longitude: 73.8475,
-      contactPhone: "+91 98220 77884",
-      totalStudents: 850,
-      hasScienceLab: true,
-      hasElectricity: true,
-      hasInternet: true,
-      priorityScore: 45.0,
-      priorityCategory: "STANDARD" as const,
-    },
-    {
-      id: "school-zp-loni",
-      udiseCode: "27250500505",
-      name: "Zilla Parishad Madhyamik Shala, Loni Kalbhor",
-      address: "Solapur Highway, Loni Kalbhor, Haveli, Pune 412201",
-      regionId: region.id,
-      districtId: "district-pune",
-      blockId: "block-haveli",
-      latitude: 18.4907,
-      longitude: 74.0194,
-      contactPhone: "+91 98220 99005",
-      totalStudents: 390,
-      hasScienceLab: false,
-      hasElectricity: true,
-      hasInternet: false,
-      priorityScore: 82.0,
-      priorityCategory: "HIGH_OUTREACH" as const,
-    },
-  ];
-
-  for (const s of schools) {
-    await prisma.school.upsert({
-      where: { id: s.id },
-      update: s,
-      create: s,
-    });
-  }
-  console.log(`Schools seeded: ${schools.length}`);
+  const schoolSummary = await seedSchoolsFromCsv({ removeDummy: true });
+  console.log(`School CSV seed complete: ${schoolSummary.schoolsUpserted} schools, ${schoolSummary.districtsUpserted} districts, ${schoolSummary.importedSchedulesUpserted} schedule entries, ${schoolSummary.eventsUpserted} visit events, ${schoolSummary.registrationsUpserted} registrations.`);
 
   // --------------------------------------------------
   // 13. Seed Real Inventory Directly from Inventory.csv
@@ -517,39 +420,6 @@ async function main() {
   // --------------------------------------------------
   const invSummary = await seedInventoryFromCsv({ removeDummy: true });
   console.log(`Inventory CSV seed complete: ${invSummary.importedLinesUpserted} invoice lines, ${invSummary.consumablesUpserted} consumables, ${invSummary.equipmentAssetsUpserted} equipment assets, ${invSummary.transactionsUpserted} stock transactions.`);
-
-  // --------------------------------------------------
-  // 16. Seed School Registrations
-  // --------------------------------------------------
-  const registrations = [
-    {
-      id: "reg-wagholi-01",
-      schoolId: "school-zp-wagholi",
-      preferredDate: new Date(Date.now() + 14 * 24 * 3600 * 1000),
-      expectedStudentCount: 220,
-      topicsRequested: ["Optics", "Electrostatics", "Cell Structure"],
-      status: "APPROVED",
-      remarks: "High outreach priority rural school - readiness approved",
-    },
-    {
-      id: "reg-shirur-01",
-      schoolId: "school-kg-shirur",
-      preferredDate: new Date(Date.now() + 21 * 24 * 3600 * 1000),
-      expectedStudentCount: 180,
-      topicsRequested: ["Chemical Reactions", "Acids and Bases", "Astronomy"],
-      status: "PENDING",
-      remarks: "Awaiting communicator schedule assignment",
-    },
-  ];
-
-  for (const r of registrations) {
-    await prisma.schoolRegistration.upsert({
-      where: { id: r.id },
-      update: r,
-      create: r,
-    });
-  }
-  console.log(`School Registrations seeded: ${registrations.length}`);
 
   console.log("");
   console.log("========================================");

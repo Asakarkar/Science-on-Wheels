@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { requireAuth, requirePermission, requireSuperAdmin } from "../middleware/auth";
 import { hashPassword } from "../lib/password";
 import { seedInventoryFromCsv } from "../lib/inventoryImporter";
+import { seedSchoolsFromCsv } from "../lib/schoolImporter";
 
 export const superAdminRouter = Router();
 superAdminRouter.use(requireAuth, requireSuperAdmin);
@@ -401,6 +402,15 @@ superAdminRouter.post("/inventory/seed-csv", async (_req, res) => {
     res.json({ message: "Inventory CSV seeded successfully", summary });
   } catch (error: any) {
     res.status(500).json({ message: error?.message || "Failed to seed inventory from CSV" });
+  }
+});
+
+superAdminRouter.post("/schools/seed-csv", async (_req, res) => {
+  try {
+    const summary = await seedSchoolsFromCsv({ removeDummy: true });
+    res.json({ message: "School CSV seeded successfully", summary });
+  } catch (error: any) {
+    res.status(500).json({ message: error?.message || "Failed to seed schools from CSV" });
   }
 });
 
