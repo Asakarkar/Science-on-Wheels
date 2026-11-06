@@ -7,7 +7,8 @@ import {
   updateRolePermissions,
   createResource,
   updateResource,
-  deleteResource
+  deleteResource,
+  getUserHistory
 } from "./controllers/crudController";
 import { getReportsSummary, exportResourceCsv } from "./controllers/reportController";
 import { seedInventory, seedSchools } from "./controllers/seedController";
@@ -28,6 +29,7 @@ superAdminRouter.get("/overview", requirePermission("dashboard.view"), getOvervi
 superAdminRouter.get("/health", requirePermission("security.view"), getHealth);
 
 // Universal Resource CRUD
+superAdminRouter.get(["/users/:id/history", "/resource/users/:id/history"], getUserHistory);
 superAdminRouter.get(["/resource/:resource", "/:resource"], listResources);
 superAdminRouter.get(["/roles/:id/permissions", "/resource/roles/:id/permissions"], getRolePermissions);
 superAdminRouter.put(["/roles/:id/permissions", "/resource/roles/:id/permissions"], updateRolePermissions);

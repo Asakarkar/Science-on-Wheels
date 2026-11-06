@@ -45,6 +45,23 @@ export async function listResources(req: Request, res: Response, next: NextFunct
       permissionKeys: r.permissions.map((p: any) => p.permission.key),
       userCount: r._count?.users ?? 0,
     }));
+  } else if (resource === "users") {
+    rows = await prisma.user.findMany({
+      where,
+      take,
+      orderBy: { createdAt: "desc" },
+      include: {
+        Region: { select: { id: true, name: true } },
+        Bus: { select: { id: true, busCode: true, registrationNumber: true } }
+      }
+    });
+    rows = rows.map((u: any) => ({
+      ...u,
+      regionName: u.Region?.name || (u.roleEnum === "SUPER_ADMIN" ? "All Regions (HQ)" : "—"),
+      busName: u.Bus ? `${u.Bus.busCode || u.Bus.registrationNumber} (${u.Bus.registrationNumber})` : "—",
+      busId: u.Bus?.id || null,
+      passwordHash: undefined
+    }));
   } else {
     const orderBy = ["schoolScheduleEntries", "inventoryInvoiceLines"].includes(resource) ? { sourceRow: "asc" } : { createdAt: "desc" };
     rows = await delegate.findMany({ where, take, orderBy }).catch(async () => delegate.findMany({ where, take }));
@@ -215,6 +232,14 @@ export async function createResource(req: Request, res: Response, next: NextFunc
     }
 
     await audit(req, "CREATE", resource, row.id, { fields: Object.keys(data).filter((x) => x !== "passwordHash") });
+
+    if (resource === "users" && req.body.busId) {
+      await prisma.bus.update({
+        where: { id: String(req.body.busId) },
+        data: { driverId: row.id }
+      }).catch(() => undefined);
+    }
+
     const safe = resource === "users" ? { ...row, passwordHash: undefined } : row;
     res.status(201).json(safe);
   } catch (error: any) {
@@ -224,6 +249,7 @@ export async function createResource(req: Request, res: Response, next: NextFunc
 
 export async function updateResource(req: Request, res: Response, next: NextFunction): Promise<void> {
   const resource = String(req.params.resource);
+  const id = String(req.params.id);
   if (resource === "inventoryInvoiceLines") {
     res.status(405).json({ message: "Imported invoice lines are read-only" });
     return;
@@ -237,7 +263,35 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
   if (resource === "users" && data.password) {
     data.passwordHash = await hashPassword(String(data.password));
     delete data.password;
+    // Password management: Revoke active sessions on password reset
+    await prisma.session.updateMany({
+      where: { userId: id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    }).catch(() => undefined);
+    await audit(req, "PASSWORD_RESET", "User", id, { initiatedBy: "ADMIN" });
   }
+  if (resource === "users" && (data.status === "DEACTIVATED" || data.isActive === false)) {
+    // Revoke active sessions for deactivated staff accounts
+    await prisma.session.updateMany({
+      where: { userId: id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    }).catch(() => undefined);
+    await audit(req, "DEACTIVATE", "User", id, { status: data.status, isActive: data.isActive });
+  }
+  if (resource === "users" && req.body.busId !== undefined) {
+    const targetBusId = req.body.busId ? String(req.body.busId) : null;
+    await prisma.bus.updateMany({
+      where: { driverId: id },
+      data: { driverId: null },
+    }).catch(() => undefined);
+    if (targetBusId) {
+      await prisma.bus.update({
+        where: { id: targetBusId },
+        data: { driverId: id },
+      }).catch(() => undefined);
+    }
+  }
+  delete data.busId;
   if (resource === "users" && data.roleEnum) {
     const roleRecord = await prisma.role.findUnique({ where: { name: String(data.roleEnum) } });
     if (!roleRecord) {
@@ -248,7 +302,7 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
     if (data.roleEnum === "SUPER_ADMIN") data.regionId = null;
   }
   try {
-    const row = await delegate.update({ where: { id: req.params.id }, data });
+    const row = await delegate.update({ where: { id }, data });
     await audit(req, "UPDATE", resource, row.id, { fields: Object.keys(data) });
     res.json(resource === "users" ? { ...row, passwordHash: undefined } : row);
   } catch (error: any) {
@@ -392,4 +446,50 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
     res.status(status).json({ message: formatted });
   }
 }
+
+export async function getUserHistory(req: Request, res: Response): Promise<void> {
+  const userId = String(req.params.id);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        roleEnum: true,
+        status: true,
+        isActive: true,
+        createdAt: true,
+        lastLoginAt: true,
+        Region: { select: { id: true, name: true } },
+        Bus: { select: { id: true, busCode: true, registrationNumber: true } }
+      }
+    });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+    const logs = await prisma.auditLog.findMany({
+      where: {
+        OR: [
+          { actorUserId: userId },
+          { entityId: userId }
+        ]
+      },
+      take: 50,
+      orderBy: { timestamp: "desc" }
+    });
+    res.json({
+      user: {
+        ...user,
+        regionName: user.Region?.name || "—",
+        busName: user.Bus ? `${user.Bus.busCode || user.Bus.registrationNumber} (${user.Bus.registrationNumber})` : "—"
+      },
+      logs
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
 
