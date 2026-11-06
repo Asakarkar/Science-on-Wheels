@@ -108,11 +108,13 @@ export const router = createBrowserRouter([
               { path: "schools", element: <SchoolsPage /> },
               { path: "curriculum", element: <CurriculumPage /> },
               { path: "inventory", element: <InventoryPage /> },
+              { path: "inventory-allocation", element: <InventoryPage /> },
               { path: "operations", element: <OperationsPage /> },
               { path: "analytics", element: <AnalyticsPage /> },
               { path: "reports", element: <ReportsPage /> },
               { path: "audit-logs", element: <SecurityAuditPage /> },
-              { path: "security-audit", element: <SecurityAuditPage /> }
+              { path: "security-audit", element: <SecurityAuditPage /> },
+              { path: "settings", element: <OrganizationPage /> }
             ]
           }
         ]

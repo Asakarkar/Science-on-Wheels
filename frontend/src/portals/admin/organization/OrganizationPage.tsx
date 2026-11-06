@@ -1,10 +1,12 @@
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { configs } from "../config/resources";
 import { ResourceView } from "../components/ResourceView";
 
 export function OrganizationPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const sub = searchParams.get("sub") || "Regions";
+  const location = useLocation();
+  const isSettingsRoute = location.pathname.includes("settings");
+  const sub = searchParams.get("sub") || (isSettingsRoute ? "Organization Settings" : "Regions");
 
   function setSub(newSub: string) {
     setSearchParams({ sub: newSub });
@@ -16,7 +18,7 @@ export function OrganizationPage() {
   if (sub === "States" || sub === "Geography") activeConfig = configs.states;
   else if (sub === "Districts") activeConfig = configs.districts;
   else if (sub === "Blocks") activeConfig = configs.blocks;
-  else if (sub === "Organization Settings") activeConfig = configs.systemConfig;
+  else if (sub === "Organization Settings" || sub === "Settings") activeConfig = configs.systemConfig;
 
   return (
     <div className="portal-module">

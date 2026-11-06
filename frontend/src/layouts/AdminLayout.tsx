@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/providers/AuthProvider";
 import { BrandLogo } from "../shared/components/BrandLogo";
-import { ADMIN_NAVIGATION } from "../shared/constants/navigation";
+import { ADMIN_NAV_SECTIONS, AdminNavSection, NavSubItem } from "../shared/constants/navigation";
 
 export function AdminLayout() {
   const { user, logout, hasPermission } = useAuth();
@@ -11,27 +11,37 @@ export function AdminLayout() {
   const [mobileNav, setMobileNav] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     organization: true,
-    people: true,
+    "inventory-ops": true,
+    monitoring: true,
   });
 
-  const visibleNav = ADMIN_NAVIGATION.filter(
-    (item) => !item.permission || hasPermission(item.permission)
-  );
-
   const currentPath = location.pathname;
-  const activeNav =
-    visibleNav.find(
-      (item) => currentPath === item.path || currentPath.startsWith(item.path + "/")
-    ) || visibleNav[0];
 
-  function handleSelect(path: string, childKey?: string) {
-    navigate(childKey ? `${path}?sub=${encodeURIComponent(childKey)}` : path);
+  // Resolve active navigation item and parent section for breadcrumb & active styling
+  let activeItem: NavSubItem | undefined;
+  let activeSection: AdminNavSection | undefined;
+
+  for (const section of ADMIN_NAV_SECTIONS) {
+    for (const item of section.items) {
+      const match =
+        currentPath === item.path ||
+        (item.path !== "/admin/dashboard" && currentPath.startsWith(item.path));
+      if (match) {
+        activeItem = item;
+        activeSection = section;
+        break;
+      }
+    }
+    if (activeItem) break;
+  }
+
+  function handleSelect(path: string) {
+    navigate(path);
     setMobileNav(false);
   }
 
   return (
     <div className="admin-shell bg-grid-warm">
-
       {/* Top System Status Bar matching login aesthetic */}
       <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
         <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
@@ -86,36 +96,79 @@ export function AdminLayout() {
           </div>
 
           <nav>
-            {visibleNav.map((item) => {
-              const isActive = activeNav?.key === item.key;
-              return (
-                <div key={item.key} className="nav-group">
-                  <button
-                    className={`nav-item ${isActive ? "active" : ""}`}
-                    onClick={() => {
-                      if (item.children && item.children.length > 0) {
-                        setExpanded((p) => ({ ...p, [item.key]: !p[item.key] }));
-                      }
-                      handleSelect(item.path);
-                    }}
-                  >
-                    <i>{item.icon}</i>
-                    <span>{item.label}</span>
-                    {item.children && item.children.length > 0 && (
-                      <b className="font-mono text-xs">{expanded[item.key] ? "−" : "+"}</b>
-                    )}
-                  </button>
-                  {expanded[item.key] && item.children && item.children.length > 0 && (
-                    <div className="subnav">
-                      {item.children.map((c) => (
+            {ADMIN_NAV_SECTIONS.map((section) => {
+              const visibleItems = section.items.filter(
+                (item) => !item.permission || hasPermission(item.permission)
+              );
+              if (visibleItems.length === 0) return null;
+
+              if (section.type === "heading") {
+                return (
+                  <div key={section.key} className="nav-section-group">
+                    <div className="nav-section-heading">{section.label}</div>
+                    {visibleItems.map((item) => {
+                      const isActive =
+                        currentPath === item.path ||
+                        (item.path !== "/admin/dashboard" && currentPath.startsWith(item.path));
+                      return (
                         <button
-                          key={c}
-                          className={location.search.includes(encodeURIComponent(c)) ? "selected" : ""}
-                          onClick={() => handleSelect(item.path, c)}
+                          key={item.key}
+                          type="button"
+                          className={`nav-item ${isActive ? "active" : ""}`}
+                          onClick={() => handleSelect(item.path)}
                         >
-                          {c}
+                          <i>{item.icon}</i>
+                          <span>{item.label}</span>
                         </button>
-                      ))}
+                      );
+                    })}
+                  </div>
+                );
+              }
+
+              // Dropdown collapsible section
+              const isExpanded = expanded[section.key] ?? true;
+              const hasActiveChild = visibleItems.some(
+                (item) =>
+                  currentPath === item.path ||
+                  (item.path !== "/admin/dashboard" && currentPath.startsWith(item.path))
+              );
+
+              return (
+                <div key={section.key} className="nav-section-group">
+                  <button
+                    type="button"
+                    className={`nav-dropdown-trigger ${hasActiveChild ? "has-active" : ""}`}
+                    onClick={() =>
+                      setExpanded((prev) => ({
+                        ...prev,
+                        [section.key]: !isExpanded,
+                      }))
+                    }
+                  >
+                    <i>{section.icon}</i>
+                    <span>{section.label}</span>
+                    <b className="font-mono text-xs">{isExpanded ? "▾" : "▸"}</b>
+                  </button>
+
+                  {isExpanded && (
+                    <div className="subnav">
+                      {visibleItems.map((item) => {
+                        const isActive =
+                          currentPath === item.path ||
+                          (item.path !== "/admin/dashboard" && currentPath.startsWith(item.path));
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            className={`nav-sub-item ${isActive ? "active" : ""}`}
+                            onClick={() => handleSelect(item.path)}
+                          >
+                            <i>{item.icon}</i>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -142,7 +195,13 @@ export function AdminLayout() {
             <div className="breadcrumbs font-mono text-xs">
               <span>Science on Wheels</span>
               <b className="text-stone">›</b>
-              <strong className="text-charcoal font-semibold">{activeNav?.label}</strong>
+              {activeSection && activeSection.type === "dropdown" && (
+                <>
+                  <span className="text-charcoal-muted">{activeSection.label}</span>
+                  <b className="text-stone">›</b>
+                </>
+              )}
+              <strong className="text-charcoal font-semibold">{activeItem?.label || "Dashboard"}</strong>
             </div>
 
             <div className="top-actions">

@@ -758,6 +758,127 @@ button:disabled {
   color: var(--terracotta-dark);
 }
 
+/* Section Headings and Dropdowns */
+.nav-section-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.nav-section-heading {
+  padding: 10px 11px 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--charcoal-subtle);
+  user-select: none;
+}
+
+.nav-dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--charcoal);
+  text-align: left;
+  padding: 8px 11px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-dropdown-trigger:hover {
+  background: var(--stone-light);
+  color: var(--charcoal-dark);
+}
+
+.nav-dropdown-trigger.has-active {
+  color: var(--terracotta-dark);
+}
+
+.nav-dropdown-trigger i {
+  font-style: normal;
+  width: 18px;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.nav-dropdown-trigger span {
+  flex: 1;
+}
+
+.nav-dropdown-trigger b {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--charcoal-subtle);
+  transition: transform 0.2s ease;
+}
+
+.nav-sub-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: transparent;
+  color: var(--charcoal-muted);
+  text-align: left;
+  padding: 7px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.nav-sub-item:hover {
+  background: var(--stone-light);
+  color: var(--charcoal-dark);
+}
+
+.nav-sub-item i {
+  font-style: normal;
+  width: 15px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.nav-sub-item span {
+  flex: 1;
+}
+
+.nav-sub-item.active {
+  background: var(--charcoal-dark) !important;
+  color: var(--white) !important;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(30, 36, 43, 0.15);
+}
+
+.nav-sub-item.active:after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  background-color: var(--terracotta);
+}
+
 /* Sidebar bottom */
 .sidebar-bottom,
 .field-bottom {

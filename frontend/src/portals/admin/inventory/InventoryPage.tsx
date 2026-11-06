@@ -1,20 +1,22 @@
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { configs } from "../config/resources";
 import { ResourceView } from "../components/ResourceView";
 
 export function InventoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const sub = searchParams.get("sub") || "Equipment Master";
+  const location = useLocation();
+  const isAllocationRoute = location.pathname.includes("allocation");
+  const sub = searchParams.get("sub") || (isAllocationRoute ? "Inventory Allocation" : "Equipment Master");
 
   function setSub(newSub: string) {
     setSearchParams({ sub: newSub });
   }
 
-  const subOptions = ["Equipment Master", "Consumables", "Transactions", "Invoice Import", "Procurement"];
+  const subOptions = ["Equipment Master", "Consumables", "Inventory Allocation", "Transactions", "Invoice Import", "Procurement"];
 
   let activeConfig = configs.equipmentMasters;
   if (sub === "Consumables") activeConfig = configs.consumables;
-  else if (sub === "Transactions") activeConfig = configs.inventoryTransactions;
+  else if (sub === "Inventory Allocation" || sub === "Transactions" || sub === "Allocation") activeConfig = configs.inventoryTransactions;
   else if (sub === "Invoice Import") activeConfig = configs.inventoryInvoiceLines;
   else if (sub === "Procurement") activeConfig = configs.procurement;
 

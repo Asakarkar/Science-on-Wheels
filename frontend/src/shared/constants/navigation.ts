@@ -7,19 +7,77 @@ export interface NavItem {
   children?: string[];
 }
 
-export const ADMIN_NAVIGATION: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/admin/dashboard", permission: "dashboard.view", children: [] },
-  { key: "organization", label: "Organization", icon: "◎", path: "/admin/organization", permission: "organization.view", children: ["Regions", "Geography", "Organization Settings"] },
-  { key: "users", label: "Users & Access", icon: "◉", path: "/admin/users", permission: "people.view", children: ["All Users", "Regional Administrators", "Field Staff"] },
-  { key: "roles", label: "Roles & Permissions", icon: "◈", path: "/admin/roles", permission: "security.view", children: ["Roles", "Permissions"] },
-  { key: "mobile-labs", label: "Mobile Laboratories", icon: "▣", path: "/admin/mobile-labs", permission: "labs.view", children: ["All Labs", "Lab Details", "Maintenance", "GPS / Telemetry"] },
-  { key: "schools", label: "Schools", icon: "⌁", path: "/admin/schools", permission: "schools.view", children: ["School Directory", "Registration", "Verification", "Priority"] },
-  { key: "curriculum", label: "Curriculum & Experiments", icon: "◇", path: "/admin/curriculum", permission: "curriculum.view", children: ["Curriculum Master", "Experiments"] },
-  { key: "inventory", label: "Inventory & Assets", icon: "◈", path: "/admin/inventory", permission: "resources.view", children: ["Equipment Master", "Consumables", "Transactions"] },
-  { key: "operations", label: "Operations", icon: "➜", path: "/admin/operations", permission: "operations.view", children: ["Visits", "Schedules", "Routes", "Operational Issues"] },
-  { key: "analytics", label: "Analytics & Reports", icon: "▥", path: "/admin/analytics", permission: "analytics.view", children: ["Overview", "Schools", "Labs", "Students", "Inventory"] },
-  { key: "audit-logs", label: "Security & Audit", icon: "◇", path: "/admin/audit-logs", permission: "security.view", children: ["Audit Logs", "Login Activity", "Security Events"] }
+export interface NavSubItem {
+  key: string;
+  label: string;
+  icon: string;
+  path: string;
+  permission?: string;
+}
+
+export interface AdminNavSection {
+  key: string;
+  label: string;
+  type: "heading" | "dropdown";
+  icon?: string;
+  items: NavSubItem[];
+}
+
+export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
+  {
+    key: "overview",
+    label: "OVERVIEW",
+    type: "heading",
+    items: [
+      { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/admin/dashboard", permission: "dashboard.view" }
+    ]
+  },
+  {
+    key: "organization",
+    label: "ORGANIZATION",
+    type: "dropdown",
+    icon: "◎",
+    items: [
+      { key: "users", label: "User Management", icon: "◉", path: "/admin/users", permission: "people.view" },
+      { key: "organization", label: "Regional Management", icon: "◎", path: "/admin/organization", permission: "organization.view" },
+      { key: "mobile-labs", label: "Bus Management", icon: "▣", path: "/admin/mobile-labs", permission: "labs.view" },
+      { key: "schools", label: "School Management", icon: "⌁", path: "/admin/schools", permission: "schools.view" },
+      { key: "curriculum", label: "Experiment Management", icon: "◇", path: "/admin/curriculum", permission: "curriculum.view" }
+    ]
+  },
+  {
+    key: "inventory-ops",
+    label: "INVENTORY OPERATIONS",
+    type: "dropdown",
+    icon: "◈",
+    items: [
+      { key: "inventory", label: "Inventory Management", icon: "◈", path: "/admin/inventory", permission: "resources.view" },
+      { key: "inventory-allocation", label: "Inventory Allocation", icon: "⇄", path: "/admin/inventory-allocation", permission: "resources.view" }
+    ]
+  },
+  {
+    key: "monitoring",
+    label: "MONITORING",
+    type: "dropdown",
+    icon: "▥",
+    items: [
+      { key: "reports", label: "Reports & Analytics", icon: "▥", path: "/admin/reports", permission: "analytics.view" },
+      { key: "audit-logs", label: "Audit Logs", icon: "🛡", path: "/admin/audit-logs", permission: "security.view" },
+      { key: "settings", label: "Settings", icon: "⚙", path: "/admin/settings", permission: "organization.view" }
+    ]
+  }
 ];
+
+export const ADMIN_NAVIGATION: NavItem[] = ADMIN_NAV_SECTIONS.flatMap((section) =>
+  section.items.map((item) => ({
+    key: item.key,
+    label: item.label,
+    icon: item.icon,
+    path: item.path,
+    permission: item.permission,
+    children: []
+  }))
+);
 
 export const REGIONAL_NAVIGATION: NavItem[] = [
   { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/regional/dashboard", permission: "dashboard.view", children: [] },
