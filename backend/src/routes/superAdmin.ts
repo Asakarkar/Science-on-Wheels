@@ -5,6 +5,7 @@ import { requireAuth, requirePermission, requireSuperAdmin } from "../middleware
 import { hashPassword } from "../lib/password";
 import { seedInventoryFromCsv } from "../lib/inventoryImporter";
 import { seedSchoolsFromCsv } from "../lib/schoolImporter";
+import { env } from "../config/env";
 
 export const superAdminRouter = Router();
 superAdminRouter.use(requireAuth, requireSuperAdmin);
@@ -318,7 +319,7 @@ superAdminRouter.post(["/resource/:resource", "/:resource"], async (req, res, ne
     const safe = resource === "users" ? { ...row, passwordHash: undefined } : row;
     res.status(201).json(safe);
   } catch (error: any) {
-    res.status(400).json({ message: error?.message || "Unable to create record" });
+    res.status(400).json({ message: formatPrismaError(error) });
   }
 });
 
@@ -346,21 +347,232 @@ superAdminRouter.patch(["/resource/:resource/:id", "/:resource/:id"], async (req
     await audit(req, "UPDATE", resource, row.id, { fields: Object.keys(data) });
     res.json(resource === "users" ? { ...row, passwordHash: undefined } : row);
   } catch (error: any) {
-    res.status(400).json({ message: error?.message || "Unable to update record" });
+    res.status(400).json({ message: formatPrismaError(error) });
   }
 });
 
+function formatPrismaError(error: any): string {
+  if (error?.code === "P2003") {
+    const constraint = String(error.meta?.field_name || error.meta?.constraint || error.message || "");
+    if (constraint.includes("Bus_regionId_fkey")) {
+      return "Cannot delete this Region because active Mobile Laboratories (Buses) are assigned to it. Please reassign or delete the associated buses first.";
+    }
+    if (constraint.includes("District_regionId_fkey")) {
+      return "Cannot delete this Region because Districts belong to it. Please remove or reassign the associated districts first.";
+    }
+    if (constraint.includes("School_regionId_fkey")) {
+      return "Cannot delete this Region because Schools are registered under it. Please remove or reassign the associated schools first.";
+    }
+    if (constraint.includes("User_regionId_fkey")) {
+      return "Cannot delete this Region because Staff/User accounts are assigned to it. Please reassign staff to another region first.";
+    }
+    if (constraint.includes("Route_regionId_fkey")) {
+      return "Cannot delete this Region because Routes belong to it.";
+    }
+    if (constraint.includes("StaffTravelAssignment_regionId_fkey")) {
+      return "Cannot delete this Region because Staff Travel Assignments reference it.";
+    }
+    if (constraint.includes("OperationalIssue_regionId_fkey")) {
+      return "Cannot delete this Region because Operational Issues are logged against it.";
+    }
+    if (constraint.includes("Block_districtId_fkey")) {
+      return "Cannot delete this District because Blocks belong to it. Please remove or reassign the blocks first.";
+    }
+    if (constraint.includes("School_districtId_fkey")) {
+      return "Cannot delete this District because Schools belong to it. Please remove or reassign the schools first.";
+    }
+    if (constraint.includes("School_blockId_fkey")) {
+      return "Cannot delete this Block because Schools are assigned to it. Please remove or reassign the schools first.";
+    }
+    if (constraint.includes("Equipment_busId_fkey")) {
+      return "Cannot delete this Mobile Lab because physical Equipment assets are assigned to it. Please transfer equipment to another lab first.";
+    }
+    if (constraint.includes("Event_busId_fkey")) {
+      return "Cannot delete this Mobile Lab because Visit Events are scheduled for it.";
+    }
+    if (constraint.includes("Trip_busId_fkey")) {
+      return "Cannot delete this Mobile Lab because travel Trips reference it.";
+    }
+    if (constraint.includes("Event_schoolId_fkey")) {
+      return "Cannot delete this School because Visit Events are scheduled or completed for it.";
+    }
+    if (constraint.includes("SchoolRegistration_schoolId_fkey")) {
+      return "Cannot delete this School because Registration requests reference it.";
+    }
+    if (constraint.includes("RouteStop_schoolId_fkey")) {
+      return "Cannot delete this School because Route Stops reference it.";
+    }
+    if (constraint.includes("Student_schoolId_fkey")) {
+      return "Cannot delete this School because Student records are associated with it.";
+    }
+    if (constraint.includes("Teacher_schoolId_fkey")) {
+      return "Cannot delete this School because Teacher records are associated with it.";
+    }
+    if (constraint.includes("User_roleId_fkey")) {
+      return "Cannot delete this Role because User accounts currently have this role assigned.";
+    }
+    if (constraint.includes("Equipment_equipmentMasterId_fkey")) {
+      return "Cannot delete this Equipment Master item because physical Equipment assets are linked to it.";
+    }
+    if (constraint.includes("ConsumableUsage_consumableId_fkey")) {
+      return "Cannot delete this Consumable because lab usage records reference it.";
+    }
+    if (constraint.includes("InventoryTransaction_consumableId_fkey")) {
+      return "Cannot delete this Consumable because inventory transactions reference it.";
+    }
+    const match = constraint.match(/`?([A-Za-z0-9]+)_([A-Za-z0-9]+)_fkey`?/);
+    if (match) {
+      const [, table, field] = match;
+      return `Cannot delete this record because dependent '${table}' records still reference it via '${field}'. Please remove or reassign related records first.`;
+    }
+    return "Cannot delete this record because other records in the system depend on it. Please remove or reassign dependent records first.";
+  }
+
+  if (error?.code === "P2025") {
+    return "Record not found or has already been deleted.";
+  }
+
+  if (error?.code === "P2002") {
+    const target = Array.isArray(error.meta?.target) ? error.meta.target.join(", ") : error.meta?.target || "unique field";
+    return `A record with this ${target} already exists.`;
+  }
+
+  const raw = String(error?.message || "Operation failed");
+  const missingMatch = raw.match(/Argument `([^`]+)` is missing/);
+  if (missingMatch) {
+    return `Required field '${missingMatch[1]}' is missing.`;
+  }
+
+  const clean = raw
+    .replace(/Invalid `[^`]+` invocation in [^\n]+\n/g, "")
+    .replace(/\n\s*→\s*\d+\s+[^\n]+/g, "")
+    .replace(/Foreign key constraint violated on the constraint:\s*`?[A-Za-z0-9_]+`?/g, "A dependent record prevents this deletion.")
+    .trim();
+
+  return clean || "Operation failed";
+}
+
 superAdminRouter.delete(["/resource/:resource/:id", "/:resource/:id"], async (req, res, next) => {
   const resource = String(req.params.resource);
+  const id = String(req.params.id);
+  const cascade = req.query.cascade === "true" || req.body?.cascade === true;
+
   if (resource === "inventoryInvoiceLines") return res.status(405).json({ message: "Imported invoice lines are read-only" });
   const delegateName = resourceMap[resource];
   if (!delegateName) return next();
+
+  // 1. Guard core protected entities
+  if (resource === "regions" && id === "region-west-1") {
+    return res.status(403).json({
+      message: "The core operational region (Western Region) is protected and cannot be deleted because mobile laboratories, districts, and schools depend on it."
+    });
+  }
+
+  if (resource === "states" && id === "state-mh") {
+    return res.status(403).json({
+      message: "The core state (Maharashtra) is protected and cannot be deleted."
+    });
+  }
+
+  if (resource === "roles") {
+    const role = await prisma.role.findUnique({ where: { id } });
+    if (role && ["SUPER_ADMIN", "REGIONAL_ADMIN", "SCIENCE_COMMUNICATOR"].includes(role.name)) {
+      return res.status(403).json({
+        message: `Core system role '${role.name}' is protected and cannot be deleted.`
+      });
+    }
+  }
+
+  if (resource === "users") {
+    const currentUserId = req.userId || res.locals.user?.id;
+    if (currentUserId && currentUserId === id) {
+      return res.status(403).json({ message: "You cannot delete your own active administrator account." });
+    }
+    const targetUser = await prisma.user.findUnique({ where: { id } });
+    if (targetUser && targetUser.email.toLowerCase() === env.BOOTSTRAP_ADMIN_EMAIL.toLowerCase()) {
+      return res.status(403).json({
+        message: "The primary bootstrap Super Administrator account is protected and cannot be deleted."
+      });
+    }
+  }
+
   try {
-    const row = await (prisma as any)[delegateName].delete({ where: { id: req.params.id } });
+    // 2. Resource-specific cascade logic if requested
+    if (resource === "regions") {
+      const totalRegions = await prisma.region.count();
+      if (totalRegions <= 1) {
+        return res.status(403).json({
+          message: "Cannot delete the only region in the system. The platform requires at least one active region."
+        });
+      }
+      if (cascade) {
+        const fallbackRegion = await prisma.region.findFirst({
+          where: { id: { not: id } }
+        });
+        if (!fallbackRegion) {
+          return res.status(400).json({ message: "No alternate region available to reassign resources to." });
+        }
+        await prisma.$transaction([
+          prisma.user.updateMany({ where: { regionId: id }, data: { regionId: fallbackRegion.id } }),
+          prisma.bus.updateMany({ where: { regionId: id }, data: { regionId: fallbackRegion.id } }),
+          prisma.district.updateMany({ where: { regionId: id }, data: { regionId: fallbackRegion.id } }),
+          prisma.school.updateMany({ where: { regionId: id }, data: { regionId: fallbackRegion.id } }),
+          prisma.route.updateMany({ where: { regionId: id }, data: { regionId: fallbackRegion.id } }),
+          prisma.staffTravelAssignment.deleteMany({ where: { regionId: id } }),
+          prisma.region.delete({ where: { id } })
+        ]);
+        await audit(req, "DELETE", resource, id, { cascade: true, reallocatedTo: fallbackRegion.id });
+        return res.status(204).send();
+      }
+    }
+
+    if (resource === "schools" && cascade) {
+      await prisma.$transaction([
+        prisma.schoolRegistration.deleteMany({ where: { schoolId: id } }),
+        prisma.routeStop.deleteMany({ where: { schoolId: id } }),
+        prisma.student.deleteMany({ where: { schoolId: id } }),
+        prisma.teacher.deleteMany({ where: { schoolId: id } }),
+        prisma.operationalIssue.deleteMany({ where: { schoolId: id } }),
+        prisma.eventAttendance.deleteMany({ where: { Event: { schoolId: id } } }),
+        prisma.consumableUsage.deleteMany({ where: { Event: { schoolId: id } } }),
+        prisma.experimentSession.deleteMany({ where: { Event: { schoolId: id } } }),
+        prisma.eventReadinessCheck.deleteMany({ where: { Event: { schoolId: id } } }),
+        prisma.feedbackRecord.deleteMany({ where: { Event: { schoolId: id } } }),
+        prisma.event.deleteMany({ where: { schoolId: id } }),
+        prisma.school.delete({ where: { id } }),
+      ]);
+      await audit(req, "DELETE", resource, id, { cascade: true });
+      return res.status(204).send();
+    }
+
+    if (resource === "districts" && cascade) {
+      const schoolsInDistrict = await prisma.school.findMany({ where: { districtId: id }, select: { id: true } });
+      const schoolIds = schoolsInDistrict.map((s) => s.id);
+      await prisma.$transaction([
+        prisma.schoolRegistration.deleteMany({ where: { schoolId: { in: schoolIds } } }),
+        prisma.routeStop.deleteMany({ where: { schoolId: { in: schoolIds } } }),
+        prisma.event.deleteMany({ where: { schoolId: { in: schoolIds } } }),
+        prisma.school.deleteMany({ where: { districtId: id } }),
+        prisma.block.deleteMany({ where: { districtId: id } }),
+        prisma.user.updateMany({ where: { districtId: id }, data: { districtId: null } }),
+        prisma.district.delete({ where: { id } })
+      ]);
+      await audit(req, "DELETE", resource, id, { cascade: true });
+      return res.status(204).send();
+    }
+
+    if (resource === "users") {
+      await prisma.bus.updateMany({ where: { driverId: id }, data: { driverId: null } });
+      await prisma.staffTravelAssignment.deleteMany({ where: { userId: id } });
+    }
+
+    const row = await (prisma as any)[delegateName].delete({ where: { id } });
     await audit(req, "DELETE", resource, row.id);
     res.status(204).send();
   } catch (error: any) {
-    res.status(400).json({ message: error?.message || "Unable to delete record" });
+    const formatted = formatPrismaError(error);
+    const status = error?.code === "P2003" ? 409 : 400;
+    res.status(status).json({ message: formatted });
   }
 });
 

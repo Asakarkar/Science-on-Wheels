@@ -12,6 +12,14 @@ interface ResourceViewProps {
   filterQuery?: string;
 }
 
+function isProtectedRecord(resourceKey: string, row: Record<string, any>): boolean {
+  if (resourceKey === "regions" && row.id === "region-west-1") return true;
+  if (resourceKey === "states" && (row.code === "MH" || row.id === "state-mh")) return true;
+  if (resourceKey === "roles" && ["SUPER_ADMIN", "REGIONAL_ADMIN", "SCIENCE_COMMUNICATOR"].includes(row.name)) return true;
+  if (resourceKey === "users" && (row.email === "admin@scienceonwheels.com" || row.roleEnum === "SUPER_ADMIN")) return true;
+  return false;
+}
+
 export function ResourceView({
   config,
   onBack,
@@ -156,9 +164,26 @@ export function ResourceView({
                           Edit
                         </button>
                         {config.key !== "auditLogs" && (
-                          <button className="danger-link" onClick={() => remove(row.id)}>
-                            Delete
-                          </button>
+                          isProtectedRecord(config.key, row) ? (
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                padding: "3px 8px",
+                                borderRadius: "4px",
+                                background: "rgba(255,255,255,0.06)",
+                                color: "#94a3b8",
+                                cursor: "default",
+                                border: "1px solid rgba(255,255,255,0.1)"
+                              }}
+                              title="Core system record is protected from deletion"
+                            >
+                              Protected
+                            </span>
+                          ) : (
+                            <button className="danger-link" onClick={() => remove(row.id)}>
+                              Delete
+                            </button>
+                          )
                         )}
                       </div>
                     </td>
