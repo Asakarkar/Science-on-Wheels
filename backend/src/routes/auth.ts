@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma";
 import { verifyPassword, dummyVerifyPassword } from "../lib/password";
 import { createSession, deleteSession, refreshSession, SESSION_COOKIE } from "../lib/session";
 import { checkLoginRateLimit, recordFailedLogin, resetLoginRateLimit } from "../lib/rateLimiter";
+import { logAudit } from "../lib/audit";
 
 export const authRouter = Router();
 
@@ -36,28 +37,7 @@ function serializeUser(user: any, allSystemPermissions?: string[]) {
   };
 }
 
-async function audit(
-  actorUserId: string | undefined,
-  action: string,
-  entity?: string,
-  entityId?: string,
-  req?: any,
-  metadata?: any
-) {
-  await prisma.auditLog
-    .create({
-      data: {
-        actorUserId,
-        action,
-        entity,
-        entityId,
-        ipAddress: req?.ip,
-        userAgent: req?.get?.("user-agent"),
-        metadata,
-      },
-    })
-    .catch(() => undefined);
-}
+const audit = logAudit;
 
 function getClientIp(req: Request): string {
   const forwarded = req.headers["x-forwarded-for"];

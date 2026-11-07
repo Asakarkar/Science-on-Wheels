@@ -6,6 +6,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { hashPassword } from "../lib/password";
 import { requireAuth, requireRegionalAdmin } from "../middleware/auth";
+import { getBusStaffRoster, setBusStaffRoster } from "../services/busRosterService";
 
 export const regionalAdminRouter = Router();
 
@@ -78,35 +79,6 @@ regionalAdminRouter.use((req: AuthenticatedRequest, res, next) => {
   req.userId = res.locals.user?.id;
   next();
 });
-
-// Helper to get multi-staff roster for a bus
-async function getBusStaffRoster(busId: string): Promise<Array<{ staffId: string; staffName: string; role: string; assignedAt: string }>> {
-  try {
-    const config = await prisma.systemConfig.findUnique({
-      where: { key: `bus_staff_${busId}` },
-    });
-    if (config?.value) {
-      return JSON.parse(config.value);
-    }
-  } catch {
-    // fallback
-  }
-  return [];
-}
-
-async function setBusStaffRoster(busId: string, roster: Array<{ staffId: string; staffName: string; role: string; assignedAt: string }>) {
-  await prisma.systemConfig.upsert({
-    where: { key: `bus_staff_${busId}` },
-    update: { value: JSON.stringify(roster), updatedAt: new Date() },
-    create: {
-      id: `bus-staff-${busId}`,
-      key: `bus_staff_${busId}`,
-      value: JSON.stringify(roster),
-      description: `Assigned staff roster for Bus ${busId}`,
-      updatedAt: new Date(),
-    },
-  });
-}
 
 // =========================================================================
 // 1. DASHBOARD & REGIONAL OVERVIEW (Section 4.1)

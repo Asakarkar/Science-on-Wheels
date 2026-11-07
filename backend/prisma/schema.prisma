@@ -111,6 +111,8 @@ model AuditLog {
 
   @@index([action])
   @@index([actorUserId])
+  @@index([timestamp])
+  @@index([entity])
 }
 
 model EquipmentMaster {
@@ -195,6 +197,9 @@ model InventoryTransaction {
 
   @@index([consumableId])
   @@index([timestamp])
+  @@index([busId])
+  @@index([type])
+  @@index([referenceId])
 }
 
 model AIPrioritizationModel {
@@ -274,6 +279,9 @@ model Consumable {
   expiryDate      DateTime?
   ConsumableUsage       ConsumableUsage[]
   InventoryTransaction  InventoryTransaction[]
+
+  @@index([category])
+  @@index([name])
 }
 
 model ImportedInventoryLine {
@@ -360,6 +368,10 @@ model Equipment {
   ExperimentRequirement ExperimentRequirement[]
   equipmentMasterId     String?
   equipmentMaster       EquipmentMaster? @relation(fields: [equipmentMasterId], references: [id])
+
+  @@index([busId])
+  @@index([status])
+  @@index([category])
 }
 
 model EquipmentMovement {
@@ -395,6 +407,11 @@ model Event {
   ExperimentSession    ExperimentSession[]
   FeedbackRecord      FeedbackRecord[]
   OperationalIssues   OperationalIssue[]
+
+  @@index([eventDate])
+  @@index([busId])
+  @@index([schoolId])
+  @@index([status])
 }
 
 model EventAttendance {

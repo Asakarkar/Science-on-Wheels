@@ -1,4 +1,4 @@
-import { prisma } from "../../../lib/prisma";
+import { logAudit } from "../../../lib/audit";
 
 export async function audit(
   req: any,
@@ -7,16 +7,7 @@ export async function audit(
   entityId?: string,
   metadata?: any
 ): Promise<void> {
-  await prisma.auditLog.create({
-    data: {
-      actorUserId: req.userId,
-      action,
-      entity,
-      entityId,
-      ipAddress: req.ip,
-      userAgent: req.get("user-agent"),
-      metadata
-    }
-  }).catch(() => undefined);
+  return logAudit(req.userId, action, entity, entityId, req, metadata);
 }
 
+export default audit;

@@ -3,6 +3,8 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { requireAuth } from "../middleware/auth";
+import { logAudit } from "../lib/audit";
+import { getBusStaffRoster } from "../services/busRosterService";
 
 export const fieldRouter = Router();
 fieldRouter.use(requireAuth);
@@ -46,19 +48,7 @@ async function audit(
   entityId?: string,
   metadata?: any
 ) {
-  await prisma.auditLog
-    .create({
-      data: {
-        actorUserId: actor(res),
-        action,
-        entity,
-        entityId,
-        ipAddress: req.ip,
-        userAgent: req.get("user-agent"),
-        metadata,
-      },
-    })
-    .catch(() => undefined);
+  return logAudit(actor(res), action, entity, entityId, req, metadata);
 }
 
 /**
@@ -79,18 +69,9 @@ async function getAssignedBusForStaff(userId: string, regionId?: string | null) 
   });
 
   for (const b of regionBuses) {
-    try {
-      const cfg = await prisma.systemConfig.findUnique({
-        where: { key: `bus_staff_${b.id}` },
-      });
-      if (cfg?.value) {
-        const roster = JSON.parse(cfg.value);
-        if (Array.isArray(roster) && roster.some((r: any) => r.staffId === userId)) {
-          return b;
-        }
-      }
-    } catch {
-      // ignore parse errors
+    const roster = await getBusStaffRoster(b.id);
+    if (roster.some((r: any) => r.staffId === userId)) {
+      return b;
     }
   }
 
