@@ -16,10 +16,12 @@ import {
   SchoolsPage,
   CurriculumPage,
   InventoryPage,
+  InventoryAllocationPage,
   OperationsPage,
   AnalyticsPage,
   ReportsPage,
-  SecurityAuditPage
+  SecurityAuditPage,
+  SettingsPage
 } from "../portals/admin";
 
 // Regional Portal Pages
@@ -108,13 +110,13 @@ export const router = createBrowserRouter([
               { path: "schools", element: <SchoolsPage /> },
               { path: "curriculum", element: <CurriculumPage /> },
               { path: "inventory", element: <InventoryPage /> },
-              { path: "inventory-allocation", element: <InventoryPage /> },
+              { path: "inventory-allocation", element: <InventoryAllocationPage /> },
               { path: "operations", element: <OperationsPage /> },
               { path: "analytics", element: <AnalyticsPage /> },
               { path: "reports", element: <ReportsPage /> },
               { path: "audit-logs", element: <SecurityAuditPage /> },
               { path: "security-audit", element: <SecurityAuditPage /> },
-              { path: "settings", element: <OrganizationPage /> }
+              { path: "settings", element: <SettingsPage /> }
             ]
           }
         ]

@@ -62,6 +62,100 @@ export async function listResources(req: Request, res: Response, next: NextFunct
       busId: u.Bus?.id || null,
       passwordHash: undefined
     }));
+  } else if (resource === "regions") {
+    const rawRegions = await prisma.region.findMany({
+      where,
+      take,
+      orderBy: { name: "asc" },
+      include: {
+        State: { select: { id: true, name: true, code: true } },
+        _count: { select: { School: true, Bus: true, District: true } },
+      },
+    });
+    const regionalAdmins = await prisma.user.findMany({
+      where: { roleEnum: "REGIONAL_ADMIN", status: "ACTIVE" },
+      select: { id: true, name: true, email: true, phone: true, regionId: true },
+    });
+    const adminByRegion = new Map<string, any>();
+    for (const a of regionalAdmins) {
+      if (a.regionId) adminByRegion.set(a.regionId, a);
+    }
+    rows = rawRegions.map((r: any) => {
+      const admin = adminByRegion.get(r.id);
+      return {
+        ...r,
+        stateName: r.State ? `${r.State.name} (${r.State.code})` : "—",
+        schoolCount: r._count?.School ?? 0,
+        busCount: r._count?.Bus ?? 0,
+        districtCount: r._count?.District ?? 0,
+        adminName: admin ? admin.name : "Unassigned",
+        adminEmail: admin ? admin.email : null,
+        adminId: admin ? admin.id : null,
+      };
+    });
+  } else if (resource === "labs") {
+    const rawBuses = await prisma.bus.findMany({
+      where,
+      take,
+      orderBy: { busCode: "asc" },
+      include: {
+        Region: { select: { id: true, name: true } },
+        User: { select: { id: true, name: true, email: true, phone: true } },
+        GpsDevice: { select: { id: true, imeiNumber: true, status: true, lastSeenAt: true } },
+        _count: { select: { Equipment: true, BusMaintenanceRecord: true, Trip: true } }
+      }
+    });
+    rows = rawBuses.map((b: any) => ({
+      ...b,
+      regionName: b.Region?.name || "Unassigned",
+      staffName: b.User?.name || "Unassigned",
+      staffEmail: b.User?.email || null,
+      equipmentCount: b._count?.Equipment ?? 0,
+      maintenanceCount: b._count?.BusMaintenanceRecord ?? 0,
+      tripCount: b._count?.Trip ?? 0,
+      gpsStatus: b.GpsDevice?.status || (b.currentLat ? "ACTIVE" : "OFFLINE")
+    }));
+  } else if (resource === "schools") {
+    const rawSchools = await prisma.school.findMany({
+      where,
+      take,
+      orderBy: { name: "asc" },
+      include: {
+        Region: { select: { id: true, name: true } },
+        District: { select: { id: true, name: true } },
+        Block: { select: { id: true, name: true } },
+        _count: { select: { Student: true, Teacher: true, Event: true } }
+      }
+    });
+    rows = rawSchools.map((s: any) => ({
+      ...s,
+      regionName: s.Region?.name || "Unassigned",
+      districtName: s.District?.name || "—",
+      blockName: s.Block?.name || "—",
+      studentCount: s._count?.Student ?? s.totalStudents ?? 0,
+      teacherCount: s._count?.Teacher ?? 0,
+      eventCount: s._count?.Event ?? 0,
+      status: s.priorityCategory === "LOW" ? "INACTIVE" : "ACTIVE"
+    }));
+  } else if (resource === "auditLogs") {
+    if (req.query.entity) where.entity = String(req.query.entity);
+    if (req.query.actorUserId) where.actorUserId = String(req.query.actorUserId);
+    const rawLogs = await prisma.auditLog.findMany({
+      where,
+      take,
+      orderBy: { timestamp: "desc" },
+      include: {
+        User: { select: { id: true, name: true, email: true, roleEnum: true } }
+      }
+    });
+    rows = rawLogs.map((l: any) => ({
+      ...l,
+      actorName: l.User?.name || "System Automated",
+      actorEmail: l.User?.email || null,
+      actorRole: l.User?.roleEnum || "SYSTEM",
+      module: l.entity || "System",
+      metadataFormatted: typeof l.metadata === "object" ? JSON.stringify(l.metadata, null, 2) : String(l.metadata || "")
+    }));
   } else {
     const orderBy = ["schoolScheduleEntries", "inventoryInvoiceLines"].includes(resource) ? { sourceRow: "asc" } : { createdAt: "desc" };
     rows = await delegate.findMany({ where, take, orderBy }).catch(async () => delegate.findMany({ where, take }));
@@ -163,6 +257,10 @@ export async function createResource(req: Request, res: Response, next: NextFunc
     res.status(405).json({ message: "Imported invoice lines are read-only" });
     return;
   }
+  if (resource === "auditLogs") {
+    res.status(403).json({ message: "Audit logs are strictly append-only and cannot be deleted." });
+    return;
+  }
   const delegateName = resourceMap[resource];
   if (!delegateName || !idModels.has(resource)) return next();
   const delegate = (prisma as any)[delegateName];
@@ -201,6 +299,41 @@ export async function createResource(req: Request, res: Response, next: NextFunc
     }
     data.updatedAt = new Date();
   }
+  if (resource === "labs") {
+    if (!data.insuranceExpiry) data.insuranceExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    if (!data.fitnessExpiry) data.fitnessExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    if (data.driverId) {
+      await prisma.bus.updateMany({
+        where: { driverId: String(data.driverId) },
+        data: { driverId: null }
+      }).catch(() => undefined);
+    }
+  }
+  if (resource === "schools") {
+    if (!data.udiseCode) {
+      data.udiseCode = `UDISE-${Date.now().toString().slice(-6)}`;
+    }
+    if (data.totalStudents !== undefined) data.totalStudents = Number(data.totalStudents) || 0;
+    if (data.latitude !== undefined) data.latitude = Number(data.latitude) || 19.076;
+    if (data.longitude !== undefined) data.longitude = Number(data.longitude) || 72.8777;
+    if (data.priorityScore !== undefined) data.priorityScore = Number(data.priorityScore) || 0;
+    if (data.hasScienceLab !== undefined) data.hasScienceLab = Boolean(data.hasScienceLab);
+    if (data.hasElectricity !== undefined) data.hasElectricity = Boolean(data.hasElectricity);
+    if (data.hasInternet !== undefined) data.hasInternet = Boolean(data.hasInternet);
+    if (data.locationVerified !== undefined) data.locationVerified = Boolean(data.locationVerified);
+    
+    if (!data.districtId && data.regionId) {
+      const defaultDistrict = await prisma.district.findFirst({ where: { regionId: String(data.regionId) } });
+      if (defaultDistrict) data.districtId = defaultDistrict.id;
+    }
+    if (!data.blockId && data.districtId) {
+      const defaultBlock = await prisma.block.findFirst({ where: { districtId: String(data.districtId) } });
+      if (defaultBlock) data.blockId = defaultBlock.id;
+    }
+  }
+
+  delete data.adminUserId;
+  delete data.busId;
 
   try {
     if (resource === "inventoryTransactions") {
@@ -240,6 +373,17 @@ export async function createResource(req: Request, res: Response, next: NextFunc
       }).catch(() => undefined);
     }
 
+    if (resource === "regions" && req.body.adminUserId) {
+      const targetUserId = String(req.body.adminUserId);
+      const role = await prisma.role.findUnique({ where: { name: "REGIONAL_ADMIN" } });
+      if (role) {
+        await prisma.user.update({
+          where: { id: targetUserId },
+          data: { regionId: row.id, roleEnum: "REGIONAL_ADMIN", roleId: role.id }
+        }).catch(() => undefined);
+      }
+    }
+
     const safe = resource === "users" ? { ...row, passwordHash: undefined } : row;
     res.status(201).json(safe);
   } catch (error: any) {
@@ -252,6 +396,10 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
   const id = String(req.params.id);
   if (resource === "inventoryInvoiceLines") {
     res.status(405).json({ message: "Imported invoice lines are read-only" });
+    return;
+  }
+  if (resource === "auditLogs") {
+    res.status(403).json({ message: "Audit logs are strictly append-only and cannot be deleted." });
     return;
   }
   const delegateName = resourceMap[resource];
@@ -291,7 +439,27 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
       }).catch(() => undefined);
     }
   }
-  delete data.busId;
+  if (resource === "regions" && req.body.adminUserId !== undefined) {
+    const targetUserId = req.body.adminUserId ? String(req.body.adminUserId) : null;
+    const role = await prisma.role.findUnique({ where: { name: "REGIONAL_ADMIN" } });
+    if (role) {
+      if (targetUserId) {
+        await prisma.user.updateMany({
+          where: { regionId: id, roleEnum: "REGIONAL_ADMIN", id: { not: targetUserId } },
+          data: { regionId: null }
+        }).catch(() => undefined);
+        await prisma.user.update({
+          where: { id: targetUserId },
+          data: { regionId: id, roleEnum: "REGIONAL_ADMIN", roleId: role.id }
+        }).catch(() => undefined);
+      } else {
+        await prisma.user.updateMany({
+          where: { regionId: id, roleEnum: "REGIONAL_ADMIN" },
+          data: { regionId: null }
+        }).catch(() => undefined);
+      }
+    }
+  }
   if (resource === "users" && data.roleEnum) {
     const roleRecord = await prisma.role.findUnique({ where: { name: String(data.roleEnum) } });
     if (!roleRecord) {
@@ -301,6 +469,37 @@ export async function updateResource(req: Request, res: Response, next: NextFunc
     data.roleId = roleRecord.id;
     if (data.roleEnum === "SUPER_ADMIN") data.regionId = null;
   }
+  if (resource === "labs" && data.driverId) {
+    await prisma.bus.updateMany({
+      where: { driverId: String(data.driverId), id: { not: id } },
+      data: { driverId: null }
+    }).catch(() => undefined);
+  }
+  if (resource === "schools") {
+    if (data.totalStudents !== undefined) data.totalStudents = Number(data.totalStudents) || 0;
+    if (data.latitude !== undefined) data.latitude = Number(data.latitude) || 0;
+    if (data.longitude !== undefined) data.longitude = Number(data.longitude) || 0;
+    if (data.priorityScore !== undefined) data.priorityScore = Number(data.priorityScore) || 0;
+    if (data.hasScienceLab !== undefined) data.hasScienceLab = Boolean(data.hasScienceLab);
+    if (data.hasElectricity !== undefined) data.hasElectricity = Boolean(data.hasElectricity);
+    if (data.hasInternet !== undefined) data.hasInternet = Boolean(data.hasInternet);
+    if (data.locationVerified !== undefined) data.locationVerified = Boolean(data.locationVerified);
+
+    delete data.regionName;
+    delete data.districtName;
+    delete data.blockName;
+    delete data.studentCount;
+    delete data.teacherCount;
+    delete data.eventCount;
+    delete data.status;
+    delete data.Region;
+    delete data.District;
+    delete data.Block;
+    delete data._count;
+  }
+  delete data.adminUserId;
+  delete data.busId;
+
   try {
     const row = await delegate.update({ where: { id }, data });
     await audit(req, "UPDATE", resource, row.id, { fields: Object.keys(data) });
@@ -317,6 +516,10 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
 
   if (resource === "inventoryInvoiceLines") {
     res.status(405).json({ message: "Imported invoice lines are read-only" });
+    return;
+  }
+  if (resource === "auditLogs") {
+    res.status(403).json({ message: "Audit logs are strictly append-only and cannot be deleted." });
     return;
   }
   const delegateName = resourceMap[resource];
@@ -491,5 +694,606 @@ export async function getUserHistory(req: Request, res: Response): Promise<void>
     res.status(400).json({ message: formatPrismaError(error) });
   }
 }
+
+export async function getRegionProfile(req: Request, res: Response): Promise<void> {
+  const regionId = String(req.params.id);
+  try {
+    const region = await prisma.region.findUnique({
+      where: { id: regionId },
+      include: {
+        State: { select: { id: true, name: true, code: true } },
+        _count: { select: { School: true, Bus: true, District: true, User: true } }
+      }
+    });
+
+    if (!region) {
+      res.status(404).json({ message: "Region not found" });
+      return;
+    }
+
+    const [
+      regionalAdmins,
+      schools,
+      buses,
+      fieldStaff,
+      equipment,
+      recentTransactions,
+      recentIssues,
+      eventStats
+    ] = await Promise.all([
+      prisma.user.findMany({
+        where: { regionId, roleEnum: "REGIONAL_ADMIN" },
+        select: { id: true, name: true, email: true, phone: true, status: true, lastLoginAt: true }
+      }),
+      prisma.school.findMany({
+        where: { regionId },
+        take: 100,
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, udiseCode: true, contactPhone: true, totalStudents: true, districtId: true, priorityCategory: true }
+      }),
+      prisma.bus.findMany({
+        where: { regionId },
+        take: 50,
+        orderBy: { busCode: "asc" },
+        include: {
+          User: { select: { id: true, name: true, email: true, phone: true } }
+        }
+      }),
+      prisma.user.findMany({
+        where: { regionId, roleEnum: "SCIENCE_COMMUNICATOR" },
+        take: 50,
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, email: true, phone: true, status: true, Bus: { select: { id: true, busCode: true, registrationNumber: true } } }
+      }),
+      prisma.equipment.findMany({
+        where: { Bus: { regionId } },
+        take: 100,
+        orderBy: { name: "asc" },
+        select: { id: true, assetTag: true, name: true, category: true, status: true, busId: true, Bus: { select: { busCode: true, registrationNumber: true } } }
+      }),
+      prisma.inventoryTransaction.findMany({
+        where: { bus: { regionId } },
+        take: 25,
+        orderBy: { timestamp: "desc" },
+        include: {
+          consumable: { select: { name: true, unitMetric: true } },
+          bus: { select: { busCode: true, registrationNumber: true } }
+        }
+      }),
+      prisma.operationalIssue.findMany({
+        where: { regionId },
+        take: 20,
+        orderBy: { createdAt: "desc" },
+        select: { id: true, title: true, category: true, priority: true, status: true, createdAt: true }
+      }),
+      prisma.event.groupBy({
+        by: ["status"],
+        where: { School: { regionId } },
+        _count: { id: true }
+      }).catch(() => [])
+    ]);
+
+    const totalStudents = schools.reduce((sum, s) => sum + (s.totalStudents || 0), 0);
+    const availableBuses = buses.filter((b) => b.status === "AVAILABLE" || b.status === "AT_SCHOOL" || b.status === "ON_ROUTE").length;
+
+    res.json({
+      region: {
+        ...region,
+        stateName: region.State ? `${region.State.name} (${region.State.code})` : "—"
+      },
+      regionalAdmins,
+      schools,
+      buses,
+      fieldStaff: fieldStaff.map((f: any) => ({
+        ...f,
+        busName: f.Bus ? `${f.Bus.busCode || f.Bus.registrationNumber} (${f.Bus.registrationNumber})` : "Unassigned"
+      })),
+      equipment,
+      recentTransactions,
+      recentIssues,
+      performance: {
+        totalSchools: schools.length,
+        totalStudents,
+        totalBuses: buses.length,
+        availableBuses,
+        totalFieldStaff: fieldStaff.length,
+        eventStatusCounts: eventStats,
+        openIssuesCount: recentIssues.filter((i) => i.status !== "RESOLVED" && i.status !== "CLOSED").length
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function assignRegionalAdmin(req: Request, res: Response): Promise<void> {
+  const regionId = String(req.params.id);
+  const targetUserId = req.body.userId ? String(req.body.userId) : null;
+  const transferPrevious = req.body.transferPrevious !== false;
+
+  try {
+    const region = await prisma.region.findUnique({ where: { id: regionId } });
+    if (!region) {
+      res.status(404).json({ message: "Region not found" });
+      return;
+    }
+
+    const regionalAdminRole = await prisma.role.findUnique({ where: { name: "REGIONAL_ADMIN" } });
+    if (!regionalAdminRole) {
+      res.status(400).json({ message: "REGIONAL_ADMIN role is not configured" });
+      return;
+    }
+
+    let previousAdmin = null;
+    if (transferPrevious) {
+      previousAdmin = await prisma.user.findFirst({
+        where: { regionId, roleEnum: "REGIONAL_ADMIN" }
+      });
+      if (previousAdmin && previousAdmin.id !== targetUserId) {
+        await prisma.user.update({
+          where: { id: previousAdmin.id },
+          data: { regionId: null }
+        }).catch(() => undefined);
+      }
+    }
+
+    if (!targetUserId) {
+      await audit(req, "TRANSFER_REGIONAL_ADMIN", "Region", regionId, {
+        previousAdminId: previousAdmin?.id,
+        action: "UNASSIGN"
+      });
+      res.json({ message: "Regional administrator unassigned successfully" });
+      return;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: targetUserId },
+      data: {
+        regionId,
+        roleEnum: "REGIONAL_ADMIN",
+        roleId: regionalAdminRole.id,
+        status: "ACTIVE",
+        isActive: true
+      },
+      select: { id: true, name: true, email: true, roleEnum: true, regionId: true }
+    });
+
+    await audit(req, "TRANSFER_REGIONAL_ADMIN", "Region", regionId, {
+      previousAdminId: previousAdmin?.id,
+      newAdminId: targetUserId,
+      newAdminName: updatedUser.name
+    });
+
+    res.json({
+      message: `Successfully appointed ${updatedUser.name} as Regional Administrator for ${region.name}`,
+      user: updatedUser
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function getBusProfile(req: Request, res: Response): Promise<void> {
+  const busId = String(req.params.id);
+  try {
+    const bus = await prisma.bus.findUnique({
+      where: { id: busId },
+      include: {
+        Region: {
+          select: {
+            id: true,
+            name: true,
+            State: { select: { name: true, code: true } }
+          }
+        },
+        User: { select: { id: true, name: true, email: true, phone: true, status: true } },
+        GpsDevice: { select: { id: true, imeiNumber: true, providerName: true, status: true, lastSeenAt: true } },
+        _count: { select: { Equipment: true, BusMaintenanceRecord: true, Trip: true } }
+      }
+    });
+
+    if (!bus) {
+      res.status(404).json({ message: "Bus not found" });
+      return;
+    }
+
+    const [equipment, maintenanceRecords, trips, inventoryTransactions] = await Promise.all([
+      prisma.equipment.findMany({
+        where: { busId },
+        take: 100,
+        orderBy: { name: "asc" },
+        select: { id: true, assetTag: true, name: true, category: true, status: true, storageUnit: true, purchaseDate: true, cost: true }
+      }),
+      prisma.busMaintenanceRecord.findMany({
+        where: { busId },
+        take: 50,
+        orderBy: { serviceDate: "desc" }
+      }),
+      prisma.trip.findMany({
+        where: { busId },
+        take: 30,
+        orderBy: { startedAt: "desc" },
+        include: {
+          Route: { select: { routeCode: true, routeName: true, startLocation: true, endLocation: true } },
+          User: { select: { name: true } }
+        }
+      }),
+      prisma.inventoryTransaction.findMany({
+        where: { busId },
+        take: 30,
+        orderBy: { timestamp: "desc" },
+        include: {
+          consumable: { select: { name: true, unitMetric: true } }
+        }
+      })
+    ]);
+
+    const totalEquipmentCost = equipment.reduce((sum, e) => sum + (e.cost || 0), 0);
+    const totalMaintenanceCost = maintenanceRecords.reduce((sum, m) => sum + (m.costAmount || 0), 0);
+
+    res.json({
+      bus: {
+        ...bus,
+        regionName: bus.Region?.name || "Unassigned",
+        stateName: bus.Region?.State ? `${bus.Region.State.name} (${bus.Region.State.code})` : "—",
+        staffName: bus.User?.name || "Unassigned"
+      },
+      equipment,
+      maintenanceRecords,
+      trips,
+      inventoryTransactions,
+      stats: {
+        totalEquipmentCount: equipment.length,
+        totalEquipmentCost,
+        totalMaintenanceCount: maintenanceRecords.length,
+        totalMaintenanceCost,
+        totalTrips: trips.length
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function assignBusStaff(req: Request, res: Response): Promise<void> {
+  const busId = String(req.params.id);
+  const targetStaffId = req.body.staffId ? String(req.body.staffId) : null;
+
+  try {
+    const bus = await prisma.bus.findUnique({ where: { id: busId } });
+    if (!bus) {
+      res.status(404).json({ message: "Bus not found" });
+      return;
+    }
+
+    if (targetStaffId) {
+      await prisma.bus.updateMany({
+        where: { driverId: targetStaffId, id: { not: busId } },
+        data: { driverId: null }
+      });
+    }
+
+    const updated = await prisma.bus.update({
+      where: { id: busId },
+      data: { driverId: targetStaffId },
+      include: {
+        User: { select: { id: true, name: true, email: true } },
+        Region: { select: { id: true, name: true } }
+      }
+    });
+
+    await audit(req, "ASSIGN_BUS_STAFF", "Bus", busId, {
+      staffId: targetStaffId,
+      staffName: updated.User?.name || "Unassigned"
+    });
+
+    res.json({
+      message: targetStaffId
+        ? `Field staff ${updated.User?.name} successfully assigned to bus ${bus.busCode || bus.registrationNumber}`
+        : `Field staff unassigned from bus ${bus.busCode || bus.registrationNumber}`,
+      bus: updated
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function assignBusRegion(req: Request, res: Response): Promise<void> {
+  const busId = String(req.params.id);
+  const targetRegionId = String(req.body.regionId);
+
+  try {
+    const region = await prisma.region.findUnique({ where: { id: targetRegionId } });
+    if (!region) {
+      res.status(404).json({ message: "Region not found" });
+      return;
+    }
+
+    const updated = await prisma.bus.update({
+      where: { id: busId },
+      data: { regionId: targetRegionId },
+      include: {
+        Region: { select: { id: true, name: true } }
+      }
+    });
+
+    await audit(req, "ASSIGN_BUS_REGION", "Bus", busId, {
+      regionId: targetRegionId,
+      regionName: region.name
+    });
+
+    res.json({
+      message: `Bus successfully linked to region "${region.name}"`,
+      bus: updated
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function addBusMaintenance(req: Request, res: Response): Promise<void> {
+  const busId = String(req.params.id);
+  const { serviceType, costAmount, serviceDate, nextDueDate, remarks, updateBusStatus } = req.body;
+
+  try {
+    const bus = await prisma.bus.findUnique({ where: { id: busId } });
+    if (!bus) {
+      res.status(404).json({ message: "Bus not found" });
+      return;
+    }
+
+    const record = await prisma.busMaintenanceRecord.create({
+      data: {
+        id: newId(),
+        busId,
+        serviceType: serviceType || "GENERAL_SERVICING",
+        costAmount: Number(costAmount) || 0,
+        serviceDate: serviceDate ? new Date(serviceDate) : new Date(),
+        nextDueDate: nextDueDate ? new Date(nextDueDate) : new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+        remarks: remarks || null
+      }
+    });
+
+    if (updateBusStatus) {
+      await prisma.bus.update({
+        where: { id: busId },
+        data: { status: updateBusStatus, serviceDate: record.serviceDate }
+      });
+    }
+
+    await audit(req, "ADD_MAINTENANCE_RECORD", "Bus", busId, {
+      recordId: record.id,
+      serviceType: record.serviceType,
+      costAmount: record.costAmount
+    });
+
+    res.status(201).json({
+      message: "Maintenance record recorded successfully",
+      record
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function getSchoolProfile(req: Request, res: Response): Promise<void> {
+  const schoolId = String(req.params.id);
+
+  try {
+    const school = await prisma.school.findUnique({
+      where: { id: schoolId },
+      include: {
+        Region: { select: { id: true, name: true } },
+        District: { select: { id: true, name: true } },
+        Block: { select: { id: true, name: true } },
+        SchoolRegistration: true,
+        _count: {
+          select: {
+            Student: true,
+            Teacher: true,
+            Event: true,
+            OperationalIssues: true,
+            RouteStop: true,
+          }
+        }
+      }
+    });
+
+    if (!school) {
+      res.status(404).json({ message: "School not found" });
+      return;
+    }
+
+    // Fetch enrolled students
+    const students = await prisma.student.findMany({
+      where: { schoolId },
+      take: 50,
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        gradeClass: true,
+        section: true,
+        rollNumber: true,
+        totalPoints: true,
+        _count: { select: { EventAttendance: true } }
+      }
+    });
+
+    // Fetch teachers
+    const teachers = await prisma.teacher.findMany({
+      where: { schoolId },
+      select: {
+        id: true,
+        subjectTaught: true,
+        User: { select: { id: true, name: true, email: true, phone: true } }
+      }
+    });
+
+    // Fetch visits / mobile lab events
+    const visits = await prisma.event.findMany({
+      where: { schoolId },
+      take: 50,
+      orderBy: { eventDate: "desc" },
+      include: {
+        Bus: { select: { id: true, busCode: true, registrationNumber: true } },
+        EventsOnCommunicator: {
+          include: {
+            User: { select: { id: true, name: true, phone: true } }
+          }
+        },
+        ExperimentSession: {
+          include: {
+            Experiment: { select: { id: true, title: true, subject: true } }
+          }
+        },
+        _count: {
+          select: { EventAttendance: true, ConsumableUsage: true }
+        }
+      }
+    });
+
+    // Fetch inventory / consumable allocations for sessions at this school
+    const consumableUsage = await prisma.consumableUsage.findMany({
+      where: {
+        Event: { schoolId }
+      },
+      take: 50,
+      orderBy: { usedAt: "desc" },
+      include: {
+        Consumable: { select: { id: true, name: true, category: true, unitMetric: true } },
+        Event: { select: { id: true, eventCode: true, eventDate: true } }
+      }
+    });
+
+    // Fetch operational issues
+    const issues = await prisma.operationalIssue.findMany({
+      where: { schoolId },
+      take: 20,
+      orderBy: { createdAt: "desc" }
+    });
+
+    const totalStudentsEnrolled = school._count.Student;
+    const totalTeachers = school._count.Teacher;
+    const totalVisits = school._count.Event;
+    const totalConsumablesUsed = consumableUsage.reduce((acc, c) => acc + (c.qtyUsed || 0), 0);
+
+    res.json({
+      school: {
+        ...school,
+        regionName: school.Region?.name || "Unassigned",
+        districtName: school.District?.name || "—",
+        blockName: school.Block?.name || "—",
+      },
+      students,
+      teachers: teachers.map((t: any) => ({
+        id: t.id,
+        subjectTaught: t.subjectTaught,
+        name: t.User?.name || "Teacher",
+        email: t.User?.email || null,
+        phone: t.User?.phone || null
+      })),
+      visits: visits.map((v: any) => ({
+        id: v.id,
+        eventCode: v.eventCode,
+        eventDate: v.eventDate,
+        startTime: v.startTime,
+        endTime: v.endTime,
+        status: v.status,
+        expectedStudents: v.expectedStudentCount,
+        attendanceCount: v._count.EventAttendance,
+        readinessPercentage: v.readinessPercentage,
+        busName: v.Bus ? `${v.Bus.busCode || v.Bus.registrationNumber} (${v.Bus.registrationNumber})` : "Unassigned",
+        busId: v.Bus?.id || null,
+        communicators: v.EventsOnCommunicator.map((c: any) => c.User?.name).filter(Boolean),
+        experiments: v.ExperimentSession.map((s: any) => s.Experiment?.title).filter(Boolean)
+      })),
+      inventoryAllocations: consumableUsage.map((c: any) => ({
+        id: c.id,
+        consumableName: c.Consumable?.name || "Consumable",
+        category: c.Consumable?.category || "Standard",
+        quantity: c.qtyUsed,
+        unit: c.Consumable?.unitMetric || "Units",
+        date: c.usedAt,
+        eventCode: c.Event?.eventCode || "—"
+      })),
+      issues,
+      stats: {
+        totalStudentsEnrolled,
+        totalTeachers,
+        totalVisits,
+        totalConsumablesUsed,
+        facilitiesScore: (school.hasScienceLab ? 1 : 0) + (school.hasElectricity ? 1 : 0) + (school.hasInternet ? 1 : 0)
+      }
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+export async function assignSchoolRegion(req: Request, res: Response): Promise<void> {
+  const schoolId = String(req.params.id);
+  const targetRegionId = String(req.body.regionId);
+  const targetDistrictId = req.body.districtId ? String(req.body.districtId) : undefined;
+  const targetBlockId = req.body.blockId ? String(req.body.blockId) : undefined;
+
+  try {
+    const region = await prisma.region.findUnique({ where: { id: targetRegionId } });
+    if (!region) {
+      res.status(404).json({ message: "Region not found" });
+      return;
+    }
+
+    const updateData: any = { regionId: targetRegionId };
+
+    if (targetDistrictId) {
+      updateData.districtId = targetDistrictId;
+    } else {
+      const existingSchool = await prisma.school.findUnique({ where: { id: schoolId } });
+      const currentDistrict = existingSchool?.districtId
+        ? await prisma.district.findUnique({ where: { id: existingSchool.districtId } })
+        : null;
+
+      if (!currentDistrict || currentDistrict.regionId !== targetRegionId) {
+        const fallbackDistrict = await prisma.district.findFirst({ where: { regionId: targetRegionId } });
+        if (fallbackDistrict) {
+          updateData.districtId = fallbackDistrict.id;
+          const fallbackBlock = await prisma.block.findFirst({ where: { districtId: fallbackDistrict.id } });
+          if (fallbackBlock) updateData.blockId = fallbackBlock.id;
+        }
+      }
+    }
+
+    if (targetBlockId) {
+      updateData.blockId = targetBlockId;
+    }
+
+    const updated = await prisma.school.update({
+      where: { id: schoolId },
+      data: updateData,
+      include: {
+        Region: { select: { id: true, name: true } },
+        District: { select: { id: true, name: true } },
+        Block: { select: { id: true, name: true } }
+      }
+    });
+
+    await audit(req, "ASSIGN_SCHOOL_REGION", "School", schoolId, {
+      regionId: targetRegionId,
+      regionName: region.name,
+      districtId: updated.districtId,
+      blockId: updated.blockId
+    });
+
+    res.json({
+      message: `School successfully mapped to region "${region.name}"`,
+      school: updated
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: formatPrismaError(error) });
+  }
+}
+
+
 
 

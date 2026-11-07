@@ -41,8 +41,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
       { key: "users", label: "User Management", icon: "◉", path: "/admin/users", permission: "people.view" },
       { key: "organization", label: "Regional Management", icon: "◎", path: "/admin/organization", permission: "organization.view" },
       { key: "mobile-labs", label: "Bus Management", icon: "▣", path: "/admin/mobile-labs", permission: "labs.view" },
-      { key: "schools", label: "School Management", icon: "⌁", path: "/admin/schools", permission: "schools.view" },
-      { key: "curriculum", label: "Experiment Management", icon: "◇", path: "/admin/curriculum", permission: "curriculum.view" }
+      { key: "schools", label: "School Management", icon: "⌁", path: "/admin/schools", permission: "schools.view" }
     ]
   },
   {
@@ -62,7 +61,14 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
     icon: "▥",
     items: [
       { key: "reports", label: "Reports & Analytics", icon: "▥", path: "/admin/reports", permission: "analytics.view" },
-      { key: "audit-logs", label: "Audit Logs", icon: "🛡", path: "/admin/audit-logs", permission: "security.view" },
+      { key: "audit-logs", label: "Audit Logs", icon: "🛡", path: "/admin/audit-logs", permission: "security.view" }
+    ]
+  },
+  {
+    key: "settings-group",
+    label: "SYSTEM",
+    type: "heading",
+    items: [
       { key: "settings", label: "Settings", icon: "⚙", path: "/admin/settings", permission: "organization.view" }
     ]
   }
