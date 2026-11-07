@@ -3,21 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../../services/api-client";
 import { BrandLogo } from "../../../shared/components/BrandLogo";
 
-interface RegionalOverview {
-  region: { id: string; name: string; state?: { name: string } };
+interface RegionalDashboardData {
+  region: {
+    id: string;
+    name: string;
+    state?: string;
+    adminName?: string;
+    adminEmail?: string;
+  };
   kpis: {
-    districts: number;
-    blocks: number;
-    schools: number;
-    activeLabs: number;
-    availableStaff: number;
+    totalSchools: number;
+    activeBuses: number;
+    maintenanceBuses: number;
+    totalBuses: number;
+    totalStaff: number;
+    activeStaff: number;
     studentsReached: number;
     todayVisits: number;
     upcomingVisits: number;
-    completedSessions: number;
-    pendingSessions: number;
-    inventoryAlerts: number;
+    completedVisits: number;
+    scheduledVisits: number;
+    pendingReviews: number;
+    consumablesAvailable: number;
+    consumablesItemsCount: number;
+    equipmentTotal: number;
+    equipmentAvailable: number;
+    equipmentAllocated: number;
+    equipmentDamaged: number;
+    equipmentMaintenance: number;
+    lowStockCount: number;
+    expiredConsumablesCount: number;
+    pendingAllocationsCount: number;
     operationalIssues: number;
+    districts: number;
+    blocks: number;
   };
   labs: Array<{
     id: string;
@@ -26,23 +45,45 @@ interface RegionalOverview {
     status: string;
     currentLat: number | null;
     currentLng: number | null;
+    driverName?: string;
+    equipmentCount?: number;
+    lastMaintenance?: string | null;
   }>;
-  alerts: Array<{ severity: string; title: string; detail: string }>;
+  alerts: Array<{ severity: string; type: string; title: string; detail: string }>;
   recentActivity: any[];
   generatedAt: string;
 }
 
-function Stat({ label, value, accent = "cyan" }: { label: string; value: any; accent?: string }) {
+function StatCard({
+  label,
+  value,
+  subtext,
+  accent = "cyan",
+  onClick,
+}: {
+  label: string;
+  value: any;
+  subtext?: string;
+  accent?: string;
+  onClick?: () => void;
+}) {
+  const displayVal = typeof value === "number" ? value.toLocaleString() : value ?? "0";
   return (
-    <div className={`kpi-card ${accent}`}>
-      <span>{label}</span>
-      <strong>{value ?? "—"}</strong>
+    <div
+      className={`kpi-card ${accent} ${onClick ? "cursor-pointer hover:shadow-md transition-shadow" : ""}`}
+      onClick={onClick}
+    >
+      <div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal-muted block">{label}</span>
+        <strong className="text-2xl font-bold tracking-tight text-charcoal block">{displayVal}</strong>
+      </div>
+      {subtext && <span className="font-mono text-[10px] text-charcoal-subtle block mt-1">{subtext}</span>}
     </div>
   );
 }
 
 export function RegionalDashboardPage() {
-  const [overview, setOverview] = useState<RegionalOverview | null>(null);
+  const [data, setData] = useState<RegionalDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -51,8 +92,8 @@ export function RegionalDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiClient<RegionalOverview>("/regional-admin/overview");
-      setOverview(data);
+      const res = await apiClient<RegionalDashboardData>("/regional-admin/overview");
+      setData(res);
     } catch (err: any) {
       console.error("Unable to load regional overview", err);
       setError(err?.message || "Failed to load regional overview data");
@@ -67,41 +108,44 @@ export function RegionalDashboardPage() {
 
   if (loading) {
     return (
-      <div className="loading-state">
-        <div className="loader-ring" />
+      <div className="loading-state p-12 text-center font-mono text-sm">
+        <div className="loader-ring mx-auto mb-4" />
         Loading regional command center…
       </div>
     );
   }
 
-  if (error || !overview) {
+  if (error || !data) {
     return (
-      <div className="error-state">
-        <div className="surface" style={{ maxWidth: 480, margin: "2rem auto", textAlign: "center" }}>
-          <h3 style={{ color: "var(--crimson)", marginBottom: 8 }}>Unable to Load Regional Command Center</h3>
-          <p style={{ color: "var(--charcoal-muted)", fontSize: 13, marginBottom: 16 }}>{error || "An unexpected error occurred while fetching regional data."}</p>
-          <button className="primary" onClick={() => void load()}>Retry loading</button>
+      <div className="error-state p-8">
+        <div className="surface max-w-md mx-auto p-6 text-center rounded-lg shadow-sm">
+          <h3 className="text-crimson font-bold text-lg mb-2">Unable to Load Regional Operations</h3>
+          <p className="text-charcoal-muted text-sm mb-4">{error || "Unexpected error occurred."}</p>
+          <button className="primary font-mono text-xs px-4 py-2" onClick={() => void load()}>
+            Retry Loading
+          </button>
         </div>
       </div>
     );
   }
 
-  const k = overview.kpis;
+  const k = data.kpis;
 
   return (
-    <section>
+    <div className="space-y-6">
+      {/* SECTION A: REGIONAL OVERVIEW HERO (Section 4.1.A) */}
       <div className="command-hero regional-hero">
         <div>
           <div className="eyebrow">REGIONAL COMMAND CENTER</div>
-          <h2>{overview.region?.name || "Assigned Region"}</h2>
+          <h2>{data.region?.name || "Operational Region"}</h2>
           <p>
-            Plan, assign, coordinate and monitor Science on Wheels operations within your assigned
-            region.
+            Centralized operational management for STEM education across {k.districts || 0} districts and {k.blocks || 0} blocks.
           </p>
           <div className="hero-meta">
-            <span>Region scoped access</span>
-            <span>{overview.region?.state?.name || "State"}</span>
-            <span>Live database</span>
+            <span>Region: {data.region?.name}</span>
+            <span>State: {data.region?.state || "State"}</span>
+            <span>Admin: {data.region?.adminName || "Regional Admin"}</span>
+            <span>Fleet: {k.totalBuses} Mobile Labs</span>
           </div>
         </div>
         <div className="hero-visual">
@@ -116,115 +160,331 @@ export function RegionalDashboardPage() {
         </div>
       </div>
 
-      <div className="kpi-grid">
-        <Stat label="Districts" value={k?.districts} />
-        <Stat label="Blocks" value={k?.blocks} />
-        <Stat label="Schools covered" value={k?.schools} />
-        <Stat label="Active labs" value={k?.activeLabs} />
-        <Stat label="Available field staff" value={k?.availableStaff} />
-        <Stat label="Students reached" value={k?.studentsReached} />
-        <Stat label="Today's visits" value={k?.todayVisits} />
-        <Stat label="Upcoming visits" value={k?.upcomingVisits} />
-        <Stat label="Completed sessions" value={k?.completedSessions} />
-        <Stat label="Pending sessions" value={k?.pendingSessions} />
-        <Stat label="Inventory alerts" value={k?.inventoryAlerts} accent="warning" />
-        <Stat label="Operational issues" value={k?.operationalIssues} accent="coral" />
-      </div>
-
-      <div className="dashboard-grid">
-        <section className="surface">
-          <div className="module-head">
-            <div>
-              <div className="section-kicker">TODAY'S OPERATIONS</div>
-              <h2>Field workload</h2>
-            </div>
-            <button className="ghost" onClick={() => navigate("/regional/schedules")}>
-              Open schedules →
-            </button>
-          </div>
-          <div className="mini-grid">
-            <div>
-              <strong>{k?.todayVisits ?? 0}</strong>
-              <span>Visits today</span>
-            </div>
-            <div>
-              <strong>{k?.pendingSessions ?? 0}</strong>
-              <span>Pending sessions</span>
-            </div>
-            <div>
-              <strong>
-                {overview.labs.filter((x) => x.status === "ON_ROUTE").length}
-              </strong>
-              <span>Labs moving</span>
-            </div>
-            <div>
-              <strong>
-                {overview.labs.filter((x) => x.status === "AT_SCHOOL").length}
-              </strong>
-              <span>Labs at schools</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="surface">
-          <div className="module-head">
-            <div>
-              <div className="section-kicker">REGIONAL ALERTS</div>
-              <h2>Needs attention</h2>
-            </div>
-            <button className="ghost" onClick={() => navigate("/regional/reports")}>
-              View all →
-            </button>
-          </div>
-          <div className="alert-list">
-            {overview.alerts.length ? (
-              overview.alerts.slice(0, 5).map((a, i) => (
-                <div className={`alert-row ${a.severity}`} key={i}>
-                  <div className="alert-icon">!</div>
-                  <div>
-                    <strong>{a.title}</strong>
-                    <span>{a.detail}</span>
-                  </div>
+      {/* ACTIONABLE WORKFLOW BANNERS (Section 4.1.E) */}
+      {(k.pendingAllocationsCount > 0 || k.pendingReviews > 0) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {k.pendingAllocationsCount > 0 && (
+            <div className="border border-blue-200 bg-blue-50/70 p-4 rounded-lg flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">📦</span>
+                <div>
+                  <strong className="text-sm font-semibold text-blue-950 block">
+                    {k.pendingAllocationsCount} Central Stock Shipment(s) Ready for Receipt
+                  </strong>
+                  <span className="text-xs text-blue-800">
+                    Dispatched from HQ. Verify quantities and confirm arrival into your regional depot.
+                  </span>
                 </div>
-              ))
-            ) : (
-              <div className="empty-state compact">No active alerts for this region.</div>
-            )}
-          </div>
-        </section>
+              </div>
+              <button
+                className="btn primary text-xs font-mono shrink-0 ml-4 px-3 py-1.5"
+                onClick={() => navigate("/regional/inventory-allocation")}
+              >
+                Confirm Receipt →
+              </button>
+            </div>
+          )}
+
+          {k.pendingReviews > 0 && (
+            <div className="border border-amber-200 bg-amber-50/70 p-4 rounded-lg flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">📝</span>
+                <div>
+                  <strong className="text-sm font-semibold text-amber-950 block">
+                    {k.pendingReviews} Field Visit Report(s) Awaiting Review
+                  </strong>
+                  <span className="text-xs text-amber-800">
+                    Field Staff submitted visit session data and material usage for administrative approval.
+                  </span>
+                </div>
+              </div>
+              <button
+                className="btn primary text-xs font-mono shrink-0 ml-4 px-3 py-1.5"
+                onClick={() => navigate("/regional/field-reports")}
+              >
+                Review Reports →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CORE STATS GRID */}
+      <div className="kpi-grid">
+        <StatCard
+          label="Registered Schools"
+          value={k.totalSchools}
+          subtext={`${k.districts} districts covered`}
+          onClick={() => navigate("/regional/schools")}
+        />
+        <StatCard
+          label="Active Mobile Labs"
+          value={k.activeBuses}
+          subtext={`${k.maintenanceBuses} in maintenance`}
+          onClick={() => navigate("/regional/mobile-labs")}
+        />
+        <StatCard
+          label="Field Staff"
+          value={k.activeStaff}
+          subtext={`${k.totalStaff} total registered`}
+          onClick={() => navigate("/regional/staff")}
+        />
+        <StatCard
+          label="Students Reached"
+          value={k.studentsReached}
+          subtext="Total participant impact"
+        />
+        <StatCard
+          label="Today's Visits"
+          value={k.todayVisits}
+          subtext={`${k.upcomingVisits} upcoming visits`}
+          accent="amber"
+          onClick={() => navigate("/regional/schedules")}
+        />
+        <StatCard
+          label="Reports for Review"
+          value={k.pendingReviews}
+          subtext={`${k.completedVisits} completed visits`}
+          accent={k.pendingReviews > 0 ? "warning" : "cyan"}
+          onClick={() => navigate("/regional/field-reports")}
+        />
+        <StatCard
+          label="Consumables Units"
+          value={k.consumablesAvailable}
+          subtext={`${k.lowStockCount} low-stock alerts`}
+          accent={k.lowStockCount > 0 ? "warning" : "cyan"}
+          onClick={() => navigate("/regional/inventory")}
+        />
+        <StatCard
+          label="Equipment Assets"
+          value={k.equipmentTotal}
+          subtext={`${k.equipmentAllocated} on buses, ${k.equipmentDamaged} damaged`}
+          accent={k.equipmentDamaged > 0 ? "coral" : "cyan"}
+          onClick={() => navigate("/regional/inventory")}
+        />
       </div>
 
-      <section className="surface" style={{ marginTop: "1rem" }}>
-        <div className="module-head">
-          <div>
-            <div className="section-kicker">LIVE LABS</div>
-            <h2>Regional laboratory network</h2>
+      {/* TWO COLUMN DETAIL GRID: (Section B: Inventory & Section C: Visits) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* SECTION B: REGIONAL INVENTORY OVERVIEW */}
+        <div className="surface p-5 rounded-lg border border-stone">
+          <div className="module-head flex items-center justify-between mb-4">
+            <div>
+              <div className="section-kicker font-mono text-[10px] text-[#3D6B52] uppercase font-bold">
+                INVENTORY OVERVIEW
+              </div>
+              <h3 className="text-base font-bold text-charcoal">Depot & Fleet Stock</h3>
+            </div>
+            <button
+              className="ghost font-mono text-xs text-charcoal-muted hover:text-charcoal"
+              onClick={() => navigate("/regional/inventory")}
+            >
+              Manage Inventory →
+            </button>
           </div>
-          <button className="ghost" onClick={() => navigate("/regional/mobile-labs")}>
-            Open telemetry →
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Consumables</span>
+              <strong className="text-lg text-charcoal font-bold">{k.consumablesAvailable}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">{k.consumablesItemsCount} catalogue items</span>
+            </div>
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Equipment</span>
+              <strong className="text-lg text-charcoal font-bold">{k.equipmentTotal}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">{k.equipmentAvailable} available</span>
+            </div>
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Allocated</span>
+              <strong className="text-lg text-charcoal font-bold">{k.equipmentAllocated}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">Onboard buses</span>
+            </div>
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Alerts</span>
+              <strong className="text-lg text-amber-700 font-bold">{k.lowStockCount + k.expiredConsumablesCount}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">Low stock / Expired</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs p-2 bg-stone-50 rounded font-mono">
+              <span className="text-charcoal font-medium">Pending Central Transfers (In-Transit from HQ)</span>
+              <span className="font-bold text-blue-700">{k.pendingAllocationsCount} shipments</span>
+            </div>
+            <div className="flex items-center justify-between text-xs p-2 bg-stone-50 rounded font-mono">
+              <span className="text-charcoal font-medium">Damaged or Maintenance Required Assets</span>
+              <span className="font-bold text-red-600">{k.equipmentDamaged + k.equipmentMaintenance} items</span>
+            </div>
+            <div className="flex items-center justify-between text-xs p-2 bg-stone-50 rounded font-mono">
+              <span className="text-charcoal font-medium">School-Allocated Items (Bus Physical Custody)</span>
+              <span className="font-bold text-[#3D6B52]">Tracked via Ledger</span>
+            </div>
+          </div>
+        </div>
+
+        {/* SECTION C: SCHOOL VISIT WORKLOAD */}
+        <div className="surface p-5 rounded-lg border border-stone">
+          <div className="module-head flex items-center justify-between mb-4">
+            <div>
+              <div className="section-kicker font-mono text-[10px] text-[#3D6B52] uppercase font-bold">
+                VISIT PIPELINE
+              </div>
+              <h3 className="text-base font-bold text-charcoal">Operations & Review Status</h3>
+            </div>
+            <button
+              className="ghost font-mono text-xs text-charcoal-muted hover:text-charcoal"
+              onClick={() => navigate("/regional/schedules")}
+            >
+              View Schedule →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Today</span>
+              <strong className="text-lg text-charcoal font-bold">{k.todayVisits}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">Active operations</span>
+            </div>
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Upcoming</span>
+              <strong className="text-lg text-charcoal font-bold">{k.upcomingVisits}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">Next 30 days</span>
+            </div>
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Completed</span>
+              <strong className="text-lg text-charcoal font-bold">{k.completedVisits}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">Finished sessions</span>
+            </div>
+            <div className="p-3 bg-stone-50 rounded border border-stone text-center">
+              <span className="block font-mono text-[10px] text-charcoal-muted uppercase">Awaiting Review</span>
+              <strong className="text-lg text-amber-700 font-bold">{k.pendingReviews}</strong>
+              <span className="block text-[10px] text-charcoal-subtle">Reports pending</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs p-2 bg-stone-50 rounded font-mono">
+              <span className="text-charcoal font-medium">Buses en-route / on-site today</span>
+              <span className="font-bold text-emerald-700">
+                {data.labs.filter((l) => ["ON_ROUTE", "AT_SCHOOL"].includes(l.status)).length} buses
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs p-2 bg-stone-50 rounded font-mono">
+              <span className="text-charcoal font-medium">Operational issues requiring resolution</span>
+              <span className="font-bold text-amber-700">{k.operationalIssues} open</span>
+            </div>
+            <div className="flex items-center justify-between text-xs p-2 bg-stone-50 rounded font-mono">
+              <span className="text-charcoal font-medium">Field Staff deployment rate</span>
+              <span className="font-bold text-charcoal">
+                {k.totalStaff > 0 ? Math.round((k.activeStaff / k.totalStaff) * 100) : 100}% active
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION D: REGIONAL BUS FLEET (Section 4.3) */}
+      <div className="surface p-5 rounded-lg border border-stone">
+        <div className="module-head flex items-center justify-between mb-4">
+          <div>
+            <div className="section-kicker font-mono text-[10px] text-[#3D6B52] uppercase font-bold">
+              LABORATORY FLEET
+            </div>
+            <h3 className="text-base font-bold text-charcoal">Mobile Laboratory Fleet Status</h3>
+          </div>
+          <button
+            className="ghost font-mono text-xs text-charcoal-muted hover:text-charcoal"
+            onClick={() => navigate("/regional/mobile-labs")}
+          >
+            Manage Fleet →
           </button>
         </div>
-        <div className="lab-grid">
-          {overview.labs.map((l) => (
-            <div className="lab-card" key={l.id}>
-              <div className="lab-status">
-                <span className={`status-dot ${String(l.status).toLowerCase()}`} />
-                {String(l.status).replaceAll("_", " ")}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {data.labs.map((lab) => (
+            <div key={lab.id} className="p-4 border border-stone rounded-lg bg-white shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-xs font-bold text-charcoal">
+                  {lab.busCode || lab.registrationNumber}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                    lab.status === "AVAILABLE"
+                      ? "bg-emerald-100 text-emerald-800"
+                      : lab.status === "ON_ROUTE"
+                      ? "bg-blue-100 text-blue-800"
+                      : lab.status === "UNDER_MAINTENANCE"
+                      ? "bg-amber-100 text-amber-800"
+                      : "bg-stone-200 text-stone-700"
+                  }`}
+                >
+                  {lab.status}
+                </span>
               </div>
-              <h3>{l.busCode || l.registrationNumber}</h3>
-              <p>{l.registrationNumber}</p>
-              <div className="lab-coords">
-                {l.currentLat != null
-                  ? `${Number(l.currentLat).toFixed(4)}, ${Number(l.currentLng).toFixed(4)}`
-                  : "Location unavailable"}
+              <div className="text-xs text-charcoal-muted space-y-1 font-mono">
+                <div>Plate: {lab.registrationNumber}</div>
+                <div>Primary Staff: {lab.driverName || "Unassigned"}</div>
+                <div>Equipment on board: {lab.equipmentCount || 0} assets</div>
+                <div>
+                  Last Servicing:{" "}
+                  {lab.lastMaintenance ? new Date(lab.lastMaintenance).toLocaleDateString() : "Up to date"}
+                </div>
               </div>
             </div>
           ))}
-          {!overview.labs.length && (
-            <div className="empty-state">No laboratories assigned to this region yet.</div>
+          {data.labs.length === 0 && (
+            <div className="col-span-3 text-center p-6 font-mono text-xs text-charcoal-muted">
+              No mobile laboratory buses registered in this region yet.
+            </div>
           )}
         </div>
-      </section>
-    </section>
+      </div>
+
+      {/* SECTION E: ACTIVE OPERATIONAL ALERTS (Section 4.1.E) */}
+      <div className="surface p-5 rounded-lg border border-stone">
+        <div className="module-head flex items-center justify-between mb-3">
+          <div>
+            <div className="section-kicker font-mono text-[10px] text-[#3D6B52] uppercase font-bold">
+              ACTIONABLE ALERTS
+            </div>
+            <h3 className="text-base font-bold text-charcoal">Regional Operational Notifications</h3>
+          </div>
+          <button
+            className="ghost font-mono text-xs text-charcoal-muted hover:text-charcoal"
+            onClick={() => navigate("/regional/notifications")}
+          >
+            Notification Center →
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {data.alerts.slice(0, 5).map((a, i) => (
+            <div
+              key={i}
+              className={`p-3 rounded-lg border flex items-start space-x-3 text-xs ${
+                a.severity === "error"
+                  ? "bg-red-50 border-red-200 text-red-900"
+                  : a.severity === "warning"
+                  ? "bg-amber-50 border-amber-200 text-amber-900"
+                  : "bg-blue-50 border-blue-200 text-blue-900"
+              }`}
+            >
+              <span className="font-bold text-sm shrink-0">
+                {a.severity === "error" ? "🚨" : a.severity === "warning" ? "⚠️" : "ℹ️"}
+              </span>
+              <div className="flex-1">
+                <strong className="font-semibold block">{a.title}</strong>
+                <span className="opacity-90">{a.detail}</span>
+              </div>
+            </div>
+          ))}
+          {data.alerts.length === 0 && (
+            <div className="p-4 text-center font-mono text-xs text-charcoal-muted">
+              All regional systems operating normally. No pending alerts.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

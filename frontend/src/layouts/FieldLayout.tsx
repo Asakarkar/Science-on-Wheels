@@ -31,17 +31,16 @@ export function FieldLayout() {
 
   return (
     <div className="field-shell instructor-shell bg-grid-warm">
-
-      {/* Top System Status Bar matching login aesthetic */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
+      {/* Top System Status Bar */}
+      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
         <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 font-semibold text-charcoal">
               <span
                 className="inline-block h-2 w-2 rounded-xs"
-                style={{ backgroundColor: "#B45309" }}
+                style={{ backgroundColor: "#176B50" }}
               />
-              <span className="tracking-tight">FIELD OPERATIONS</span>
+              <span className="tracking-tight">FIELD OPERATIONS COMMAND</span>
             </div>
           </div>
 
@@ -63,9 +62,9 @@ export function FieldLayout() {
         )}
 
         {/* Field Operations Sidebar */}
-        <aside className={`field-sidebar ${mobileNav ? "open" : ""}`}>
-          <div className="field-brand">
-            <div className="field-logo instructor">
+        <aside className={`admin-sidebar field-sidebar ${mobileNav ? "open" : ""}`}>
+          <div className="sidebar-brand field-brand">
+            <div className="brand-mark field-logo" style={{ backgroundColor: "#176B50" }}>
               <BrandLogo />
             </div>
             <div>
@@ -76,8 +75,8 @@ export function FieldLayout() {
             </div>
           </div>
 
-          <div className="field-role instructor">
-            <span className="font-mono text-[9px] font-bold tracking-widest text-charcoal">
+          <div className="command-role field-role">
+            <span className="font-mono text-[9px] font-bold tracking-widest text-[#176B50]">
               SCIENCE COMMUNICATOR
             </span>
             <b className="font-mono text-[8px] text-charcoal-subtle uppercase">
@@ -89,9 +88,9 @@ export function FieldLayout() {
             {visibleNav.map((item) => {
               const isActive = activeNav?.key === item.key;
               return (
-                <div key={item.key} className="field-nav-group">
+                <div key={item.key} className="nav-section-group field-nav-group">
                   <button
-                    className={`field-nav ${isActive ? "active" : ""}`}
+                    className={`nav-item field-nav ${isActive ? "active" : ""}`}
                     onClick={() => {
                       if (item.children && item.children.length > 0) {
                         setExpanded((p) => ({ ...p, [item.key]: !p[item.key] }));
@@ -102,18 +101,19 @@ export function FieldLayout() {
                     <i>{item.icon}</i>
                     <span>{item.label}</span>
                     {item.children && item.children.length > 0 && (
-                      <b className="font-mono text-xs">{expanded[item.key] ? "−" : "+"}</b>
+                      <b className="font-mono text-xs">{expanded[item.key] ? "▾" : "▸"}</b>
                     )}
                   </button>
                   {expanded[item.key] && item.children && item.children.length > 0 && (
-                    <div className="field-subnav">
+                    <div className="subnav field-subnav">
                       {item.children.map((c) => (
                         <button
                           key={c}
-                          className={location.search.includes(encodeURIComponent(c)) ? "selected" : ""}
+                          type="button"
+                          className={`nav-sub-item ${location.search.includes(encodeURIComponent(c)) ? "active" : ""}`}
                           onClick={() => handleSelect(item.path, c)}
                         >
-                          {c}
+                          <span>{c}</span>
                         </button>
                       ))}
                     </div>
@@ -123,44 +123,48 @@ export function FieldLayout() {
             })}
           </nav>
 
-          <div className="field-bottom">
-            <span className="font-mono text-[10px]">● Active Field Shift</span>
-            <button className="font-mono text-xs" onClick={() => void logout()}>
+          <div className="sidebar-bottom field-bottom">
+            <div className="sync-indicator font-mono text-[10px]">
+              <span style={{ backgroundColor: "#176B50" }} /> Active Field Shift
+            </div>
+            <button className="logout font-mono text-xs" onClick={() => void logout()}>
               ↪ Sign out
             </button>
           </div>
         </aside>
 
         {/* Main Content Area */}
-        <main className="field-main">
-          <header className="field-top" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <button className="field-mobile" onClick={() => setMobileNav(!mobileNav)}>
-                ☰
-              </button>
-              <div className="breadcrumbs font-mono text-xs">
-                <span>Science on Wheels</span>
-                <b className="text-stone">›</b>
-                <strong className="text-charcoal font-semibold">{activeNav?.label}</strong>
-              </div>
+        <main className="admin-main field-main">
+          <header className="admin-topbar field-top">
+            <button
+              className="mobile-menu field-mobile"
+              onClick={() => setMobileNav(!mobileNav)}
+              aria-label="Toggle navigation menu"
+            >
+              ☰
+            </button>
+            <div className="breadcrumbs font-mono text-xs">
+              <span>Science on Wheels</span>
+              <b className="text-stone">›</b>
+              <strong className="text-charcoal font-semibold">{activeNav?.label || "Field"}</strong>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div className="field-user">
-                <div className="avatar font-mono" style={{ backgroundColor: "#1E242B" }}>
+            <div className="top-actions">
+              <div className="profile field-user">
+                <div className="avatar font-mono" style={{ backgroundColor: "#176B50" }}>
                   {(user?.name || "SC").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <span className="text-xs text-charcoal font-medium">{user?.name || "Field User"}</span>
-                  <small className="block font-mono text-[9px] text-charcoal-subtle">
-                    SCIENCE COMMUNICATOR
-                  </small>
+                  <strong className="text-xs text-charcoal font-medium">{user?.name || "Field User"}</strong>
+                  <span className="font-mono text-[10px] text-charcoal-subtle block">
+                    Science Communicator
+                  </span>
                 </div>
               </div>
             </div>
           </header>
 
-          <div className="field-content">
+          <div className="page-content field-content">
             <Outlet />
           </div>
         </main>

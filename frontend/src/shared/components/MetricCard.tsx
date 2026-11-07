@@ -4,41 +4,27 @@ export interface MetricCardProps {
   detail?: string;
   tone?: string;
   accent?: string;
+  onClick?: () => void;
 }
 
-export function MetricCard({ label, value, detail, tone, accent }: MetricCardProps) {
+export function MetricCard({ label, value, detail, tone, accent, onClick }: MetricCardProps) {
   const displayValue = typeof value === "number" ? value.toLocaleString() : value ?? "—";
-
-  if (accent) {
-    return (
-      <div className={`kpi-card ${accent}`}>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal-muted">
-          {label}
-        </span>
-        <strong className="font-sans text-2xl font-bold tracking-tight text-charcoal">
-          {displayValue}
-        </strong>
-        {detail && <small className="mt-1 block font-mono text-[10px] text-charcoal-subtle">{detail}</small>}
-      </div>
-    );
-  }
+  const modifier = accent || tone || "";
 
   return (
-    <article className={`metric-card ${tone || ""}`}>
-      <div className="metric-label font-mono text-[10px] uppercase tracking-wider text-charcoal-muted">
-        {label}
+    <article
+      className={`metric-card ${modifier} ${onClick ? "cursor-pointer" : ""}`}
+      onClick={onClick}
+    >
+      <div>
+        <div className="metric-label font-mono text-[10px] uppercase tracking-wider text-charcoal-muted">
+          {label}
+        </div>
+        <strong className="font-sans text-2xl font-bold tracking-tight text-charcoal sm:text-3xl">
+          {displayValue}
+        </strong>
       </div>
-      <strong className="font-sans text-2xl font-bold tracking-tight text-charcoal sm:text-3xl">
-        {displayValue}
-      </strong>
-      {detail && <small className="font-mono text-[10px] text-charcoal-subtle">{detail}</small>}
-      <div className="metric-spark" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-        <i />
-        <i />
-      </div>
+      {detail && <small className="font-mono text-[10px] text-charcoal-subtle block mt-1">{detail}</small>}
     </article>
   );
 }

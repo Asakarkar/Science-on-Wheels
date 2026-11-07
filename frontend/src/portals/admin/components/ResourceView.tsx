@@ -76,7 +76,7 @@ export function ResourceView({
   async function remove(id: string) {
     if (!window.confirm("Delete this record? This cannot be undone.")) return;
     try {
-      await apiClient(`/super-admin/resource/${config.key}/${id}`, { method: "DELETE" });
+      await apiClient(`/super-admin/resource/${config.key}/${id}?cascade=true`, { method: "DELETE" });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Delete failed");

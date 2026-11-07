@@ -610,6 +610,7 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
         prisma.experimentSession.deleteMany({ where: { Event: { schoolId: id } } }),
         prisma.eventReadinessCheck.deleteMany({ where: { Event: { schoolId: id } } }),
         prisma.feedbackRecord.deleteMany({ where: { Event: { schoolId: id } } }),
+        prisma.eventsOnCommunicator.deleteMany({ where: { Event: { schoolId: id } } }),
         prisma.event.deleteMany({ where: { schoolId: id } }),
         prisma.school.delete({ where: { id } }),
       ]);
@@ -618,12 +619,22 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
       return;
     }
 
+    if (resource === "events") {
+      await prisma.eventsOnCommunicator.deleteMany({ where: { eventId: id } });
+      await prisma.eventAttendance.deleteMany({ where: { eventId: id } });
+      await prisma.consumableUsage.deleteMany({ where: { eventId: id } });
+      await prisma.experimentSession.deleteMany({ where: { eventId: id } });
+      await prisma.eventReadinessCheck.deleteMany({ where: { eventId: id } });
+      await prisma.feedbackRecord.deleteMany({ where: { eventId: id } });
+    }
+
     if (resource === "districts" && cascade) {
       const schoolsInDistrict = await prisma.school.findMany({ where: { districtId: id }, select: { id: true } });
       const schoolIds = schoolsInDistrict.map((s) => s.id);
       await prisma.$transaction([
         prisma.schoolRegistration.deleteMany({ where: { schoolId: { in: schoolIds } } }),
         prisma.routeStop.deleteMany({ where: { schoolId: { in: schoolIds } } }),
+        prisma.eventsOnCommunicator.deleteMany({ where: { Event: { schoolId: { in: schoolIds } } } }),
         prisma.event.deleteMany({ where: { schoolId: { in: schoolIds } } }),
         prisma.school.deleteMany({ where: { districtId: id } }),
         prisma.block.deleteMany({ where: { districtId: id } }),
@@ -636,8 +647,43 @@ export async function deleteResource(req: Request, res: Response, next: NextFunc
     }
 
     if (resource === "users") {
-      await prisma.bus.updateMany({ where: { driverId: id }, data: { driverId: null } });
+      // 1. Remove communicator assignments to visit events (EventsOnCommunicator)
+      await prisma.eventsOnCommunicator.deleteMany({ where: { userId: id } });
+
+      // 2. Remove staff travel assignments
       await prisma.staffTravelAssignment.deleteMany({ where: { userId: id } });
+
+      // 3. Unassign from buses (as primary driver)
+      await prisma.bus.updateMany({ where: { driverId: id }, data: { driverId: null } });
+
+      // 4. Remove active login sessions
+      await prisma.session.deleteMany({ where: { userId: id } });
+
+      // 5. Remove user feedback records
+      await prisma.feedbackRecord.deleteMany({ where: { userId: id } });
+
+      // 6. Clear nullable tracking references in audit logs, inventory transactions, and issues
+      await prisma.auditLog.updateMany({ where: { actorUserId: id }, data: { actorUserId: null } });
+      await prisma.inventoryTransaction.updateMany({ where: { performedById: id }, data: { performedById: null } });
+      await prisma.operationalIssue.updateMany({ where: { assignedResolverId: id }, data: { assignedResolverId: null } });
+
+      // 7. For non-nullable required relationships, reassign to a system admin if possible
+      const fallbackAdmin = await prisma.user.findFirst({
+        where: { roleEnum: "SUPER_ADMIN", id: { not: id } }
+      });
+      if (fallbackAdmin) {
+        await prisma.operationalIssue.updateMany({ where: { reportedById: id }, data: { reportedById: fallbackAdmin.id } });
+        await prisma.trip.updateMany({ where: { driverId: id }, data: { driverId: fallbackAdmin.id } });
+        await prisma.routeAssignment.updateMany({ where: { driverId: id }, data: { driverId: fallbackAdmin.id } });
+        await prisma.documentVault.updateMany({ where: { uploadedById: id }, data: { uploadedById: fallbackAdmin.id } });
+        await prisma.procurementRequest.updateMany({ where: { requestedById: id }, data: { requestedById: fallbackAdmin.id } });
+        await prisma.operationalExpense.updateMany({ where: { submittedById: id }, data: { submittedById: fallbackAdmin.id } });
+        await prisma.equipmentMovement.updateMany({ where: { movedById: id }, data: { movedById: fallbackAdmin.id } });
+      }
+
+      // 8. Disassociate student or teacher links
+      await prisma.student.updateMany({ where: { userId: id }, data: { userId: null } });
+      await prisma.teacher.deleteMany({ where: { userId: id } });
     }
 
     const row = await (prisma as any)[delegateName].delete({ where: { id } });

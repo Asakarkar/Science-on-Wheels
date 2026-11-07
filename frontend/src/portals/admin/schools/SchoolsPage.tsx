@@ -323,45 +323,20 @@ export function SchoolsPage() {
               </p>
             </div>
 
-            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
+                className="ghost"
                 onClick={() => csvDownload("schools")}
-                style={{
-                  padding: "0.55rem 0.9rem",
-                  borderRadius: "6px",
-                  border: "1px solid var(--stone, #cbd5e1)",
-                  background: "#ffffff",
-                  color: "#334155",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.4rem"
-                }}
               >
                 <span>📥</span> Export CSV
               </button>
               <button
                 type="button"
+                className="primary"
                 onClick={() => {
                   setEditingSchool(null);
                   setShowAddEditModal(true);
-                }}
-                style={{
-                  padding: "0.55rem 1.1rem",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: "var(--color-primary, #6366f1)",
-                  color: "#ffffff",
-                  fontWeight: 600,
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  boxShadow: "0 2px 4px rgba(99, 102, 241, 0.25)"
                 }}
               >
                 <span>➕</span> Register School
@@ -370,111 +345,29 @@ export function SchoolsPage() {
           </div>
 
           {/* Operational Metrics Cards */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "1rem"
-            }}
-          >
-            <div
-              style={{
-                background: "#ffffff",
-                padding: "1rem 1.25rem",
-                borderRadius: "8px",
-                border: "1px solid var(--stone, #e2e8f0)",
-                borderLeft: "4px solid #6366f1"
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "12px", fontWeight: 600, textTransform: "uppercase" }}>
-                Total Registered Schools
-              </div>
-              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1E242B", marginTop: "4px" }}>
-                {metrics.total}
-              </div>
-              <div style={{ fontSize: "12px", color: "#10b981", marginTop: "2px" }}>
-                ✓ Central Master Registry
-              </div>
+          <div className="metric-grid">
+            <div className="metric-card">
+              <div className="metric-label">Total Registered Schools</div>
+              <strong>{metrics.total}</strong>
+              <small>Central Master Registry</small>
             </div>
 
-            <div
-              style={{
-                background: "#ffffff",
-                padding: "1rem 1.25rem",
-                borderRadius: "8px",
-                border: "1px solid var(--stone, #e2e8f0)",
-                borderLeft: "4px solid #10b981"
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "12px", fontWeight: 600, textTransform: "uppercase" }}>
-                Regional Mappings
-              </div>
-              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1E242B", marginTop: "4px" }}>
-                {metrics.mapped} / {metrics.total}
-              </div>
-              <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
-                Active geographical linkage
-              </div>
+            <div className="metric-card">
+              <div className="metric-label">Regional Mappings</div>
+              <strong>{metrics.mapped} / {metrics.total}</strong>
+              <small>Active geographical linkage</small>
             </div>
 
-            <div
-              style={{
-                background: "#ffffff",
-                padding: "1rem 1.25rem",
-                borderRadius: "8px",
-                border: "1px solid var(--stone, #e2e8f0)",
-                borderLeft: "4px solid #3b82f6"
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "12px", fontWeight: 600, textTransform: "uppercase" }}>
-                Total Students Enrolled
-              </div>
-              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1E242B", marginTop: "4px" }}>
-                {metrics.totalStudents.toLocaleString()}
-              </div>
-              <div style={{ fontSize: "12px", color: "#3b82f6", marginTop: "2px" }}>
-                Across all registered schools
-              </div>
+            <div className="metric-card">
+              <div className="metric-label">Total Students Enrolled</div>
+              <strong>{metrics.totalStudents.toLocaleString()}</strong>
+              <small>Across all registered schools</small>
             </div>
 
-            <div
-              style={{
-                background: "#ffffff",
-                padding: "1rem 1.25rem",
-                borderRadius: "8px",
-                border: "1px solid var(--stone, #e2e8f0)",
-                borderLeft: "4px solid #f59e0b"
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "12px", fontWeight: 600, textTransform: "uppercase" }}>
-                Mobile Lab Visits Hosted
-              </div>
-              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1E242B", marginTop: "4px" }}>
-                {metrics.totalVisits}
-              </div>
-              <div style={{ fontSize: "12px", color: "#f59e0b", marginTop: "2px" }}>
-                On-site science sessions
-              </div>
-            </div>
-
-            <div
-              style={{
-                background: "#ffffff",
-                padding: "1rem 1.25rem",
-                borderRadius: "8px",
-                border: "1px solid var(--stone, #e2e8f0)",
-                borderLeft: "4px solid #ec4899"
-              }}
-            >
-              <div style={{ color: "#64748b", fontSize: "12px", fontWeight: 600, textTransform: "uppercase" }}>
-                Science Lab Facilities
-              </div>
-              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#1E242B", marginTop: "4px" }}>
-                {metrics.withScienceLab} / {metrics.total}
-              </div>
-              <div style={{ fontSize: "12px", color: "#ec4899", marginTop: "2px" }}>
-                {metrics.total - metrics.withScienceLab} need mobile lab focus
-              </div>
+            <div className="metric-card">
+              <div className="metric-label">Mobile Lab Visits Hosted</div>
+              <strong>{metrics.totalVisits}</strong>
+              <small>On-site science sessions</small>
             </div>
           </div>
 

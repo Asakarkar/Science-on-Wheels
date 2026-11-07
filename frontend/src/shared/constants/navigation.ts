@@ -85,26 +85,88 @@ export const ADMIN_NAVIGATION: NavItem[] = ADMIN_NAV_SECTIONS.flatMap((section) 
   }))
 );
 
-export const REGIONAL_NAVIGATION: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/regional/dashboard", permission: "dashboard.view", children: [] },
-  { key: "schools", label: "Schools", icon: "⌁", path: "/regional/schools", permission: "schools.view", children: ["School Directory", "Registrations", "Priority"] },
-  { key: "staff", label: "Field Staff", icon: "◉", path: "/regional/staff", permission: "people.view", children: ["Staff Directory", "Session Assignments"] },
-  { key: "mobile-labs", label: "Mobile Labs", icon: "▣", path: "/regional/mobile-labs", permission: "labs.view", children: ["Assigned Labs", "Live Status", "Telemetry"] },
-  { key: "schedules", label: "Schedules & Visits", icon: "➜", path: "/regional/schedules", permission: "operations.view", children: ["Today's Visits", "Upcoming Visits", "New Visit"] },
-  { key: "routes", label: "Routes & Travel", icon: "◎", path: "/regional/routes", permission: "operations.view", children: ["Regional Routes", "Stops"] },
-  { key: "inventory", label: "Inventory", icon: "◈", path: "/regional/inventory", permission: "resources.view", children: ["Consumables Stock", "Equipment Assets", "Transactions"] },
-  { key: "maintenance", label: "Maintenance", icon: "▣", path: "/regional/maintenance", permission: "labs.view", children: ["Service Records", "Schedule Maintenance"] },
-  { key: "reports", label: "Reports & Analytics", icon: "▥", path: "/regional/reports", permission: "analytics.view", children: ["Regional Summary", "CSV Exports"] }
+export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
+  {
+    key: "overview",
+    label: "OVERVIEW",
+    type: "heading",
+    items: [
+      { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/regional/dashboard", permission: "dashboard.view" }
+    ]
+  },
+  {
+    key: "regional-management",
+    label: "REGIONAL MANAGEMENT",
+    type: "dropdown",
+    icon: "◎",
+    items: [
+      { key: "schools", label: "School Management", icon: "⌁", path: "/regional/schools", permission: "schools.view" },
+      { key: "mobile-labs", label: "Bus Management", icon: "▣", path: "/regional/mobile-labs", permission: "labs.view" },
+      { key: "staff", label: "Field Staff Management", icon: "◉", path: "/regional/staff", permission: "people.view" }
+    ]
+  },
+  {
+    key: "inventory-ops",
+    label: "INVENTORY OPERATIONS",
+    type: "dropdown",
+    icon: "◈",
+    items: [
+      { key: "inventory", label: "Regional Inventory", icon: "◈", path: "/regional/inventory", permission: "resources.view" },
+      { key: "inventory-allocation", label: "Inventory Allocation", icon: "⇄", path: "/regional/inventory-allocation", permission: "resources.view" },
+      { key: "inventory-transactions", label: "Inventory Transactions", icon: "📋", path: "/regional/inventory-transactions", permission: "resources.view" },
+      { key: "equipment", label: "Equipment Management", icon: "🔬", path: "/regional/equipment", permission: "resources.view" }
+    ]
+  },
+  {
+    key: "field-ops",
+    label: "FIELD OPERATIONS",
+    type: "dropdown",
+    icon: "➜",
+    items: [
+      { key: "schedules", label: "School Visit Scheduling", icon: "➜", path: "/regional/schedules", permission: "operations.view" },
+      { key: "visits", label: "Visit Monitoring", icon: "◎", path: "/regional/visits", permission: "operations.view" },
+      { key: "field-reports", label: "Field Reports", icon: "📝", path: "/regional/field-reports", permission: "operations.view" }
+    ]
+  },
+  {
+    key: "monitoring",
+    label: "MONITORING",
+    type: "dropdown",
+    icon: "▥",
+    items: [
+      { key: "reports", label: "Reports & Analytics", icon: "▥", path: "/regional/reports", permission: "analytics.view" },
+      { key: "notifications", label: "Notifications", icon: "🔔", path: "/regional/notifications", permission: "dashboard.view" }
+    ]
+  },
+  {
+    key: "account",
+    label: "ACCOUNT",
+    type: "heading",
+    items: [
+      { key: "profile", label: "My Profile", icon: "👤", path: "/regional/profile", permission: "dashboard.view" },
+      { key: "settings", label: "Settings", icon: "⚙", path: "/regional/settings", permission: "dashboard.view" }
+    ]
+  }
 ];
+
+export const REGIONAL_NAVIGATION: NavItem[] = REGIONAL_NAV_SECTIONS.flatMap((section) =>
+  section.items.map((item) => ({
+    key: item.key,
+    label: item.label,
+    icon: item.icon,
+    path: item.path,
+    permission: item.permission,
+    children: []
+  }))
+);
 
 export const FIELD_NAVIGATION: NavItem[] = [
   { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/field/dashboard", permission: "dashboard.view", children: [] },
-  { key: "assignments", label: "My Schedule", icon: "◎", path: "/field/assignments", permission: "field.schedule.view", children: ["Today's Visits", "Upcoming Visits"] },
-  { key: "visits", label: "School Visits", icon: "⌁", path: "/field/visits", permission: "field.visit.view", children: ["Assigned Schools", "Arrival / Departure", "History"] },
-  { key: "experiments", label: "Science Sessions", icon: "◇", path: "/field/experiments", permission: "field.session.view", children: ["Assigned Sessions", "Experiment Details"] },
-  { key: "attendance", label: "Student Attendance", icon: "◉", path: "/field/attendance", permission: "field.session.view", children: ["Mark Attendance", "Records"] },
-  { key: "equipment", label: "Lab & Equipment", icon: "▣", path: "/field/equipment", permission: "field.inventory.view", children: ["Lab Details", "Equipment Checklist", "Consumables Used"] },
-  { key: "inspections", label: "Vehicle & Readiness", icon: "➜", path: "/field/inspections", permission: "field.safety.record", children: ["Readiness Checklist", "GPS Telemetry"] },
-  { key: "incidents", label: "Issues & Support", icon: "!", path: "/field/incidents", permission: "field.issue.report", children: ["Report Issue", "Support Requests"] },
-  { key: "history", label: "Records & History", icon: "▥", path: "/field/history", permission: "field.records.view", children: ["Completed Sessions", "Submitted Reports"] }
+  { key: "schedule", label: "My Schedule", icon: "📅", path: "/field/schedule", permission: "field.schedule.view", children: [] },
+  { key: "visits", label: "School Visits", icon: "🏫", path: "/field/visits", permission: "field.visit.view", children: [] },
+  { key: "inventory", label: "Bus Inventory", icon: "🚌", path: "/field/inventory", permission: "field.inventory.view", children: [] },
+  { key: "reports", label: "Visit Reports", icon: "📝", path: "/field/reports", permission: "field.session.view", children: [] },
+  { key: "issues", label: "Report an Issue", icon: "⚠️", path: "/field/issues", permission: "field.issue.report", children: [] },
+  { key: "notifications", label: "Notifications", icon: "🔔", path: "/field/notifications", permission: "dashboard.view", children: [] },
+  { key: "profile", label: "My Profile", icon: "👤", path: "/field/profile", permission: "dashboard.view", children: [] }
 ];

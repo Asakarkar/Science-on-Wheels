@@ -67,6 +67,12 @@ export function formatPrismaError(error: any): string {
     if (constraint.includes("InventoryTransaction_consumableId_fkey")) {
       return "Cannot delete this Consumable because inventory transactions reference it.";
     }
+    if (constraint.includes("EventsOnCommunicator_userId_fkey")) {
+      return "Cannot delete this user because they are assigned to visit events as a communicator. Please remove or reassign the event assignments first.";
+    }
+    if (constraint.includes("EventsOnCommunicator_eventId_fkey")) {
+      return "Cannot delete this event because communicators are assigned to it.";
+    }
     const match = constraint.match(/`?([A-Za-z0-9]+)_([A-Za-z0-9]+)_fkey`?/);
     if (match) {
       const [, table, field] = match;

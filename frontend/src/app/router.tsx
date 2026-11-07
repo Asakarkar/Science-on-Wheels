@@ -33,22 +33,26 @@ import {
   RegionalSchedulesPage,
   RegionalRoutesPage,
   RegionalInventoryPage,
+  RegionalAllocationPage,
   RegionalMaintenancePage,
   RegionalDocumentsPage,
-  RegionalReportsPage
+  RegionalReportsPage,
+  RegionalFieldReportsPage,
+  RegionalNotificationsPage,
+  RegionalProfilePage,
+  RegionalSettingsPage
 } from "../portals/regional";
 
 // Field Operations Portal Pages
 import {
   FieldDashboardPage,
-  FieldAssignmentsPage,
+  FieldSchedulePage,
   FieldVisitsPage,
-  FieldExperimentsPage,
-  FieldAttendancePage,
-  FieldEquipmentPage,
-  FieldInspectionsPage,
-  FieldIncidentsPage,
-  FieldHistoryPage
+  FieldInventoryPage,
+  FieldReportsPage,
+  FieldIssuesPage,
+  FieldNotificationsPage,
+  FieldProfilePage,
 } from "../portals/field";
 
 import { useAuth } from "./providers/AuthProvider";
@@ -141,11 +145,19 @@ export const router = createBrowserRouter([
               { path: "staff", element: <RegionalStaffPage /> },
               { path: "mobile-labs", element: <RegionalMobileLabsPage /> },
               { path: "schedules", element: <RegionalSchedulesPage /> },
+              { path: "visits", element: <RegionalSchedulesPage /> },
               { path: "routes", element: <RegionalRoutesPage /> },
               { path: "inventory", element: <RegionalInventoryPage /> },
+              { path: "inventory-allocation", element: <RegionalAllocationPage /> },
+              { path: "inventory-transactions", element: <RegionalAllocationPage /> },
+              { path: "equipment", element: <RegionalInventoryPage /> },
+              { path: "field-reports", element: <RegionalFieldReportsPage /> },
               { path: "maintenance", element: <RegionalMaintenancePage /> },
               { path: "documents", element: <RegionalDocumentsPage /> },
-              { path: "reports", element: <RegionalReportsPage /> }
+              { path: "reports", element: <RegionalReportsPage /> },
+              { path: "notifications", element: <RegionalNotificationsPage /> },
+              { path: "profile", element: <RegionalProfilePage /> },
+              { path: "settings", element: <RegionalSettingsPage /> }
             ]
           }
         ]
@@ -166,19 +178,25 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="/field/dashboard" replace /> },
               { path: "dashboard", element: <FieldDashboardPage /> },
-              { path: "assignments", element: <FieldAssignmentsPage /> },
-              { path: "my-assignments", element: <FieldAssignmentsPage /> },
+              { path: "schedule", element: <FieldSchedulePage /> },
+              { path: "assignments", element: <FieldSchedulePage /> },
+              { path: "my-assignments", element: <FieldSchedulePage /> },
               { path: "visits", element: <FieldVisitsPage /> },
               { path: "school-visits", element: <FieldVisitsPage /> },
-              { path: "experiments", element: <FieldExperimentsPage /> },
-              { path: "attendance", element: <FieldAttendancePage /> },
-              { path: "equipment", element: <FieldEquipmentPage /> },
-              { path: "inspections", element: <FieldInspectionsPage /> },
-              { path: "vehicle-inspection", element: <FieldInspectionsPage /> },
-              { path: "incidents", element: <FieldIncidentsPage /> },
-              { path: "incident-reports", element: <FieldIncidentsPage /> },
-              { path: "history", element: <FieldHistoryPage /> },
-              { path: "visit-history", element: <FieldHistoryPage /> }
+              { path: "inventory", element: <FieldInventoryPage /> },
+              { path: "equipment", element: <FieldInventoryPage /> },
+              { path: "inspections", element: <FieldInventoryPage /> },
+              { path: "vehicle-inspection", element: <FieldInventoryPage /> },
+              { path: "reports", element: <FieldReportsPage /> },
+              { path: "issues", element: <FieldIssuesPage /> },
+              { path: "incidents", element: <FieldIssuesPage /> },
+              { path: "incident-reports", element: <FieldIssuesPage /> },
+              { path: "notifications", element: <FieldNotificationsPage /> },
+              { path: "profile", element: <FieldProfilePage /> },
+              { path: "history", element: <FieldSchedulePage /> },
+              { path: "visit-history", element: <FieldSchedulePage /> },
+              { path: "experiments", element: <FieldVisitsPage /> },
+              { path: "attendance", element: <FieldVisitsPage /> }
             ]
           }
         ]

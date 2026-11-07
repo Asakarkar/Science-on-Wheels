@@ -31,6 +31,7 @@ export function DataTable<T extends Record<string, any>>({
   onRefresh,
   onExportCsv,
   actions,
+  onRowClick,
   emptyMessage = "No records found.",
 }: DataTableProps<T>) {
   const columns = useMemo(() => {
@@ -45,22 +46,22 @@ export function DataTable<T extends Record<string, any>>({
 
   return (
     <section className="surface">
-      {(title || actions || onExportCsv) && (
+      {(title || actions || onExportCsv || onRefresh) && (
         <div className="module-head">
           <div>
             <div className="section-kicker">DATA VIEW</div>
             {title && <h2>{title}</h2>}
             {description && <p>{description}</p>}
           </div>
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="flex items-center gap-2">
             {actions}
             {onRefresh && (
-              <button className="ghost" onClick={onRefresh} title="Reload records">
+              <button className="ghost font-mono text-xs" onClick={onRefresh} title="Reload records">
                 ↻ Refresh
               </button>
             )}
             {onExportCsv && (
-              <button className="ghost" onClick={onExportCsv}>
+              <button className="ghost font-mono text-xs" onClick={onExportCsv}>
                 Export CSV
               </button>
             )}
@@ -80,14 +81,21 @@ export function DataTable<T extends Record<string, any>>({
               }
             }}
           />
-          {onSearchSubmit && <button onClick={onSearchSubmit}>Search</button>}
+          {onSearchSubmit && (
+            <button className="primary font-mono text-xs" onClick={onSearchSubmit}>
+              Search
+            </button>
+          )}
         </div>
       )}
 
-      {error && <div className="error">{error}</div>}
+      {error && <div className="error-banner mb-4">{error}</div>}
 
       {loading ? (
-        <div className="loading-state">Loading data…</div>
+        <div className="loading-state">
+          <div className="loader-ring" />
+          Loading data…
+        </div>
       ) : (
         <div className="table-wrap">
           <table>
@@ -100,7 +108,11 @@ export function DataTable<T extends Record<string, any>>({
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={row.id || i}>
+                <tr
+                  key={row.id || i}
+                  onClick={() => onRowClick && onRowClick(row)}
+                  className={onRowClick ? "cursor-pointer hover:bg-slate-50 transition-colors" : ""}
+                >
                   {columns.map((c) => (
                     <td key={c}>{formatValue(row[c])}</td>
                   ))}
@@ -109,7 +121,9 @@ export function DataTable<T extends Record<string, any>>({
               {!rows.length && (
                 <tr>
                   <td colSpan={Math.max(columns.length, 1)}>
-                    <div className="empty-state">{emptyMessage}</div>
+                    <div className="empty-state py-8 text-center text-charcoal-muted font-mono text-xs">
+                      {emptyMessage}
+                    </div>
                   </td>
                 </tr>
               )}

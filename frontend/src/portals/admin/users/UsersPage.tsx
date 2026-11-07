@@ -183,7 +183,7 @@ export function UsersPage() {
     if (!confirmDelete) return;
 
     try {
-      await apiClient(`/super-admin/resource/users/${user.id}`, { method: "DELETE" });
+      await apiClient(`/super-admin/resource/users/${user.id}?cascade=true`, { method: "DELETE" });
       await loadData();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to delete user");
@@ -248,55 +248,29 @@ export function UsersPage() {
       </div>
 
       {/* Metrics Cards */}
-      <div
-        className="metrics-row"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
-          gap: "1rem",
-          marginBottom: "1.5rem"
-        }}
-      >
-        <div className="surface metric-card" style={{ padding: "1rem", border: "1px solid var(--stone)", borderRadius: "8px" }}>
-          <div style={{ fontSize: "0.75rem", fontFamily: "var(--mono)", color: "var(--charcoal-subtle)", textTransform: "uppercase" }}>
-            Total Accounts
-          </div>
-          <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--charcoal)" }}>{metrics.total}</div>
-          <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>All registered users</div>
+      <div className="metric-grid">
+        <div className="metric-card">
+          <div className="metric-label">Total Accounts</div>
+          <strong>{metrics.total}</strong>
+          <small>All registered users</small>
         </div>
 
-        <div className="surface metric-card" style={{ padding: "1rem", border: "1px solid var(--stone)", borderRadius: "8px" }}>
-          <div style={{ fontSize: "0.75rem", fontFamily: "var(--mono)", color: "#BE755F", textTransform: "uppercase" }}>
-            Administrators
-          </div>
-          <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#BE755F" }}>{metrics.admins}</div>
-          <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>Complete system access</div>
+        <div className="metric-card">
+          <div className="metric-label">Administrators</div>
+          <strong>{metrics.admins}</strong>
+          <small>Complete system access</small>
         </div>
 
-        <div className="surface metric-card" style={{ padding: "1rem", border: "1px solid var(--stone)", borderRadius: "8px" }}>
-          <div style={{ fontSize: "0.75rem", fontFamily: "var(--mono)", color: "#2B523D", textTransform: "uppercase" }}>
-            Regional Admins
-          </div>
-          <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#2B523D" }}>{metrics.regional}</div>
-          <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>Regional operations</div>
+        <div className="metric-card">
+          <div className="metric-label">Regional Admins</div>
+          <strong>{metrics.regional}</strong>
+          <small>Regional operations</small>
         </div>
 
-        <div className="surface metric-card" style={{ padding: "1rem", border: "1px solid var(--stone)", borderRadius: "8px" }}>
-          <div style={{ fontSize: "0.75rem", fontFamily: "var(--mono)", color: "#2B6CB0", textTransform: "uppercase" }}>
-            Field Staff
-          </div>
-          <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#2B6CB0" }}>{metrics.field}</div>
-          <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>Bus & laboratory staff</div>
-        </div>
-
-        <div className="surface metric-card" style={{ padding: "1rem", border: "1px solid var(--stone)", borderRadius: "8px" }}>
-          <div style={{ fontSize: "0.75rem", fontFamily: "var(--mono)", color: "#16A34A", textTransform: "uppercase" }}>
-            Active Accounts
-          </div>
-          <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "#16A34A" }}>{metrics.active}</div>
-          <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>
-            {metrics.deactivated} deactivated / locked
-          </div>
+        <div className="metric-card">
+          <div className="metric-label">Field Staff</div>
+          <strong>{metrics.field}</strong>
+          <small>Bus & laboratory staff</small>
         </div>
       </div>
 

@@ -42,14 +42,14 @@ export function AdminLayout() {
 
   return (
     <div className="admin-shell bg-grid-warm">
-      {/* Top System Status Bar matching login aesthetic */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
+      {/* Top System Status Bar matching unified aesthetic */}
+      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
         <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 font-semibold text-charcoal">
               <span
                 className="inline-block h-2 w-2 rounded-xs"
-                style={{ backgroundColor: "#BE755F" }}
+                style={{ backgroundColor: "#176B50" }}
               />
               <span className="tracking-tight">CENTRAL COMMAND</span>
             </div>
@@ -75,7 +75,7 @@ export function AdminLayout() {
         {/* Sidebar */}
         <aside className={`admin-sidebar ${mobileNav ? "open" : ""}`}>
           <div className="sidebar-brand">
-            <div className="brand-mark">
+            <div className="brand-mark" style={{ backgroundColor: "#176B50" }}>
               <BrandLogo />
             </div>
             <div>
@@ -87,7 +87,7 @@ export function AdminLayout() {
           </div>
 
           <div className="command-role">
-            <span className="font-mono text-[9px] font-bold tracking-widest text-charcoal">
+            <span className="font-mono text-[9px] font-bold tracking-widest text-[#176B50]">
               SUPER ADMIN
             </span>
             <b className="font-mono text-[8px] text-charcoal-subtle uppercase">
@@ -145,6 +145,7 @@ export function AdminLayout() {
                         [section.key]: !isExpanded,
                       }))
                     }
+                    aria-expanded={isExpanded}
                   >
                     <i>{section.icon}</i>
                     <span>{section.label}</span>
@@ -178,7 +179,7 @@ export function AdminLayout() {
 
           <div className="sidebar-bottom">
             <div className="sync-indicator font-mono text-[10px]">
-              <span /> Authenticated workspace
+              <span style={{ backgroundColor: "#176B50" }} /> Authenticated workspace
             </div>
             <button className="logout font-mono text-xs" onClick={() => void logout()}>
               ↪ Sign out
@@ -189,7 +190,11 @@ export function AdminLayout() {
         {/* Main Content Area */}
         <main className="admin-main">
           <header className="admin-topbar">
-            <button className="mobile-menu" onClick={() => setMobileNav(!mobileNav)}>
+            <button
+              className="mobile-menu"
+              onClick={() => setMobileNav(!mobileNav)}
+              aria-label="Toggle navigation menu"
+            >
               ☰
             </button>
             <div className="breadcrumbs font-mono text-xs">
@@ -205,13 +210,16 @@ export function AdminLayout() {
             </div>
 
             <div className="top-actions">
-              <button className="top-search font-mono text-xs">
+              <button
+                className="top-search font-mono text-xs"
+                onClick={() => navigate("/admin/inventory")}
+              >
                 ⌕ <span>Search modules...</span>
                 <kbd className="font-mono text-[9px]">⌘ K</kbd>
               </button>
 
               <div className="profile">
-                <div className="avatar font-mono">
+                <div className="avatar font-mono" style={{ backgroundColor: "#176B50" }}>
                   {(user?.name || "SA").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
