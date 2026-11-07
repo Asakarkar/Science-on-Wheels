@@ -2,7 +2,7 @@ import { Navigate, createBrowserRouter } from "react-router-dom";
 import { AuthGuard } from "../guards/AuthGuard";
 import { RoleGuard } from "../guards/RoleGuard";
 import { AuthLayout, AdminLayout, RegionalLayout, FieldLayout } from "../layouts";
-import { LoginPage } from "../features/auth/components/LoginPage";
+import { LoginPage } from "../portals/auth";
 import { ForbiddenPage, NotFoundPage } from "../shared/components/ErrorPages";
 
 // Admin Portal Pages

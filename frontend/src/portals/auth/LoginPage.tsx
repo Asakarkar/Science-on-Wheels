@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../../app/providers/AuthProvider";
+import { useAuth } from "../../app/providers/AuthProvider";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -220,3 +220,4 @@ export function LoginPage() {
     </div>
   );
 }
+
