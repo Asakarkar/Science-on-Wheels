@@ -1,4 +1,5 @@
-const { prisma } = require("./dist/src/lib/prisma");
+const path = require("path");
+const { prisma } = require(path.resolve(__dirname, "../dist/src/lib/prisma"));
 
 async function main() {
   console.log("=== SCI-MOVE FIELD STAFF INTEGRATION TEST SUITE ===");

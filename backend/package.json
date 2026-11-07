@@ -2,14 +2,18 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "test:regional": "node --env-file=.env tests/test-regional-admin.js",
+    "test:field": "node --env-file=.env tests/test-field-staff.js",
+    "test:rbac": "node --env-file=.env tests/test-rbac.js",
+    "test:security": "node --env-file=.env tests/test-security.js",
+    "test:concurrent": "node --env-file=.env tests/test-multiuser-concurrent.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
-    "@supabase/supabase-js": "^2.118.0",
     "argon2": "latest",
     "cookie-parser": "latest",
     "cors": "latest",

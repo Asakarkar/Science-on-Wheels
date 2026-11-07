@@ -5,9 +5,10 @@
  * token rotation, and immunity to race conditions across concurrent sessions.
  */
 
-const { app } = require("./dist/src/app");
+const path = require("path");
+const { app } = require(path.resolve(__dirname, "../dist/src/app"));
 const { PrismaClient } = require("@prisma/client");
-const { signJwt } = require("./dist/src/lib/jwt");
+const { signJwt } = require(path.resolve(__dirname, "../dist/src/lib/jwt"));
 const http = require("http");
 
 const prisma = new PrismaClient();

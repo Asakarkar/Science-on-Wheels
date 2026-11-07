@@ -1,5 +1,6 @@
 const http = require("http");
-const { app } = require("./dist/src/app");
+const path = require("path");
+const { app } = require(path.resolve(__dirname, "../dist/src/app"));
 
 let activePort = 5000;
 let serverInstance = null;
