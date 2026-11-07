@@ -1,134 +1,134 @@
-# Science on Wheels — Unified Three-Role Platform
+# SciMove – Intelligent Mobile STEM Education and Resource Management Platform
 
-This package is the merged Science on Wheels application.
+SciMove is an enterprise-grade platform governing the administration, logistics, and field execution of mobile science laboratory buses for STEM education across distributed school networks.
 
-## Architecture
+---
 
-One application:
-- one React/Vite frontend
-- one Express/TypeScript backend
-- one PostgreSQL (Supabase) / Prisma database
-- one database-backed HttpOnly session
-- one login page
-- three role-specific portals
+## 1. System Architecture
 
-Login routing:
-- `SUPER_ADMIN` → `/super-admin`
-- `REGIONAL_ADMIN` → `/regional-admin`
-- `SCIENCE_COMMUNICATOR` → `/instructor`
+SciMove operates as a clean, modular monolith with explicit role boundaries:
 
-## RBAC
-
-### Super Admin
-Organization-wide control:
-- organization/geography
-- Regional Administrators and Field Staff
-- roles and permissions
-- mobile laboratories
-- schools
-- curriculum/experiments
-- resources
-- operations
-- monitoring
-- analytics/reports
-- security/audit
-
-### Regional Admin
-Assigned-region operational scope:
-- region/district/block/school visibility
-- field staff assignments
-- assigned labs
-- schools and verification
-- approved curriculum selection
-- inventory/resource operations
-- visits, schedules, routes, assignments and sessions
-- monitoring, analytics and records
-
-The backend derives region scope from the authenticated user session. A frontend-supplied `regionId` is not trusted.
-
-### Science Communicator / Instructor
-Field execution:
-- assigned visits and schools
-- assigned mobile laboratory
-- route/travel visibility
-- arrival and session execution
-- attendance recording
-- consumable consumption
-- field issues
-- session/visit records
-
-## Security
-
-- Argon2id password hashing
-- database-backed sessions
-- HttpOnly session cookie
-- server-side role enforcement
-- server-side permission enforcement
-- regional data isolation
-- audit logging
-- no JWT dependency
-- no plaintext passwords
-
-## Run
-
-### Backend
-
-```bash
-cd backend
-npm install
-npx prisma generate
-npm run seed
-npm run dev
+```
+scimove/
+│
+├── backend/                  # Node.js, Express & TypeScript API Service
+│   ├── src/
+│   │   ├── config/           # Environment validation (Zod)
+│   │   ├── lib/              # Core utilities (Prisma, Argon2id, JWT, Audit, RateLimiter)
+│   │   ├── middleware/       # Token extraction & RBAC role/permission guards
+│   │   ├── routes/           # Role-based API route modules
+│   │   │   ├── auth.ts       # Authentication, login rate limiting, session refresh
+│   │   │   ├── me.ts         # Identity & permissions dictionary endpoint
+│   │   │   ├── superAdmin/   # Organization, geography, users, roles & dynamic resource engine
+│   │   │   ├── regionalAdmin.ts # Fleet, schools, multi-staff bus rosters, visits & inventory allocations
+│   │   │   └── field.ts      # 4-step bus inventory reconciliation, session execution & reports
+│   │   ├── services/         # Domain business services (Bus staff rosters, etc.)
+│   │   ├── app.ts            # Express application configuration & security headers
+│   │   └── server.ts         # HTTP server entrypoint
+│   ├── prisma/               # Schema, migrations & CSV seeding pipeline
+│   └── tests/                # Automated test suites (Regional Admin, Field Staff, RBAC, Security)
+│
+├── frontend/                 # React 19, Vite, TypeScript & React Router 7 SPA
+│   ├── src/
+│   │   ├── app/              # Router, AuthProvider, and application shell
+│   │   ├── layouts/          # Portal layouts with mobile drawers (Admin, Regional, Field, Auth)
+│   │   ├── portals/          # Role-specific operational interfaces
+│   │   │   ├── admin/        # Super Admin Command Center (12 operational modules)
+│   │   │   ├── regional/     # Regional Operations Command (11 operational modules)
+│   │   │   └── field/        # Field Operations Hub (8 standardized mobile-first modules)
+│   │   ├── services/         # Centralized API client (`apiClient`) with Bearer token isolation
+│   │   └── shared/           # Design system tokens, SVGs, error boundaries, navigation constants
+│
+└── package.json              # Monorepo workspace configuration & development scripts
 ```
 
-### Frontend
+---
+
+## 2. Role-Based Access Control (RBAC) & Portal Routing
+
+| Role | Primary Portal Route | Operational Scope |
+|---|---|---|
+| `SUPER_ADMIN` | `/admin/dashboard` | Organization-wide administration, global master catalog, geography, user & role lifecycle, global audit logs, system configuration. |
+| `REGIONAL_ADMIN` | `/regional/dashboard` | Scoped regional fleet administration, school onboarding, multi-staff bus rosters, visit scheduling & conflicts, inventory custody & allocations, report review. |
+| `SCIENCE_COMMUNICATOR` | `/field/dashboard` | Mobile laboratory execution, 4-step bus inventory reconciliation, session attendance logging, visit report drafting, operational incident escalation. |
+
+*Note: The backend derives regional and operational scope strictly from the authenticated database session identity. Client-supplied IDs are never trusted.*
+
+---
+
+## 3. Four-Step Continuous Bus Inventory Reconciliation
+
+Field staff execute continuous stock reconciliation directly on mobile laboratory buses:
+1. **Step A – Opening Stock Verification:** Physical count before departing for schools. Any variance requires mandatory justification and triggers an automatic alert for the Regional Administrator.
+2. **Step B – Material Consumption Logging:** Atomic stock decrements with non-negative validation and immutable ledger audit logging.
+3. **Step C – Equipment Inspection:** Reusable assets checked before and after visits. Defective or missing items escalate directly to Regional Admin.
+4. **Step D – Closing Stock Reconciliation:** Post-visit reconciliation ($\text{Opening} - \text{Consumed} = \text{Closing}$) detecting unrecorded shrinkage.
+
+---
+
+## 4. Getting Started
+
+### Prerequisites
+- Node.js 20+
+- PostgreSQL database (Supabase pooler supported)
+
+### Environment Configuration
+1. Backend: Copy `backend/.env.example` to `backend/.env` and configure:
+   - `DATABASE_URL` (Port 6543 pooler with `pgbouncer=true`)
+   - `DIRECT_URL` (Port 5432 direct connection for Prisma migrations)
+   - `SESSION_SECRET` (At least 32 random characters)
+   - `FRONTEND_URL` (`http://localhost:5173`)
+   - `BOOTSTRAP_ADMIN_EMAIL` & `BOOTSTRAP_ADMIN_PASSWORD`
+2. Frontend: Copy `frontend/.env.example` to `frontend/.env` and configure:
+   - `VITE_API_BASE_URL` (`http://localhost:5000/api`)
+
+### Running the Application
 
 ```bash
+# Backend setup & development
+cd backend
+npm install
+npm run build
+npm run dev
+
+# Frontend setup & development (in a separate terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-Frontend: `http://localhost:5173`
-Backend: `http://localhost:5000`
+Frontend runs at `http://localhost:5173`.  
+Backend runs at `http://localhost:5000`.
 
-## Environment
+---
 
-Copy `backend/.env.example` to `backend/.env`.
+## 5. Automated Test Suites
 
-Required:
-- `DATABASE_URL` (Supabase connection pooler URL, port 6543)
-- `DIRECT_URL` (Supabase direct database URL, port 5432, for Prisma migrations)
-- `SESSION_SECRET` (32+ characters and separate from the database password)
-- `FRONTEND_URL`
-- bootstrap Super Admin credentials
-
-Optional integrations can remain unset during local development.
-
-## Important
-
-Do not run `prisma migrate reset` against a real database.
-
-After changing `schema.prisma`:
+SciMove includes specialized functional integration and security test suites in `backend/tests/`:
 
 ```bash
-npx prisma generate
-npx prisma migrate dev --name <descriptive_name>
+cd backend
+
+# Run Regional Admin 15-assertion functional test suite
+npm run test:regional
+
+# Run Field Staff 8-endpoint operational suite
+npm run test:field
+
+# Run Multi-User RBAC & Permission boundary audit
+npm run test:rbac
+
+# Run Multi-User session isolation & concurrency suite
+npm run test:concurrent
 ```
 
-The Super Admin creates Regional Admin and Science Communicator accounts through the existing People & Access user workflow. The same login page then routes each account to its role-specific dashboard.
+---
 
-## Frontend visual direction
+## 6. Security & Production Hardening
 
-The dashboard UI is implemented in the React pages and `frontend/src/styles.css`, using the supplied Fleet Interface HTML files as visual references only. The styling follows the reference's warm linen grid, industrial charcoal navigation, terracotta action colour, sage status accents, compact technical labels, restrained borders, and responsive field-operations layout. The mockup HTML and its sample values are not used as runtime pages.
-
-The role portals continue to use the existing authenticated API and database-backed records. No demo login or mock account bypass has been added.
-
-## Environment files
-
-- `backend/.env.example` — backend configuration template.
-- `frontend/.env.example` — frontend configuration template.
-- Copy each template to `.env` in its respective folder and replace placeholders locally.
-- Never commit `.env` files or include them in project ZIPs. Frontend `VITE_*` variables are browser-visible and must not contain private secrets.
-
-The Geoapify and Traccar entries are forward-looking configuration placeholders for planned route calculation and dedicated-device tracking. Adding these variables does not itself integrate those providers. The current backend already has a trip GPS-position endpoint for updates submitted through the SOW field workflow, but the Geoapify road-routing and Traccar ingestion integrations are not included in this visual refresh. The fleet network panel is explicitly labelled as a schematic, not a geographic live map.
+- **Password Hashing:** Native Argon2id cryptographic hashing (`argon2`).
+- **Session Isolation:** Independent Bearer tokens with client-tab isolation.
+- **Brute-Force Protection:** IP-based sliding window rate limiter on `/api/auth/login`.
+- **Security Headers:** Strict `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
+- **Zero Insecure Dependencies:** Unused external Supabase SDKs removed in favor of direct Prisma PostgreSQL connectivity.
+- **Database Indexing:** High-cardinality indexes on `Event`, `Equipment`, `Consumable`, `InventoryTransaction`, and `AuditLog`.
