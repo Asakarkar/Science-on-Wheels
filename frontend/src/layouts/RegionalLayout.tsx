@@ -11,10 +11,13 @@ export function RegionalLayout() {
   const navigate = useNavigate();
   const [mobileNav, setMobileNav] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    "regional-management": true,
+    overview: true,
+    "fleet-regional": true,
     "inventory-ops": true,
+    "school-logistics": true,
     "field-ops": true,
-    monitoring: true,
+    personnel: true,
+    account: true,
   });
 
   const currentPath = location.pathname;
@@ -51,14 +54,19 @@ export function RegionalLayout() {
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">VIBHA · Regional Operations Command</span>
+          <span className="status-bar-label">VIBHA · Science on Wheels ERP</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Regional Administrator Hub</span>
+          <span>Regional Depot & Operations Node</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", opacity: 0.85 }}>Territory Hub Scoped</span>
         </div>
         <div className="status-bar-right">
-          <span>Science on Wheels MIS</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
+            <span>REGIONAL DEPOT ONLINE</span>
+          </span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Assigned Territory Scoped</span>
+          <span>Bus Fleet Telemetry Synced</span>
         </div>
       </div>
 
@@ -76,18 +84,18 @@ export function RegionalLayout() {
           {/* Brand */}
           <div className="sidebar-brand">
             <div className="brand-mark regional-mark">
-              <BrandLogo size={32} />
+              <BrandLogo size={34} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">VIBHA</div>
-              <div className="sidebar-brand-role">Regional Hub</div>
+              <div className="sidebar-brand-role">Science on Wheels ERP</div>
             </div>
           </div>
 
           {/* Role badge */}
           <div className="command-role regional-role">
-            <span>REGIONAL ADMIN</span>
-            <b>Plan · Coordinate · Dispatch</b>
+            <span>ERP REGIONAL CONTROLLER</span>
+            <b>Depot Supply · Fleet Dispatch · Scheduling</b>
           </div>
 
           {/* Nav */}

@@ -102,7 +102,7 @@ export function LoginPage() {
         </div>
         <div>
           <strong className="auth-form-logo-title-mobile">VIBHA · Science on Wheels</strong>
-          <span className="auth-form-logo-sub-mobile">Operations Management Platform</span>
+          <span className="auth-form-logo-sub-mobile">Enterprise Resource Planning (ERP)</span>
         </div>
       </div>
 
@@ -236,7 +236,7 @@ export function LoginPage() {
 
       {/* Footer info */}
       <div className="auth-footer">
-        VIBHA · Science on Wheels · Autonomous STEM Logistics Management
+        VIBHA · Science on Wheels Enterprise Resource Planning (ERP) Platform
       </div>
     </div>
   );

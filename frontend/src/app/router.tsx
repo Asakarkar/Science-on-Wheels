@@ -18,10 +18,13 @@ import {
   InventoryPage,
   InventoryAllocationPage,
   OperationsPage,
+  FinanceProcurementPage,
   AnalyticsPage,
   ReportsPage,
   SecurityAuditPage,
-  SettingsPage
+  SettingsPage,
+  ResourceView,
+  configs
 } from "../portals/admin";
 
 // Regional Portal Pages
@@ -111,11 +114,17 @@ export const router = createBrowserRouter([
               { path: "roles", element: <RolesPermissionsPage /> },
               { path: "roles-permissions", element: <RolesPermissionsPage /> },
               { path: "mobile-labs", element: <MobileLabsPage /> },
+              { path: "equipment", element: <ResourceView config={configs.equipment} /> },
+              { path: "maintenance", element: <ResourceView config={configs.maintenance} /> },
               { path: "schools", element: <SchoolsPage /> },
+              { path: "registrations", element: <ResourceView config={configs.registrations} /> },
               { path: "curriculum", element: <CurriculumPage /> },
               { path: "inventory", element: <InventoryPage /> },
               { path: "inventory-allocation", element: <InventoryAllocationPage /> },
+              { path: "consumables", element: <ResourceView config={configs.consumables} /> },
+              { path: "inventory-transactions", element: <ResourceView config={configs.inventoryTransactions} /> },
               { path: "operations", element: <OperationsPage /> },
+              { path: "finance", element: <FinanceProcurementPage /> },
               { path: "analytics", element: <AnalyticsPage /> },
               { path: "reports", element: <ReportsPage /> },
               { path: "audit-logs", element: <SecurityAuditPage /> },

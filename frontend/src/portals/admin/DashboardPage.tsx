@@ -65,21 +65,23 @@ export function DashboardPage() {
     <>
       <section className="command-hero">
         <div>
-          <div className="eyebrow">ORGANIZATION COMMAND CENTER</div>
-          <h2>Science in motion, under control.</h2>
+          <div className="eyebrow">VIBHA · ENTERPRISE RESOURCE PLANNING (ERP)</div>
+          <h2>National STEM Fleet & Resource Command</h2>
           <p>
-            Configure the network, control access, monitor mobile laboratories and turn field
-            activity into organization-wide insight.
+            Unified enterprise coordination connecting multi-regional supply chains, mobile laboratory capital assets, institutional school networks, and field workforce dispatch across India.
           </p>
           <div className="hero-actions">
             <button
               className="primary"
-              onClick={() => navigate("/admin/users?sub=Regional%20Administrators")}
+              onClick={() => navigate("/admin/inventory-allocation")}
             >
-              Create administrator
+              Dispatch Allocations
             </button>
             <button className="ghost" onClick={() => navigate("/admin/mobile-labs")}>
-              View laboratories
+              Fleet Telemetry
+            </button>
+            <button className="ghost" onClick={() => navigate("/admin/finance")}>
+              ERP Financials
             </button>
           </div>
         </div>
@@ -90,7 +92,7 @@ export function DashboardPage() {
           <div className="hero-node node-b" />
           <div className="hero-node node-c" />
           <div className="hero-core">
-            <BrandLogo />
+            <BrandLogo size={42} />
           </div>
         </div>
       </section>
@@ -214,22 +216,25 @@ export function DashboardPage() {
         <article className="surface workflow">
           <div className="surface-head">
             <div>
-              <div className="section-kicker">CONTROL LOOP</div>
-              <h3>Configure → Control → Monitor → Analyse</h3>
+              <div className="section-kicker">ERP BUSINESS MODULE SUITE</div>
+              <h3>Integrated Enterprise Cross-Department Workflows</h3>
             </div>
           </div>
-          <div className="flow">
-            <button onClick={() => navigate("/admin/organization")}>01 Configure</button>
+          <div className="flow" style={{ flexWrap: "wrap", gap: "8px" }}>
+            <button onClick={() => navigate("/admin/mobile-labs")}>01 EAM Fleet</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/users")}>02 Control</button>
+            <button onClick={() => navigate("/admin/inventory")}>02 SCM Supply</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/mobile-labs")}>03 Monitor</button>
+            <button onClick={() => navigate("/admin/schools")}>03 SRM Schools</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/analytics")}>04 Analyse</button>
+            <button onClick={() => navigate("/admin/operations")}>04 Field Ops</button>
+            <span>→</span>
+            <button onClick={() => navigate("/admin/finance")}>05 Financials</button>
+            <span>→</span>
+            <button onClick={() => navigate("/admin/analytics")}>06 Intelligence</button>
           </div>
           <p>
-            Every operational record should travel through this loop so administrative decisions
-            remain connected to field reality.
+            Standard enterprise loop: resources allocated from central supply integrate into regional depots, power scheduled school visits, and sync financial audit logs across the organization.
           </p>
         </article>
       </section>

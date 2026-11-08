@@ -32,14 +32,19 @@ export function FieldLayout() {
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">VIBHA · Field Operations Console</span>
+          <span className="status-bar-label">VIBHA · Science on Wheels ERP</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Science Communicator Terminal</span>
+          <span>Field Staff Mobile Terminal</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", opacity: 0.85 }}>Live On-Site Mode</span>
         </div>
         <div className="status-bar-right">
-          <span>Science on Wheels MIS</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
+            <span>LAB TELEMETRY LINKED</span>
+          </span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Mobile Lab Linked</span>
+          <span>Offline Buffer Active</span>
         </div>
       </div>
 
@@ -57,18 +62,18 @@ export function FieldLayout() {
           {/* Brand */}
           <div className="sidebar-brand field-brand">
             <div className="brand-mark field-logo">
-              <BrandLogo size={32} />
+              <BrandLogo size={34} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">VIBHA</div>
-              <div className="sidebar-brand-role">Field Operations</div>
+              <div className="sidebar-brand-role">Science on Wheels ERP</div>
             </div>
           </div>
 
           {/* Role badge */}
           <div className="command-role field-role">
-            <span style={{ color: "var(--field-accent)" }}>SCIENCE COMMUNICATOR</span>
-            <b>Explore · Teach · Discover</b>
+            <span style={{ color: "var(--field-accent)" }}>FIELD SCIENCE COMMUNICATOR</span>
+            <b>Mobile Lab Execution & STEM Delivery</b>
           </div>
 
           {/* Navigation */}

@@ -136,16 +136,16 @@ export function RegionalDashboardPage() {
       {/* SECTION A: REGIONAL OVERVIEW HERO (Section 4.1.A) */}
       <div className="command-hero regional-hero">
         <div>
-          <div className="eyebrow">REGIONAL COMMAND CENTER</div>
+          <div className="eyebrow">VIBHA ERP · REGIONAL OPERATIONS HUB</div>
           <h2>{data.region?.name || "Operational Region"}</h2>
           <p>
-            Centralized operational management for STEM education across {k.districts || 0} districts and {k.blocks || 0} blocks.
+            Enterprise regional depot management and fleet logistics across {k.districts || 0} districts and {k.blocks || 0} blocks.
           </p>
           <div className="hero-meta">
             <span>Region: {data.region?.name}</span>
             <span>State: {data.region?.state || "State"}</span>
-            <span>Admin: {data.region?.adminName || "Regional Admin"}</span>
-            <span>Fleet: {k.totalBuses} Mobile Labs</span>
+            <span>Controller: {data.region?.adminName || "Regional Admin"}</span>
+            <span>Fleet Capital: {k.totalBuses} Mobile Labs</span>
           </div>
         </div>
         <div className="hero-visual">
@@ -155,7 +155,7 @@ export function RegionalDashboardPage() {
           <div className="hero-node node-b" />
           <div className="hero-node node-c" />
           <div className="hero-core">
-            <BrandLogo />
+            <BrandLogo size={42} />
           </div>
         </div>
       </div>

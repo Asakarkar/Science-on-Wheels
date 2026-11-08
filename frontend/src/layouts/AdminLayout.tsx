@@ -11,9 +11,14 @@ export function AdminLayout() {
   const navigate = useNavigate();
   const [mobileNav, setMobileNav] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    organization: true,
+    overview: true,
+    fleet: true,
     "inventory-ops": true,
-    monitoring: true,
+    "school-crm": true,
+    "field-academic": true,
+    finance: true,
+    hcm: true,
+    governance: true,
   });
 
   const currentPath = location.pathname;
@@ -46,14 +51,19 @@ export function AdminLayout() {
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">VIBHA · Central Command</span>
+          <span className="status-bar-label">VIBHA · Science on Wheels ERP</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Super Administrator Workspace</span>
+          <span>Central Enterprise Node (HQ)</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", opacity: 0.85 }}>FY 2026-27 · Period P08</span>
         </div>
         <div className="status-bar-right">
-          <span>Science on Wheels MIS</span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
+            <span>ALL ERP ENGINES NOMINAL</span>
+          </span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Live Hub Telemetry Active</span>
+          <span>National Telemetry Live</span>
         </div>
       </div>
 
@@ -71,18 +81,18 @@ export function AdminLayout() {
           {/* Brand */}
           <div className="sidebar-brand">
             <div className="brand-mark">
-              <BrandLogo size={32} />
+              <BrandLogo size={34} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">VIBHA</div>
-              <div className="sidebar-brand-role">Science on Wheels</div>
+              <div className="sidebar-brand-role">Science on Wheels ERP</div>
             </div>
           </div>
 
           {/* Role badge */}
           <div className="command-role">
-            <span>SUPER ADMIN</span>
-            <b>Control · Allocate · Inspect</b>
+            <span>ERP SUPER ADMIN</span>
+            <b>Enterprise Control & Strategy</b>
           </div>
 
           {/* Navigation */}

@@ -9,6 +9,7 @@ export * from "./CurriculumPage";
 export * from "./InventoryPage";
 export * from "./InventoryAllocationPage";
 export * from "./OperationsPage";
+export * from "./FinanceProcurementPage";
 export * from "./AnalyticsPage";
 export * from "./ReportsPage";
 export * from "./SecurityAuditPage";
