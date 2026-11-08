@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { BrandLogo } from "../../shared/components/BrandLogo";
@@ -11,20 +11,45 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // If already authenticated, redirect to the user's role-appropriate dashboard
+  useEffect(() => {
+    if (user) {
+      const target =
+        user.role === "SUPER_ADMIN"
+          ? "/admin/dashboard"
+          : user.role === "REGIONAL_ADMIN"
+            ? "/regional/dashboard"
+            : user.role === "SCIENCE_COMMUNICATOR"
+              ? "/field/dashboard"
+              : null;
+      if (target) {
+        navigate(target, { replace: true });
+      }
+    }
+  }, [user, navigate]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
 
     setError(null);
+    setInfoMessage(null);
+
+    if (!email.trim() || !password) {
+      setError("Please provide both your registered email and password.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const user = await login(email.trim(), password, remember);
+      const loggedUser = await login(email.trim(), password, remember);
 
       const stateFrom = (
         location.state as { from?: { pathname: string } } | null
@@ -33,9 +58,9 @@ export function LoginPage() {
       const isAllowedStateFrom =
         stateFrom &&
         stateFrom !== "/login" &&
-        ((user.role === "SUPER_ADMIN" && stateFrom.startsWith("/admin")) ||
-          (user.role === "REGIONAL_ADMIN" && stateFrom.startsWith("/regional")) ||
-          (user.role === "SCIENCE_COMMUNICATOR" && stateFrom.startsWith("/field")));
+        ((loggedUser.role === "SUPER_ADMIN" && stateFrom.startsWith("/admin")) ||
+          (loggedUser.role === "REGIONAL_ADMIN" && stateFrom.startsWith("/regional")) ||
+          (loggedUser.role === "SCIENCE_COMMUNICATOR" && stateFrom.startsWith("/field")));
 
       if (isAllowedStateFrom) {
         navigate(stateFrom, { replace: true });
@@ -43,11 +68,11 @@ export function LoginPage() {
       }
 
       const target =
-        user.role === "SUPER_ADMIN"
+        loggedUser.role === "SUPER_ADMIN"
           ? "/admin/dashboard"
-          : user.role === "REGIONAL_ADMIN"
+          : loggedUser.role === "REGIONAL_ADMIN"
             ? "/regional/dashboard"
-            : user.role === "SCIENCE_COMMUNICATOR"
+            : loggedUser.role === "SCIENCE_COMMUNICATOR"
               ? "/field/dashboard"
               : "/login";
 
@@ -61,33 +86,48 @@ export function LoginPage() {
     }
   }
 
+  function handleForgotPassword() {
+    setError(null);
+    setInfoMessage(
+      "Password resets are managed securely by central IT. Please contact your regional coordinator or system administrator."
+    );
+  }
+
   return (
     <div className="auth-form-container">
       {/* Mobile Branding (only displayed when left panel is hidden on mobile screens) */}
-      <div className="auth-form-logo-mobile" style={{ display: "none", alignItems: "center", gap: "14px", marginBottom: "28px" }}>
-        <div style={{ width: 44, height: 44, borderRadius: "var(--r-md)", backgroundColor: "#FFFFFF", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", padding: "4px", boxShadow: "var(--shadow-xs)" }}>
-          <BrandLogo size={36} />
+      <div className="auth-form-logo-mobile">
+        <div className="auth-form-logo-mark-mobile">
+          <BrandLogo size={34} />
         </div>
         <div>
-          <strong style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", display: "block" }}>VIBHA · Science on Wheels</strong>
-          <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)" }}>Operations Management Platform</span>
+          <strong className="auth-form-logo-title-mobile">VIBHA · Science on Wheels</strong>
+          <span className="auth-form-logo-sub-mobile">Operations Management Platform</span>
         </div>
       </div>
 
       {/* Header */}
       <div className="auth-form-header">
-        <h2 className="auth-form-title">Sign in to your account</h2>
+        <h2 className="auth-form-title">Sign in to Platform</h2>
         <p className="auth-form-subtitle">
-          Enter your authorized credentials to access regional coordination and fleet management.
+          Authorized personnel portal for mobile science laboratory dispatch and regional coordination.
         </p>
       </div>
 
       {/* Form */}
       <form className="auth-form" onSubmit={handleSubmit} noValidate={false}>
+        {/* Info Alert */}
+        {infoMessage && (
+          <div className="auth-info" role="status" aria-live="polite">
+            <NavIcon name="Info" size={18} style={{ flexShrink: 0, marginTop: "2px" }} />
+            <span>{infoMessage}</span>
+          </div>
+        )}
+
         {/* Error Alert */}
         {error && (
           <div className="auth-error" role="alert" aria-live="polite">
-            <NavIcon name="AlertCircle" size={18} style={{ flexShrink: 0, marginTop: "2px", color: "var(--error)" }} />
+            <NavIcon name="AlertCircle" size={18} style={{ flexShrink: 0, marginTop: "2px" }} />
             <span>{error}</span>
           </div>
         )}
@@ -97,19 +137,27 @@ export function LoginPage() {
           <label className="auth-field-label" htmlFor="email">
             Email Address
           </label>
-          <input
-            className="auth-input"
-            id="email"
-            name="email"
-            type="email"
-            placeholder="operator@scienceonwheels.com"
-            autoComplete="username"
-            autoCapitalize="none"
-            spellCheck={false}
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="auth-input-wrapper">
+            <span className="auth-input-icon">
+              <NavIcon name="Mail" size={16} />
+            </span>
+            <input
+              className="auth-input has-left-icon"
+              id="email"
+              name="email"
+              type="email"
+              placeholder="operator@scienceonwheels.com"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError(null);
+              }}
+            />
+          </div>
         </div>
 
         {/* Password with Show/Hide Toggle */}
@@ -121,16 +169,17 @@ export function LoginPage() {
             <button
               type="button"
               className="auth-link"
-              onClick={() =>
-                setError("Please contact your central system administrator to reset or re-issue your credentials.")
-              }
+              onClick={handleForgotPassword}
             >
               Forgot password?
             </button>
           </div>
-          <div style={{ position: "relative" }}>
+          <div className="auth-input-wrapper">
+            <span className="auth-input-icon">
+              <NavIcon name="Lock" size={16} />
+            </span>
             <input
-              className="auth-input"
+              className="auth-input has-left-icon"
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
@@ -138,26 +187,19 @@ export function LoginPage() {
               autoComplete="current-password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error) setError(null);
+              }}
               style={{ paddingRight: "44px" }}
             />
             <button
               type="button"
+              className="auth-password-toggle"
               onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "var(--text-subtle)",
-                padding: "4px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              <NavIcon name="Eye" size={16} />
+              <NavIcon name={showPassword ? "EyeOff" : "Eye"} size={16} />
             </button>
           </div>
         </div>
@@ -172,7 +214,7 @@ export function LoginPage() {
             onChange={(e) => setRemember(e.target.checked)}
           />
           <label htmlFor="remember" style={{ cursor: "pointer", userSelect: "none" }}>
-            Remember this terminal session
+            Keep this terminal session active
           </label>
         </div>
 
@@ -186,7 +228,7 @@ export function LoginPage() {
           ) : (
             <>
               <span>Sign in to Platform</span>
-              <NavIcon name="ArrowRightLeft" size={16} />
+              <NavIcon name="ArrowRight" size={16} />
             </>
           )}
         </button>
