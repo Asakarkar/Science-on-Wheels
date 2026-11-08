@@ -1,15 +1,15 @@
-# SciMove – Intelligent Mobile STEM Education and Resource Management Platform
+# Science on Wheels – Intelligent Mobile STEM Education and Resource Management Platform
 
-SciMove is an enterprise-grade platform governing the administration, logistics, and field execution of mobile science laboratory buses for STEM education across distributed school networks.
+Science on Wheels is an enterprise-grade platform governing the administration, logistics, and field execution of mobile science laboratory buses for STEM education across distributed school networks.
 
 ---
 
 ## 1. System Architecture
 
-SciMove operates as a clean, modular monolith with explicit role boundaries:
+Science on Wheels operates as a clean, modular monolith with explicit role boundaries:
 
 ```
-scimove/
+science-on-wheels/
 │
 ├── backend/                  # Node.js, Express & TypeScript API Service
 │   ├── src/
@@ -104,7 +104,7 @@ Backend runs at `http://localhost:5000`.
 
 ## 5. Automated Test Suites
 
-SciMove includes specialized functional integration and security test suites in `backend/tests/`:
+Science on Wheels includes specialized functional integration and security test suites in `backend/tests/`:
 
 ```bash
 cd backend

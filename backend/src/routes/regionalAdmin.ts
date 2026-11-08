@@ -1123,7 +1123,7 @@ regionalAdminRouter.get("/inventory/central-transfers", async (req: Authenticate
       assetTag: meta.assetTag || null,
       quantity: t.quantity,
       unit: t.consumable?.unitMetric || meta.unit || "units",
-      carrierName: meta.carrierName || "SciMove Logistics",
+      carrierName: meta.carrierName || "VIBHA Logistics",
       trackingNumber: meta.trackingNumber || null,
       dispatchedAt: meta.dispatchedAt || null,
       receivedAt: meta.receivedAt || null,

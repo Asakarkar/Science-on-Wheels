@@ -330,7 +330,7 @@ export async function createAllocation(req: Request, res: Response): Promise<voi
     assetTag: targetEquipment?.assetTag || null,
     equipmentName: targetEquipment?.name || null,
     unit: allocConsumable?.unitMetric || "unit",
-    carrierName: carrierName || "SciMove Logistics",
+    carrierName: carrierName || "VIBHA Logistics",
     trackingNumber: trackingNumber || `TRK-${Date.now().toString().slice(-7)}`,
     userNotes: notes || ""
   };

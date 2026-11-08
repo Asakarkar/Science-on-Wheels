@@ -825,7 +825,7 @@ export function RegionalInventoryPage() {
             <div className="p-4 bg-white border border-stone rounded inline-block mb-4">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                  `SCIMOVE-ASSET:${viewingQrAsset.assetTag}:${viewingQrAsset.id}`
+                  `SOW-ASSET:${viewingQrAsset.assetTag}:${viewingQrAsset.id}`
                 )}`}
                 alt="Asset QR Code"
                 className="w-36 h-36 mx-auto"

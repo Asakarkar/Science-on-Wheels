@@ -74,7 +74,7 @@ export function AdminLayout() {
               <BrandLogo size={32} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-              <div className="sidebar-brand-name">VIBHA · SciMove</div>
+              <div className="sidebar-brand-name">VIBHA</div>
               <div className="sidebar-brand-role">Science on Wheels</div>
             </div>
           </div>

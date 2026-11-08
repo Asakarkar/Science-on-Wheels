@@ -11,7 +11,7 @@ export function RegionalProfilePage() {
         </div>
         <h2 className="text-xl font-bold text-charcoal">Regional Operations Administrator</h2>
         <p className="text-xs text-charcoal-muted mt-0.5">
-          Your credentials and administrative scope within the SciMove platform.
+          Your credentials and administrative scope within the Science on Wheels platform.
         </p>
       </div>
 

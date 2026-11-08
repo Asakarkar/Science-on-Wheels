@@ -264,7 +264,7 @@ export function InventoryAllocationPage() {
         }}
       >
         <div style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", color: "#64748b", letterSpacing: "0.05em", marginBottom: "0.75rem" }}>
-          SciMove Distribution Workflow & In-Transit Control
+          VIBHA Science on Wheels Distribution Workflow & In-Transit Control
         </div>
         <div
           style={{
@@ -656,7 +656,7 @@ function CreateAllocationModal({
   const [consumableId, setConsumableId] = useState(consumables[0]?.id || "");
   const [equipmentId, setEquipmentId] = useState(equipment[0]?.id || "");
   const [quantity, setQuantity] = useState("25");
-  const [carrierName, setCarrierName] = useState("SciMove Central Transport");
+  const [carrierName, setCarrierName] = useState("VIBHA Central Transport");
   const [trackingNumber, setTrackingNumber] = useState(`TRK-${Date.now().toString().slice(-6)}`);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);

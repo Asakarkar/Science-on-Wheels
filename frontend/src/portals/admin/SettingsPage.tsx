@@ -199,7 +199,7 @@ export function SettingsPage() {
             </span>
           </div>
           <p style={{ margin: "4px 0 0 0", color: "#64748b", fontSize: "13px" }}>
-            Configure the overall behavior of the SciMove platform, NGO institutional credentials, and security policies.
+            Configure the overall behavior of the Science on Wheels platform, NGO institutional credentials, and security policies.
           </p>
         </div>
 

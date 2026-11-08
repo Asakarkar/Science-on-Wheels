@@ -6,12 +6,12 @@ import { audit } from "../utils/audit";
 
 const DEFAULT_SETTINGS: Record<string, any> = {
   organization: {
-    ngoName: "SciMove Foundation (Science on Wheels)",
+    ngoName: "Vijnana Bharati (VIBHA) — Science on Wheels",
     registrationNumber: "NGO-MH-2024-8849",
-    logoUrl: "/assets/scimove-logo.svg",
-    contactEmail: "admin@scimove.org",
+    logoUrl: "/logo.png",
+    contactEmail: "admin@scienceonwheels.com",
     contactPhone: "+91 22 2650 1234",
-    headquartersAddress: "SciMove Central Innovation Hub, Vidyanagari, Kalina, Santacruz East, Mumbai, Maharashtra 400098",
+    headquartersAddress: "VIBHA Central Innovation Hub, Vidyanagari, Kalina, Santacruz East, Mumbai, Maharashtra 400098",
     taxExemptNumber: "80G/12A-AACTS1984K",
     establishedYear: "2018"
   },
@@ -28,11 +28,11 @@ const DEFAULT_SETTINGS: Record<string, any> = {
     lowStockThresholdAlerts: true,
     busMaintenanceDueNoticeDays: 14,
     emergencyEventCancellationAlerts: true,
-    alertRecipientEmails: "fleet-ops@scimove.org, inventory-central@scimove.org",
+    alertRecipientEmails: "fleet-ops@scienceonwheels.com, inventory-central@scienceonwheels.com",
     smsBroadcastEnabled: false
   },
   qrConfig: {
-    qrPrefix: "SCIMOVE-AST-",
+    qrPrefix: "SOW-AST-",
     qrVersion: "Auto",
     errorCorrectionLevel: "H (High 30%)",
     autoGenerateOnAssetCreation: true,
@@ -122,14 +122,14 @@ export async function updateSettings(req: Request, res: Response): Promise<void>
       where: { key: configKey },
       update: {
         value: serializedValue,
-        description: `SciMove ${section.toUpperCase()} settings configuration`,
+        description: `Science on Wheels ${section.toUpperCase()} settings configuration`,
         updatedAt: new Date()
       },
       create: {
         id: newId(),
         key: configKey,
         value: serializedValue,
-        description: `SciMove ${section.toUpperCase()} settings configuration`,
+        description: `Science on Wheels ${section.toUpperCase()} settings configuration`,
         updatedAt: new Date()
       }
     });
