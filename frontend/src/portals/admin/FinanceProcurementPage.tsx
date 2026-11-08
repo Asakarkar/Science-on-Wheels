@@ -176,3 +176,4 @@ export function FinanceProcurementPage() {
     </div>
   );
 }
+

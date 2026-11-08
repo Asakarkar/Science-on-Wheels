@@ -110,7 +110,7 @@ export const configs: Record<string, ResourceConfig> = {
   schools: {
     key: "schools",
     title: "School Directory",
-    description: "Central school records connecting geography, visits, sessions, students and feedback.",
+    description: "Central school master records connecting geography, visits, sessions, students and feedback.",
     fields: [
       { key: "name", label: "School name", required: true },
       { key: "udiseCode", label: "UDISE code", required: true },
@@ -120,13 +120,9 @@ export const configs: Record<string, ResourceConfig> = {
       { key: "address", label: "Address", type: "textarea", required: true },
       { key: "latitude", label: "Latitude", type: "number", required: true },
       { key: "longitude", label: "Longitude", type: "number", required: true },
-      { key: "contactPhone", label: "Contact phone", required: true },
-      { key: "totalStudents", label: "Total students", type: "number", required: true },
-      { key: "hasScienceLab", label: "Has science lab", type: "boolean" },
-      { key: "hasElectricity", label: "Has electricity", type: "boolean" },
-      { key: "hasInternet", label: "Has internet", type: "boolean" }
+      { key: "totalStudents", label: "Total students", type: "number", required: true }
     ],
-    columns: ["name", "udiseCode", "regionId", "districtId", "totalStudents", "priorityCategory"]
+    columns: ["name", "udiseCode", "regionId", "districtId", "totalStudents", "address"]
   },
   schoolScheduleEntries: {
     key: "schoolScheduleEntries",
@@ -428,7 +424,6 @@ export const sectionResource: Record<string, string> = {
   "School Directory": "schools",
   Registration: "registrations",
   Verification: "registrations",
-  Priority: "schools",
   "School History": "schools",
   Experiments: "experiments",
   "Curriculum Master": "curriculumNodes",

@@ -118,7 +118,7 @@ export function SchoolsPage() {
     setSearchParams({ sub: newSub });
   }
 
-  const subOptions = ["School Directory", "Imported Schedule", "Registration", "Priority"];
+  const subOptions = ["School Directory", "Imported Schedule", "Registration"];
 
   // School directory state
   const [schools, setSchools] = useState<SchoolRecord[]>([]);
@@ -131,8 +131,7 @@ export function SchoolsPage() {
   // Toolbar filters
   const [search, setSearch] = useState("");
   const [regionFilter, setRegionFilter] = useState("ALL");
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [facilityFilter, setFacilityFilter] = useState("ALL");
+  const [districtFilter, setDistrictFilter] = useState("ALL");
 
   // Modals state
   const [showAddEditModal, setShowAddEditModal] = useState(false);
@@ -179,41 +178,31 @@ export function SchoolsPage() {
       if (regionFilter !== "ALL" && school.regionId !== regionFilter) {
         return false;
       }
-      if (statusFilter !== "ALL") {
-        if (statusFilter === "ACTIVE" && school.priorityCategory === "LOW") return false;
-        if (statusFilter === "INACTIVE" && school.priorityCategory !== "LOW") return false;
-        if (statusFilter === "HIGH" && !["CRITICAL", "HIGH"].includes(school.priorityCategory)) return false;
-      }
-      if (facilityFilter !== "ALL") {
-        if (facilityFilter === "HAS_LAB" && !school.hasScienceLab) return false;
-        if (facilityFilter === "NO_LAB" && school.hasScienceLab) return false;
-        if (facilityFilter === "HAS_POWER" && !school.hasElectricity) return false;
-        if (facilityFilter === "HAS_INTERNET" && !school.hasInternet) return false;
+      if (districtFilter !== "ALL" && school.districtId !== districtFilter) {
+        return false;
       }
       if (search.trim()) {
         const query = search.toLowerCase();
         const matchesName = school.name.toLowerCase().includes(query);
         const matchesUdise = school.udiseCode.toLowerCase().includes(query);
-        const matchesPrincipal = (school.principalName || "").toLowerCase().includes(query);
-        const matchesPhone = (school.contactPhone || "").toLowerCase().includes(query);
+        const matchesAddress = (school.address || "").toLowerCase().includes(query);
         const matchesDistrict = (school.districtName || "").toLowerCase().includes(query);
         const matchesRegion = (school.regionName || "").toLowerCase().includes(query);
-        if (!matchesName && !matchesUdise && !matchesPrincipal && !matchesPhone && !matchesDistrict && !matchesRegion) {
+        if (!matchesName && !matchesUdise && !matchesAddress && !matchesDistrict && !matchesRegion) {
           return false;
         }
       }
       return true;
     });
-  }, [schools, search, regionFilter, statusFilter, facilityFilter]);
+  }, [schools, search, regionFilter, districtFilter]);
 
   // Metrics
   const metrics = useMemo(() => {
     const total = schools.length;
     const mapped = schools.filter((s) => s.regionId).length;
     const totalStudents = schools.reduce((acc, s) => acc + (s.totalStudents || 0), 0);
-    const withScienceLab = schools.filter((s) => s.hasScienceLab).length;
     const totalVisits = schools.reduce((acc, s) => acc + (s.eventCount || 0), 0);
-    return { total, mapped, totalStudents, withScienceLab, totalVisits };
+    return { total, mapped, totalStudents, totalVisits };
   }, [schools]);
 
   async function openProfile(school: SchoolRecord) {
@@ -389,7 +378,7 @@ export function SchoolsPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by school name, UDISE code, principal, district..."
+                placeholder="Search by school name, UDISE code, address, district..."
                 style={{
                   width: "100%",
                   padding: "0.55rem 0.85rem",
@@ -404,7 +393,10 @@ export function SchoolsPage() {
             <div style={{ minWidth: "160px" }}>
               <select
                 value={regionFilter}
-                onChange={(e) => setRegionFilter(e.target.value)}
+                onChange={(e) => {
+                  setRegionFilter(e.target.value);
+                  setDistrictFilter("ALL");
+                }}
                 style={{
                   width: "100%",
                   padding: "0.55rem 0.85rem",
@@ -423,10 +415,10 @@ export function SchoolsPage() {
               </select>
             </div>
 
-            <div style={{ minWidth: "150px" }}>
+            <div style={{ minWidth: "160px" }}>
               <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                value={districtFilter}
+                onChange={(e) => setDistrictFilter(e.target.value)}
                 style={{
                   width: "100%",
                   padding: "0.55rem 0.85rem",
@@ -436,31 +428,14 @@ export function SchoolsPage() {
                   background: "#ffffff"
                 }}
               >
-                <option value="ALL">All Statuses</option>
-                <option value="ACTIVE">Active Schools</option>
-                <option value="HIGH">High / Critical Priority</option>
-                <option value="INACTIVE">Low / Inactive</option>
-              </select>
-            </div>
-
-            <div style={{ minWidth: "170px" }}>
-              <select
-                value={facilityFilter}
-                onChange={(e) => setFacilityFilter(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "0.55rem 0.85rem",
-                  borderRadius: "6px",
-                  border: "1px solid var(--stone, #cbd5e1)",
-                  fontSize: "13px",
-                  background: "#ffffff"
-                }}
-              >
-                <option value="ALL">All Facilities</option>
-                <option value="HAS_LAB">Has Science Lab</option>
-                <option value="NO_LAB">Needs Mobile Lab</option>
-                <option value="HAS_POWER">Has Electricity</option>
-                <option value="HAS_INTERNET">Has Internet</option>
+                <option value="ALL">All Districts</option>
+                {districts
+                  .filter((d) => regionFilter === "ALL" || d.regionId === regionFilter)
+                  .map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -540,10 +515,8 @@ export function SchoolsPage() {
                     <tr style={{ background: "#f8fafc", color: "#475569", borderBottom: "1px solid #e2e8f0" }}>
                       <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>School & UDISE</th>
                       <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>Regional Mapping</th>
-                      <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>Contact Details</th>
                       <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>Student Reach</th>
-                      <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>Facilities</th>
-                      <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>Priority & Status</th>
+                      <th style={{ padding: "0.75rem 1rem", fontWeight: 600 }}>Lab Visits</th>
                       <th style={{ padding: "0.75rem 1rem", fontWeight: 600, textAlign: "right" }}>Actions</th>
                     </tr>
                   </thead>
@@ -582,7 +555,7 @@ export function SchoolsPage() {
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "2px", maxWidth: "220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "2px", maxWidth: "260px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               📍 {s.address}
                             </div>
                           </td>
@@ -610,103 +583,20 @@ export function SchoolsPage() {
                           </td>
 
                           <td style={{ padding: "0.75rem 1rem" }}>
-                            <div style={{ fontWeight: 500, color: "#1e293b" }}>
-                              👤 {s.principalName || "Principal (Unrecorded)"}
-                            </div>
-                            <div style={{ fontSize: "12px", color: "#475569", marginTop: "2px" }}>
-                              📞 {s.contactPhone || "—"}
-                            </div>
-                          </td>
-
-                          <td style={{ padding: "0.75rem 1rem" }}>
                             <div style={{ fontWeight: 700, color: "#0f172a" }}>
-                              👥 {(s.totalStudents || 0).toLocaleString()} students
+                              👥 {(s.totalStudents || 0).toLocaleString()}
                             </div>
                             <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "2px" }}>
-                              🚐 Visits: <strong>{s.eventCount ?? 0}</strong>
+                              Enrolled Students
                             </div>
                           </td>
 
                           <td style={{ padding: "0.75rem 1rem" }}>
-                            <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
-                              <span
-                                title={s.hasScienceLab ? "Has On-site Science Lab" : "No Science Lab (Mobile Outreach Priority)"}
-                                style={{
-                                  fontSize: "11px",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                  background: s.hasScienceLab ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.08)",
-                                  color: s.hasScienceLab ? "#059669" : "#dc2626",
-                                  fontWeight: 600
-                                }}
-                              >
-                                {s.hasScienceLab ? "🔬 Lab" : "🚫 No Lab"}
-                              </span>
-                              <span
-                                title={s.hasElectricity ? "Electricity Available" : "No Electricity"}
-                                style={{
-                                  fontSize: "11px",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                  background: s.hasElectricity ? "rgba(59, 130, 246, 0.1)" : "rgba(148, 163, 184, 0.2)",
-                                  color: s.hasElectricity ? "#2563eb" : "#64748b"
-                                }}
-                              >
-                                ⚡ Power
-                              </span>
-                              {s.hasInternet && (
-                                <span
-                                  title="Internet Connectivity Available"
-                                  style={{
-                                    fontSize: "11px",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    background: "rgba(168, 85, 247, 0.1)",
-                                    color: "#7c3aed"
-                                  }}
-                                >
-                                  🌐 Web
-                                </span>
-                              )}
+                            <div style={{ fontWeight: 700, color: "#4f46e5" }}>
+                              🚐 {s.eventCount ?? 0}
                             </div>
-                          </td>
-
-                          <td style={{ padding: "0.75rem 1rem" }}>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  width: "fit-content",
-                                  fontSize: "11px",
-                                  fontWeight: 700,
-                                  padding: "2px 7px",
-                                  borderRadius: "4px",
-                                  background:
-                                    s.priorityCategory === "CRITICAL"
-                                      ? "#fef2f2"
-                                      : s.priorityCategory === "HIGH"
-                                      ? "#fffbeb"
-                                      : "#f0fdf4",
-                                  color:
-                                    s.priorityCategory === "CRITICAL"
-                                      ? "#b91c1c"
-                                      : s.priorityCategory === "HIGH"
-                                      ? "#b45309"
-                                      : "#15803d",
-                                  border: `1px solid ${
-                                    s.priorityCategory === "CRITICAL"
-                                      ? "#fca5a5"
-                                      : s.priorityCategory === "HIGH"
-                                      ? "#fcd34d"
-                                      : "#86efac"
-                                  }`
-                                }}
-                              >
-                                {s.priorityCategory || "STANDARD"}
-                              </span>
-                              <span style={{ fontSize: "11px", color: "#64748b" }}>
-                                Score: {(s.priorityScore || 0).toFixed(1)}
-                              </span>
+                            <div style={{ fontSize: "11.5px", color: "#64748b", marginTop: "2px" }}>
+                              Visits Hosted
                             </div>
                           </td>
 
@@ -1231,73 +1121,6 @@ function SchoolAddEditModal({
             </div>
           </div>
 
-          {/* Infrastructure & Facilities */}
-          <div style={{ background: "#ffffff", padding: "0.75rem", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "8px" }}>
-              Campus Facilities & Infrastructure
-            </div>
-            <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "13px", cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={hasScienceLab}
-                  onChange={(e) => setHasScienceLab(e.target.checked)}
-                />
-                <span>🔬 Has Existing Science Lab</span>
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "13px", cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={hasElectricity}
-                  onChange={(e) => setHasElectricity(e.target.checked)}
-                />
-                <span>⚡ Electricity Available</span>
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "13px", cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={hasInternet}
-                  onChange={(e) => setHasInternet(e.target.checked)}
-                />
-                <span>🌐 Internet Connectivity</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Priority & Outreach Status */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>
-                Priority Category
-              </label>
-              <select
-                value={priorityCategory}
-                onChange={(e) => setPriorityCategory(e.target.value)}
-                style={{ width: "100%", padding: "0.55rem", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "13px", background: "#ffffff" }}
-              >
-                <option value="CRITICAL">Critical (Immediate Outreach)</option>
-                <option value="HIGH">High Priority</option>
-                <option value="STANDARD">Standard</option>
-                <option value="LOW">Low / Inactive</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#334155", marginBottom: "4px" }}>
-                Priority Score (0 - 100)
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min={0}
-                max={100}
-                value={priorityScore}
-                onChange={(e) => setPriorityScore(e.target.value)}
-                style={{ width: "100%", padding: "0.55rem", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "13px", boxSizing: "border-box" }}
-              />
-            </div>
-          </div>
-
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.75rem", marginTop: "1rem" }}>
             <button
               type="button"
@@ -1779,60 +1602,10 @@ function SchoolProfileModal({
                     </div>
                   </div>
 
-                  {/* Infrastructure Checklist */}
-                  <div style={{ background: "#ffffff", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontSize: "12.5px", fontWeight: 700, color: "#0f172a", marginBottom: "0.75rem" }}>
-                      🏢 Infrastructure & Facilities Assessment
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
-                      <div
-                        style={{
-                          padding: "0.75rem",
-                          borderRadius: "6px",
-                          background: data.school.hasScienceLab ? "#f0fdf4" : "#fef2f2",
-                          border: `1px solid ${data.school.hasScienceLab ? "#86efac" : "#fca5a5"}`
-                        }}
-                      >
-                        <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>SCIENCE LAB</div>
-                        <div style={{ fontSize: "14px", fontWeight: 700, color: data.school.hasScienceLab ? "#15803d" : "#b91c1c", marginTop: "2px" }}>
-                          {data.school.hasScienceLab ? "✓ Existing Lab Available" : "✗ No Science Lab (Outreach Priority)"}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          padding: "0.75rem",
-                          borderRadius: "6px",
-                          background: data.school.hasElectricity ? "#eff6ff" : "#f8fafc",
-                          border: `1px solid ${data.school.hasElectricity ? "#bfdbfe" : "#e2e8f0"}`
-                        }}
-                      >
-                        <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>ELECTRICITY</div>
-                        <div style={{ fontSize: "14px", fontWeight: 700, color: data.school.hasElectricity ? "#1d4ed8" : "#64748b", marginTop: "2px" }}>
-                          {data.school.hasElectricity ? "⚡ Power Grid Active" : "⚠️ No Electricity"}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          padding: "0.75rem",
-                          borderRadius: "6px",
-                          background: data.school.hasInternet ? "#faf5ff" : "#f8fafc",
-                          border: `1px solid ${data.school.hasInternet ? "#e9d5ff" : "#e2e8f0"}`
-                        }}
-                      >
-                        <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 600 }}>INTERNET</div>
-                        <div style={{ fontSize: "14px", fontWeight: 700, color: data.school.hasInternet ? "#7e22ce" : "#64748b", marginTop: "2px" }}>
-                          {data.school.hasInternet ? "🌐 Connected" : "— No Internet"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Geolocation Details */}
                   <div style={{ background: "#ffffff", padding: "1rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
                     <div style={{ fontSize: "12.5px", fontWeight: 700, color: "#0f172a", marginBottom: "0.75rem" }}>
-                      📍 Geolocation & Priority Weighting
+                      📍 Geographical & Field Location
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", fontSize: "13px" }}>
                       <div>
@@ -1848,9 +1621,9 @@ function SchoolProfileModal({
                         </div>
                       </div>
                       <div>
-                        <span style={{ color: "#64748b" }}>Priority Category:</span>
+                        <span style={{ color: "#64748b" }}>Total Enrolled Students:</span>
                         <div style={{ fontWeight: 700, color: "#1e293b", marginTop: "2px" }}>
-                          {data.school.priorityCategory} (Score: {(data.school.priorityScore || 0).toFixed(1)})
+                          {(data.school.totalStudents || 0).toLocaleString()}
                         </div>
                       </div>
                       <div>

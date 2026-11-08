@@ -65,7 +65,6 @@ export function RegionalSchoolsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
-  const [selectedPriority, setSelectedPriority] = useState("");
 
   // Modals state
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -205,10 +204,9 @@ export function RegionalSchoolsPage() {
       !search ||
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.udiseCode.toLowerCase().includes(search.toLowerCase()) ||
-      (s.principalName && s.principalName.toLowerCase().includes(search.toLowerCase()));
+      (s.address && s.address.toLowerCase().includes(search.toLowerCase()));
     const matchesDistrict = !selectedDistrict || s.districtId === selectedDistrict;
-    const matchesPriority = !selectedPriority || s.priorityCategory === selectedPriority;
-    return matchesSearch && matchesDistrict && matchesPriority;
+    return matchesSearch && matchesDistrict;
   });
 
   return (
@@ -255,16 +253,6 @@ export function RegionalSchoolsPage() {
               </option>
             ))}
           </select>
-          <select
-            value={selectedPriority}
-            onChange={(e) => setSelectedPriority(e.target.value)}
-            className="input text-xs px-3 py-1.5 rounded border border-stone"
-          >
-            <option value="">All Priority Categories</option>
-            <option value="HIGH_OUTREACH">HIGH_OUTREACH</option>
-            <option value="MEDIUM_PRIORITY">MEDIUM_PRIORITY</option>
-            <option value="STANDARD">STANDARD</option>
-          </select>
         </div>
         <div className="text-charcoal-muted font-mono">
           Showing <strong>{filteredSchools.length}</strong> of {schools.length} schools
@@ -277,26 +265,24 @@ export function RegionalSchoolsPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-stone-50 border-b border-stone text-charcoal-muted font-mono uppercase text-[11px]">
               <tr>
-                <th className="py-2.5 px-4">School Name</th>
+                <th className="py-2.5 px-4">School Name & Address</th>
                 <th className="py-2.5 px-3">UDISE Code</th>
                 <th className="py-2.5 px-3">District</th>
-                <th className="py-2.5 px-3">Principal / Contact</th>
-                <th className="py-2.5 px-3 text-center">Students</th>
-                <th className="py-2.5 px-3">Facilities</th>
-                <th className="py-2.5 px-3">Priority</th>
+                <th className="py-2.5 px-3 text-center">Student Reach</th>
+                <th className="py-2.5 px-3 text-center">Lab Visits Hosted</th>
                 <th className="py-2.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-charcoal-muted font-mono">
+                  <td colSpan={6} className="py-8 text-center text-charcoal-muted font-mono">
                     Loading regional schools…
                   </td>
                 </tr>
               ) : filteredSchools.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-charcoal-muted font-mono">
+                  <td colSpan={6} className="py-8 text-center text-charcoal-muted font-mono">
                     No schools found matching your search.
                   </td>
                 </tr>
@@ -311,33 +297,11 @@ export function RegionalSchoolsPage() {
                     <td className="py-3 px-3 text-charcoal-muted">
                       {districts.find((d) => d.id === school.districtId)?.name || "District"}
                     </td>
-                    <td className="py-3 px-3">
-                      <span className="text-charcoal block">{school.principalName || "Principal not set"}</span>
-                      <span className="text-charcoal-subtle font-mono text-[11px]">{school.contactPhone}</span>
-                    </td>
                     <td className="py-3 px-3 text-center font-mono font-bold text-charcoal">
                       {school.totalStudents}
                     </td>
-                    <td className="py-3 px-3 font-mono text-[11px]">
-                      <span className={`inline-block mr-2 ${school.hasScienceLab ? "text-emerald-700" : "text-stone-400"}`}>
-                        {school.hasScienceLab ? "✓ Lab" : "✗ No Lab"}
-                      </span>
-                      <span className={`inline-block ${school.hasElectricity ? "text-emerald-700" : "text-stone-400"}`}>
-                        {school.hasElectricity ? "⚡ Power" : "✗ No Power"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
-                          school.priorityCategory === "HIGH_OUTREACH"
-                            ? "bg-red-100 text-red-800"
-                            : school.priorityCategory === "MEDIUM_PRIORITY"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-stone-100 text-stone-700"
-                        }`}
-                      >
-                        {school.priorityCategory.replace("_", " ")}
-                      </span>
+                    <td className="py-3 px-3 text-center font-mono font-bold text-charcoal">
+                      {school._count?.Event ?? 0}
                     </td>
                     <td className="py-3 px-4 text-right space-x-2 font-mono">
                       <button
@@ -498,49 +462,6 @@ export function RegionalSchoolsPage() {
                 </div>
               </div>
 
-              <div className="border border-stone rounded p-3 bg-stone-50 space-y-2">
-                <span className="block font-bold text-charcoal">Infrastructure Facilities</span>
-                <div className="flex flex-wrap gap-4 text-xs font-sans">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.hasScienceLab}
-                      onChange={(e) => setFormData({ ...formData, hasScienceLab: e.target.checked })}
-                    />
-                    <span>Has Existing Science Lab</span>
-                  </label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.hasElectricity}
-                      onChange={(e) => setFormData({ ...formData, hasElectricity: e.target.checked })}
-                    />
-                    <span>Has Reliable Electricity</span>
-                  </label>
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.hasInternet}
-                      onChange={(e) => setFormData({ ...formData, hasInternet: e.target.checked })}
-                    />
-                    <span>Has Internet Access</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-charcoal font-semibold mb-1">Priority Categorization</label>
-                <select
-                  value={formData.priorityCategory}
-                  onChange={(e) => setFormData({ ...formData, priorityCategory: e.target.value })}
-                  className="input w-full p-2 border border-stone rounded text-xs"
-                >
-                  <option value="HIGH_OUTREACH">HIGH OUTREACH (Remote, no science lab)</option>
-                  <option value="MEDIUM_PRIORITY">MEDIUM PRIORITY (Needs periodic visits)</option>
-                  <option value="STANDARD">STANDARD</option>
-                </select>
-              </div>
-
               <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
                 <button
                   type="button"
@@ -599,49 +520,14 @@ export function RegionalSchoolsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Principal Name</label>
-                  <input
-                    type="text"
-                    value={editingSchool.principalName || ""}
-                    onChange={(e) => setEditingSchool({ ...editingSchool, principalName: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded font-sans text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Contact Phone</label>
-                  <input
-                    type="text"
-                    value={editingSchool.contactPhone}
-                    onChange={(e) => setEditingSchool({ ...editingSchool, contactPhone: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Total Students</label>
-                  <input
-                    type="number"
-                    value={editingSchool.totalStudents}
-                    onChange={(e) => setEditingSchool({ ...editingSchool, totalStudents: Number(e.target.value) })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Priority</label>
-                  <select
-                    value={editingSchool.priorityCategory}
-                    onChange={(e) => setEditingSchool({ ...editingSchool, priorityCategory: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  >
-                    <option value="HIGH_OUTREACH">HIGH_OUTREACH</option>
-                    <option value="MEDIUM_PRIORITY">MEDIUM_PRIORITY</option>
-                    <option value="STANDARD">STANDARD</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-charcoal font-semibold mb-1">Total Students</label>
+                <input
+                  type="number"
+                  value={editingSchool.totalStudents}
+                  onChange={(e) => setEditingSchool({ ...editingSchool, totalStudents: Number(e.target.value) })}
+                  className="input w-full p-2 border border-stone rounded text-xs"
+                />
               </div>
 
               <div className="flex justify-end space-x-2 pt-3 border-t border-stone">

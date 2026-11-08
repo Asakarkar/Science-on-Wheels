@@ -1041,8 +1041,7 @@ function RegionalProfileModal({ loading, data, onClose }: RegionalProfileModalPr
                     <tr>
                       <th>School Name</th>
                       <th>UDISE Code</th>
-                      <th>Contact Phone</th>
-                      <th>Total Students</th>
+                      <th>Enrolled Students</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1050,13 +1049,12 @@ function RegionalProfileModal({ loading, data, onClose }: RegionalProfileModalPr
                       <tr key={s.id}>
                         <td><strong>{s.name}</strong></td>
                         <td style={{ fontFamily: "var(--mono)" }}>{s.udiseCode}</td>
-                        <td>{s.contactPhone || "—"}</td>
                         <td><strong>{s.totalStudents}</strong></td>
                       </tr>
                     ))}
                     {!data.schools.length && (
                       <tr>
-                        <td colSpan={4} style={{ textAlign: "center", padding: "1.5rem" }}>
+                        <td colSpan={3} style={{ textAlign: "center", padding: "1.5rem" }}>
                           No schools currently registered under this region.
                         </td>
                       </tr>

@@ -43,7 +43,7 @@ export function RegionalDataTable({
 
   const columns = useMemo(() => {
     const preferred: Record<string, string[]> = {
-      schools: ["name", "udiseCode", "districtId", "blockId", "totalStudents", "priorityCategory"],
+      schools: ["name", "udiseCode", "districtId", "blockId", "totalStudents", "address"],
       staff: ["name", "email", "roleEnum", "status", "lastLoginAt"],
       labs: ["busCode", "registrationNumber", "status", "currentLat", "currentLng", "lastGpsUpdate"],
       visits: ["eventCode", "schoolId", "busId", "eventDate", "startTime", "endTime", "status"],
