@@ -8,13 +8,10 @@ export function AuthLayout() {
       <InteractiveScienceBlueprint />
 
       {/* Top System Status Bar */}
-      <header className="login-system-header" data-purpose="system-header">
+      <header className="login-system-header">
         <div className="login-system-header-inner">
           <div className="login-header-left">
-            <div className="login-header-brand">
-              <span className="login-status-indicator-sq" />
-              <span className="login-status-title">Science on Wheels</span>
-            </div>
+            <span className="login-status-title">Science on Wheels</span>
           </div>
 
           <div className="login-header-right">
@@ -24,7 +21,7 @@ export function AuthLayout() {
       </header>
 
       {/* Main Centered Login Terminal Container */}
-      <main className="login-main-container" data-purpose="login-container">
+      <main className="login-main-container">
         <Outlet />
       </main>
 

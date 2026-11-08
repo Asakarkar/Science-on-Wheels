@@ -95,7 +95,7 @@ export function LoginPage() {
 
   return (
     <div className="login-card-panel">
-      <section className="login-card" data-purpose="auth-card-panel">
+      <section className="login-card">
         {/* Card Header with VIBHA Brand Lockup */}
         <div className="login-card-header">
           <div className="login-card-brand">
@@ -112,7 +112,7 @@ export function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <form className="login-form" data-purpose="auth-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit}>
           {/* Info Alert */}
           {infoMessage && (
             <div className="login-alert login-alert-info" role="status" aria-live="polite">
