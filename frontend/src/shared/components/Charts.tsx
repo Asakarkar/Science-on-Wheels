@@ -389,3 +389,4 @@ export function HorizontalBarChart({ data, title, subtitle }: HorizontalBarChart
     </div>
   );
 }
+
