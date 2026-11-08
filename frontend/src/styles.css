@@ -807,6 +807,8 @@ img, svg {
   flex-direction: column;
   min-height: 100vh;
   min-height: 100svh;
+  height: 100vh;
+  overflow: hidden;
   background-color: var(--canvas);
 }
 

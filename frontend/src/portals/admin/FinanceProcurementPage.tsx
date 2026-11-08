@@ -89,14 +89,13 @@ export function FinanceProcurementPage() {
 
   return (
     <div className="portal-module">
-      {/* Enterprise Financial Overview Header */}
       <div style={{ marginBottom: "24px" }}>
-        <div className="section-kicker">ERP / FINANCIALS & PROCUREMENT CONTROL</div>
+        <div className="section-kicker">FINANCIALS & PROCUREMENT</div>
         <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.02em", margin: "4px 0 8px" }}>
           Financial Management & Material Procurement
         </h2>
         <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0, maxWidth: "720px", lineHeight: 1.5 }}>
-          Enterprise tracking of operational disbursements, regional travel allowances (TA/DA), vehicle fuel logs, and institutional purchase requisitions across all operating sectors.
+          Tracking of operational disbursements, regional travel allowances (TA/DA), vehicle fuel logs, and purchase requisitions.
         </p>
       </div>
 

@@ -385,7 +385,7 @@ export function SettingsPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   <div style={{ borderBottom: "1px solid #e2e8f0", paddingBottom: "0.75rem" }}>
                     <h3 style={{ margin: 0, fontSize: "1.15rem", color: "#0f172a" }}>Role Permissions & Access Matrix</h3>
-                    <p style={{ margin: "3px 0 0", fontSize: "12.5px", color: "#64748b" }}>Manage system permissions assigned to Super Admin, Regional Admin, and Field Staff.</p>
+                    <p style={{ margin: "3px 0 0", fontSize: "12.5px", color: "#64748b" }}>Manage permissions assigned to organization roles and field staff.</p>
                   </div>
                   <div style={{ background: "#f8fafc", padding: "1.25rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
                     <div style={{ fontWeight: 600, color: "#1e293b", marginBottom: "4px" }}>System Role Matrix</div>

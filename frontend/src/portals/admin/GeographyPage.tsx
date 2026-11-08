@@ -18,19 +18,23 @@ export function GeographyPage() {
 
   return (
     <div className="portal-module">
-      <div className="subnav-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+      <div className="subnav-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap", borderBottom: "1px solid var(--stone, #e2e8f0)", paddingBottom: "0.75rem" }}>
         {subOptions.map((opt) => (
           <button
             key={opt}
+            type="button"
             className={`ghost ${sub === opt ? "primary" : ""}`}
             onClick={() => setSub(opt)}
             style={{
-              padding: "0.4rem 0.8rem",
-              borderRadius: "4px",
-              background: sub === opt ? "var(--color-primary, #6366f1)" : "rgba(255,255,255,0.05)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.1)",
-              cursor: "pointer"
+              padding: "0.45rem 0.9rem",
+              borderRadius: "6px",
+              background: sub === opt ? "var(--charcoal-dark, #1E242B)" : "#ffffff",
+              color: sub === opt ? "#ffffff" : "var(--charcoal, #334155)",
+              border: sub === opt ? "1px solid var(--charcoal-dark, #1E242B)" : "1px solid var(--stone, #cbd5e1)",
+              fontWeight: sub === opt ? 700 : 500,
+              fontSize: "13px",
+              cursor: "pointer",
+              transition: "all 0.15s ease"
             }}
           >
             {opt}

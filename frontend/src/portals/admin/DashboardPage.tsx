@@ -65,10 +65,10 @@ export function DashboardPage() {
     <>
       <section className="command-hero">
         <div>
-          <div className="eyebrow">VIBHA · ENTERPRISE RESOURCE PLANNING (ERP)</div>
-          <h2>National STEM Fleet & Resource Command</h2>
+          <div className="eyebrow">VIBHA · SCIENCE ON WHEELS</div>
+          <h2>Overview & Resource Management</h2>
           <p>
-            Unified enterprise coordination connecting multi-regional supply chains, mobile laboratory capital assets, institutional school networks, and field workforce dispatch across India.
+            Central management connecting regional depots, mobile laboratories, schools, and field sessions across India.
           </p>
           <div className="hero-actions">
             <button
@@ -78,10 +78,10 @@ export function DashboardPage() {
               Dispatch Allocations
             </button>
             <button className="ghost" onClick={() => navigate("/admin/mobile-labs")}>
-              Fleet Telemetry
+              Mobile Labs
             </button>
             <button className="ghost" onClick={() => navigate("/admin/finance")}>
-              ERP Financials
+              Financials
             </button>
           </div>
         </div>
@@ -216,25 +216,25 @@ export function DashboardPage() {
         <article className="surface workflow">
           <div className="surface-head">
             <div>
-              <div className="section-kicker">ERP BUSINESS MODULE SUITE</div>
-              <h3>Integrated Enterprise Cross-Department Workflows</h3>
+              <div className="section-kicker">OPERATIONAL WORKFLOW</div>
+              <h3>Operations Workflow</h3>
             </div>
           </div>
           <div className="flow" style={{ flexWrap: "wrap", gap: "8px" }}>
-            <button onClick={() => navigate("/admin/mobile-labs")}>01 EAM Fleet</button>
+            <button onClick={() => navigate("/admin/mobile-labs")}>01 Fleet</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/inventory")}>02 SCM Supply</button>
+            <button onClick={() => navigate("/admin/inventory")}>02 Inventory</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/schools")}>03 SRM Schools</button>
+            <button onClick={() => navigate("/admin/schools")}>03 Schools</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/operations")}>04 Field Ops</button>
+            <button onClick={() => navigate("/admin/operations")}>04 Field Sessions</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/finance")}>05 Financials</button>
+            <button onClick={() => navigate("/admin/finance")}>05 Finance</button>
             <span>→</span>
-            <button onClick={() => navigate("/admin/analytics")}>06 Intelligence</button>
+            <button onClick={() => navigate("/admin/analytics")}>06 Reports</button>
           </div>
           <p>
-            Standard enterprise loop: resources allocated from central supply integrate into regional depots, power scheduled school visits, and sync financial audit logs across the organization.
+            Resources allocated from central supply integrate into regional depots, support scheduled school visits, and sync records across the organization.
           </p>
         </article>
       </section>

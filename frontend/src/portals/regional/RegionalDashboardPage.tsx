@@ -136,16 +136,16 @@ export function RegionalDashboardPage() {
       {/* SECTION A: REGIONAL OVERVIEW HERO (Section 4.1.A) */}
       <div className="command-hero regional-hero">
         <div>
-          <div className="eyebrow">VIBHA ERP · REGIONAL OPERATIONS HUB</div>
+          <div className="eyebrow">VIBHA · REGIONAL OPERATIONS</div>
           <h2>{data.region?.name || "Operational Region"}</h2>
           <p>
-            Enterprise regional depot management and fleet logistics across {k.districts || 0} districts and {k.blocks || 0} blocks.
+            Regional depot management and fleet logistics across {k.districts || 0} districts and {k.blocks || 0} blocks.
           </p>
           <div className="hero-meta">
             <span>Region: {data.region?.name}</span>
             <span>State: {data.region?.state || "State"}</span>
-            <span>Controller: {data.region?.adminName || "Regional Admin"}</span>
-            <span>Fleet Capital: {k.totalBuses} Mobile Labs</span>
+            <span>Coordinator: {data.region?.adminName || "Regional Coordinator"}</span>
+            <span>Fleet: {k.totalBuses} Mobile Labs</span>
           </div>
         </div>
         <div className="hero-visual">

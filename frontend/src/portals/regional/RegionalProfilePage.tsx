@@ -46,7 +46,7 @@ export function RegionalProfilePage() {
         <div className="p-3 bg-stone-50 rounded border border-stone space-y-1">
           <span className="text-charcoal-muted block text-[10px] uppercase">Jurisdiction Boundary</span>
           <p className="text-charcoal font-sans text-xs">
-            Your permissions strictly grant full control over regional schools, fleet mobile labs, field staff, and visit approvals within your assigned region. Organization-wide master catalogue changes are managed by central Super Admins.
+            Your permissions grant control over regional schools, fleet mobile labs, field staff, and visit approvals within your assigned region. Organization-wide master catalogue changes are managed centrally.
           </p>
         </div>
       </div>

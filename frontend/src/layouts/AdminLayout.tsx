@@ -47,26 +47,6 @@ export function AdminLayout() {
 
   return (
     <div className="admin-shell">
-      {/* Top System Status Bar */}
-      <div className="status-bar">
-        <div className="status-bar-left">
-          <div className="status-bar-dot" />
-          <span className="status-bar-label">VIBHA · Science on Wheels ERP</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Central Enterprise Node (HQ)</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", opacity: 0.85 }}>FY 2026-27 · Period P08</span>
-        </div>
-        <div className="status-bar-right">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
-            <span>ALL ERP ENGINES NOMINAL</span>
-          </span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>National Telemetry Live</span>
-        </div>
-      </div>
-
       <div className="portal-body">
         {/* Mobile backdrop */}
         {mobileNav && (
@@ -85,14 +65,8 @@ export function AdminLayout() {
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">VIBHA</div>
-              <div className="sidebar-brand-role">Science on Wheels ERP</div>
+              <div className="sidebar-brand-role">Science on Wheels</div>
             </div>
-          </div>
-
-          {/* Role badge */}
-          <div className="command-role">
-            <span>ERP SUPER ADMIN</span>
-            <b>Enterprise Control & Strategy</b>
           </div>
 
           {/* Navigation */}
@@ -244,7 +218,7 @@ export function AdminLayout() {
                 </div>
                 <div>
                   <strong style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
-                    {user?.name || "Super Admin"}
+                    {user?.name || "Administrator"}
                   </strong>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
                     {user?.email || "admin@scienceonwheels.com"}

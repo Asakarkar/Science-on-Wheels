@@ -131,7 +131,7 @@ export function FieldDashboardPage() {
           <div className="flex items-center space-x-2">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-mono text-[11px] font-bold tracking-wider text-emerald-800 uppercase">
-              VIBHA ERP · Field Operations Terminal Active
+              Field Operations Terminal Active
             </span>
           </div>
           <h1 className="text-xl font-bold text-charcoal mt-1">

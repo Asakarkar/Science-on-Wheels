@@ -29,84 +29,84 @@ export interface AdminNavSection {
 export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
   {
     key: "overview",
-    label: "ERP Command & Intelligence",
+    label: "Overview",
     type: "heading",
     items: [
-      { key: "dashboard", label: "Executive Dashboard", icon: "LayoutDashboard", path: "/admin/dashboard", permission: "dashboard.view" },
+      { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/admin/dashboard", permission: "dashboard.view" },
       { key: "analytics", label: "Operations Analytics", icon: "BarChart3", path: "/admin/analytics", permission: "analytics.view" },
-      { key: "reports", label: "Consolidated Reports", icon: "FileText", path: "/admin/reports", permission: "analytics.view" }
+      { key: "reports", label: "Reports", icon: "FileText", path: "/admin/reports", permission: "analytics.view" }
     ]
   },
   {
     key: "fleet",
-    label: "Fleet & Capital Assets (EAM)",
+    label: "Fleet & Assets",
     type: "dropdown",
     icon: "Bus",
     items: [
       { key: "mobile-labs", label: "Mobile Science Labs", icon: "Bus", path: "/admin/mobile-labs", permission: "labs.view" },
-      { key: "equipment", label: "Lab Equipment & Assets", icon: "Microscope", path: "/admin/equipment", permission: "resources.view" },
+      { key: "equipment", label: "Lab Equipment", icon: "Microscope", path: "/admin/equipment", permission: "resources.view" },
       { key: "maintenance", label: "Fleet Maintenance Logs", icon: "Settings", path: "/admin/maintenance", permission: "labs.view" }
     ]
   },
   {
     key: "inventory-ops",
-    label: "Supply Chain & Material (SCM)",
+    label: "Inventory & Supplies",
     type: "dropdown",
     icon: "Package",
     items: [
-      { key: "inventory", label: "Multi-Depot Inventory", icon: "Package", path: "/admin/inventory", permission: "resources.view" },
-      { key: "inventory-allocation", label: "Fleet Stock Allocations", icon: "ArrowRightLeft", path: "/admin/inventory-allocation", permission: "resources.view" },
+      { key: "inventory", label: "Depot Inventory", icon: "Package", path: "/admin/inventory", permission: "resources.view" },
+      { key: "inventory-allocation", label: "Bus Stock Allocations", icon: "ArrowRightLeft", path: "/admin/inventory-allocation", permission: "resources.view" },
       { key: "consumables", label: "Consumable Supplies", icon: "CheckCircle", path: "/admin/consumables", permission: "resources.view" },
       { key: "inventory-transactions", label: "Stock Movement Logs", icon: "Receipt", path: "/admin/inventory-transactions", permission: "resources.view" }
     ]
   },
   {
     key: "school-crm",
-    label: "School & Institutional CRM",
+    label: "Schools & Geography",
     type: "dropdown",
     icon: "School",
     items: [
-      { key: "schools", label: "School Master Directory", icon: "School", path: "/admin/schools", permission: "schools.view" },
-      { key: "registrations", label: "Onboarding & MoUs", icon: "ClipboardCheck", path: "/admin/registrations", permission: "schools.view" },
+      { key: "schools", label: "School Directory", icon: "School", path: "/admin/schools", permission: "schools.view" },
+      { key: "registrations", label: "School Registrations", icon: "ClipboardCheck", path: "/admin/registrations", permission: "schools.view" },
       { key: "organization", label: "Regional Geography", icon: "MapPin", path: "/admin/organization", permission: "organization.view" }
     ]
   },
   {
     key: "field-academic",
-    label: "Field STEM & Operations",
+    label: "Field Operations",
     type: "dropdown",
     icon: "Microscope",
     items: [
       { key: "curriculum", label: "Curriculum & Experiments", icon: "Microscope", path: "/admin/curriculum", permission: "operations.view" },
-      { key: "operations", label: "Visits, Routes & Trips", icon: "CalendarDays", path: "/admin/operations", permission: "operations.view" }
+      { key: "operations", label: "Visits & Routes", icon: "CalendarDays", path: "/admin/operations", permission: "operations.view" }
     ]
   },
   {
     key: "finance",
-    label: "Financials & Procurement",
+    label: "Finance & Procurement",
     type: "dropdown",
     icon: "Receipt",
     items: [
       { key: "finance-expenses", label: "Operational Expenses", icon: "Receipt", path: "/admin/finance?sub=Operational%20Expenses", permission: "organization.view" },
-      { key: "finance-procurement", label: "Procurement Requisitions", icon: "Package", path: "/admin/finance?sub=Procurement%20Requisitions", permission: "organization.view" }
+      { key: "finance-procurement", label: "Purchase Requisitions", icon: "Package", path: "/admin/finance?sub=Procurement%20Requisitions", permission: "organization.view" }
     ]
   },
   {
     key: "hcm",
-    label: "Human Capital Management (HCM)",
+    label: "Staff & Permissions",
     type: "dropdown",
     icon: "Users",
     items: [
-      { key: "users", label: "Personnel Directory", icon: "Users", path: "/admin/users", permission: "people.view" },
-      { key: "roles", label: "Access & Roles Matrix", icon: "ShieldCheck", path: "/admin/roles-permissions", permission: "security.view" }
+      { key: "users", label: "Staff Directory", icon: "Users", path: "/admin/users", permission: "people.view" },
+      { key: "roles", label: "Roles & Permissions", icon: "ShieldCheck", path: "/admin/roles-permissions", permission: "security.view" }
     ]
   },
   {
     key: "governance",
-    label: "Governance & System (GRC)",
+    label: "System & Settings",
     type: "heading",
     items: [
-      { key: "audit-logs", label: "Enterprise Audit Logs", icon: "ShieldCheck", path: "/admin/audit-logs", permission: "security.view" },
+      { key: "audit-logs", label: "Audit Logs", icon: "ShieldCheck", path: "/admin/audit-logs", permission: "security.view" },
       { key: "settings", label: "System Configuration", icon: "Settings", path: "/admin/settings", permission: "organization.view" }
     ]
   }
@@ -126,17 +126,17 @@ export const ADMIN_NAVIGATION: NavItem[] = ADMIN_NAV_SECTIONS.flatMap((section) 
 export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
   {
     key: "overview",
-    label: "Regional Operations Hub",
+    label: "Overview",
     type: "heading",
     items: [
-      { key: "dashboard", label: "Regional ERP Dashboard", icon: "LayoutDashboard", path: "/regional/dashboard", permission: "dashboard.view" },
+      { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/regional/dashboard", permission: "dashboard.view" },
       { key: "reports", label: "Operations Reports", icon: "BarChart3", path: "/regional/reports", permission: "analytics.view" },
-      { key: "notifications", label: "Dispatch Alerts", icon: "Bell", path: "/regional/notifications", permission: "dashboard.view" }
+      { key: "notifications", label: "Alerts", icon: "Bell", path: "/regional/notifications", permission: "dashboard.view" }
     ]
   },
   {
     key: "fleet-regional",
-    label: "Fleet & Regional Assets (EAM)",
+    label: "Fleet & Assets",
     type: "dropdown",
     icon: "Bus",
     items: [
@@ -147,7 +147,7 @@ export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
   },
   {
     key: "inventory-ops",
-    label: "Supply Chain & Depot (SCM)",
+    label: "Inventory & Depot",
     type: "dropdown",
     icon: "Package",
     items: [
@@ -158,7 +158,7 @@ export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
   },
   {
     key: "school-logistics",
-    label: "School Network & Routes (CRM)",
+    label: "Schools & Routes",
     type: "dropdown",
     icon: "School",
     items: [
@@ -169,22 +169,22 @@ export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
   },
   {
     key: "field-ops",
-    label: "Field Delivery & Verification",
+    label: "Field Visits",
     type: "dropdown",
     icon: "ClipboardCheck",
     items: [
-      { key: "visits", label: "Visit Execution Tracking", icon: "ClipboardCheck", path: "/regional/visits", permission: "operations.view" },
-      { key: "field-reports", label: "Field Staff Reports", icon: "FileText", path: "/regional/field-reports", permission: "operations.view" },
-      { key: "documents", label: "Compliance & MoUs Vault", icon: "Receipt", path: "/regional/documents", permission: "dashboard.view" }
+      { key: "visits", label: "Visit Tracking", icon: "ClipboardCheck", path: "/regional/visits", permission: "operations.view" },
+      { key: "field-reports", label: "Field Reports", icon: "FileText", path: "/regional/field-reports", permission: "operations.view" },
+      { key: "documents", label: "Documents", icon: "Receipt", path: "/regional/documents", permission: "dashboard.view" }
     ]
   },
   {
     key: "personnel",
-    label: "Regional Personnel (HCM)",
+    label: "Staff",
     type: "dropdown",
     icon: "Users",
     items: [
-      { key: "staff", label: "Field Science Communicators", icon: "Users", path: "/regional/staff", permission: "people.view" }
+      { key: "staff", label: "Field Communicators", icon: "Users", path: "/regional/staff", permission: "people.view" }
     ]
   },
   {
@@ -192,7 +192,7 @@ export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
     label: "Account & Settings",
     type: "heading",
     items: [
-      { key: "profile", label: "Coordinator Profile", icon: "UserCircle", path: "/regional/profile", permission: "dashboard.view" },
+      { key: "profile", label: "Profile", icon: "UserCircle", path: "/regional/profile", permission: "dashboard.view" },
       { key: "settings", label: "Regional Settings", icon: "Settings", path: "/regional/settings", permission: "dashboard.view" }
     ]
   }

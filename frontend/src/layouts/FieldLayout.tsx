@@ -28,26 +28,6 @@ export function FieldLayout() {
 
   return (
     <div className="field-shell instructor-shell">
-      {/* Top System Status Bar */}
-      <div className="status-bar">
-        <div className="status-bar-left">
-          <div className="status-bar-dot" />
-          <span className="status-bar-label">VIBHA · Science on Wheels ERP</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Field Staff Mobile Terminal</span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", opacity: 0.85 }}>Live On-Site Mode</span>
-        </div>
-        <div className="status-bar-right">
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#10B981" }} />
-            <span>LAB TELEMETRY LINKED</span>
-          </span>
-          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Offline Buffer Active</span>
-        </div>
-      </div>
-
       <div className="portal-body">
         {/* Mobile backdrop */}
         {mobileNav && (
@@ -66,14 +46,8 @@ export function FieldLayout() {
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">VIBHA</div>
-              <div className="sidebar-brand-role">Science on Wheels ERP</div>
+              <div className="sidebar-brand-role">Science on Wheels</div>
             </div>
-          </div>
-
-          {/* Role badge */}
-          <div className="command-role field-role">
-            <span style={{ color: "var(--field-accent)" }}>FIELD SCIENCE COMMUNICATOR</span>
-            <b>Mobile Lab Execution & STEM Delivery</b>
           </div>
 
           {/* Navigation */}

@@ -198,22 +198,26 @@ export function RolesPermissionsPage() {
   return (
     <div className="portal-module">
       {/* Subnav Tabs */}
-      <div className="subnav-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+      <div className="subnav-tabs" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap", borderBottom: "1px solid var(--stone, #e2e8f0)", paddingBottom: "0.75rem" }}>
         {subOptions.map((opt) => (
           <button
             key={opt}
+            type="button"
             className={`ghost ${sub === opt ? "primary" : ""}`}
             onClick={() => setSub(opt)}
             style={{
-              padding: "0.4rem 0.8rem",
-              borderRadius: "4px",
-              background: sub === opt ? "var(--color-primary, #6366f1)" : "rgba(255,255,255,0.05)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.1)",
+              padding: "0.45rem 0.9rem",
+              borderRadius: "6px",
+              background: sub === opt ? "var(--charcoal-dark, #1E242B)" : "#ffffff",
+              color: sub === opt ? "#ffffff" : "var(--charcoal, #334155)",
+              border: sub === opt ? "1px solid var(--charcoal-dark, #1E242B)" : "1px solid var(--stone, #cbd5e1)",
+              fontWeight: sub === opt ? 700 : 500,
+              fontSize: "13px",
               cursor: "pointer",
+              transition: "all 0.15s ease"
             }}
           >
-            {opt === "Matrix" ? "⚡ Role Permission Matrix" : opt}
+            {opt === "Matrix" ? "Role Permission Matrix" : opt}
           </button>
         ))}
       </div>
@@ -229,25 +233,25 @@ export function RolesPermissionsPage() {
             style={{
               padding: "1.25rem 1.5rem",
               borderRadius: "8px",
-              background: "rgba(30, 36, 43, 0.7)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              background: "#ffffff",
+              border: "1px solid var(--stone, #e2e8f0)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
               <div>
-                <span style={{ fontSize: "11px", fontFamily: "monospace", letterSpacing: "0.08em", color: "#6366f1", textTransform: "uppercase" }}>
-                  RBAC SECURITY & GOVERNANCE
+                <span style={{ fontSize: "11px", fontFamily: "monospace", letterSpacing: "0.08em", color: "#6366f1", textTransform: "uppercase", fontWeight: 700 }}>
+                  ROLES & GOVERNANCE
                 </span>
-                <h2 style={{ margin: "4px 0", fontSize: "1.5rem", fontWeight: 700 }}>
+                <h2 style={{ margin: "4px 0", fontSize: "1.4rem", fontWeight: 700, color: "#0f172a" }}>
                   Role Permission Matrix
                 </h2>
-                <p style={{ margin: 0, color: "#94a3b8", fontSize: "14px" }}>
-                  Inspect and grant granular platform capabilities to defined system roles. Changes take effect on subsequent authenticated requests.
+                <p style={{ margin: 0, color: "#64748b", fontSize: "13.5px" }}>
+                  Inspect and configure platform capabilities assigned to each role.
                 </p>
               </div>
 
               {hasUnsavedChanges && (
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#f59e0b22", border: "1px solid #f59e0b", color: "#fcd34d", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#fef3c7", border: "1px solid #f59e0b", color: "#b45309", padding: "6px 12px", borderRadius: "6px", fontSize: "12px", fontWeight: 600 }}>
                   <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }} />
                   Unsaved Changes
                 </div>
@@ -271,9 +275,9 @@ export function RolesPermissionsPage() {
                       borderRadius: "6px",
                       cursor: "pointer",
                       transition: "all 0.15s ease",
-                      border: isSelected ? "1px solid #6366f1" : "1px solid rgba(255,255,255,0.1)",
-                      background: isSelected ? "rgba(99, 102, 241, 0.2)" : "rgba(255,255,255,0.03)",
-                      color: isSelected ? "#fff" : "#cbd5e1",
+                      border: isSelected ? "1px solid #6366f1" : "1px solid #cbd5e1",
+                      background: isSelected ? "#6366f1" : "#f8fafc",
+                      color: isSelected ? "#ffffff" : "#334155",
                     }}
                   >
                     <span style={{ fontWeight: 600, fontSize: "13px" }}>{r.name}</span>
@@ -282,8 +286,9 @@ export function RolesPermissionsPage() {
                         fontSize: "11px",
                         padding: "2px 6px",
                         borderRadius: "10px",
-                        background: isSelected ? "#6366f1" : "rgba(255,255,255,0.1)",
-                        color: "#fff",
+                        background: isSelected ? "rgba(255,255,255,0.25)" : "#e2e8f0",
+                        color: isSelected ? "#ffffff" : "#475569",
+                        fontWeight: 600,
                       }}
                     >
                       {r.userCount ?? 0} users
@@ -296,12 +301,12 @@ export function RolesPermissionsPage() {
 
           {/* Notifications */}
           {error && (
-            <div style={{ backgroundColor: "#ef444422", border: "1px solid #ef4444", color: "#fca5a5", padding: "0.75rem 1rem", borderRadius: "6px", fontSize: "13px" }}>
+            <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fca5a5", color: "#b91c1c", padding: "0.75rem 1rem", borderRadius: "6px", fontSize: "13px" }}>
               {error}
             </div>
           )}
           {success && (
-            <div style={{ backgroundColor: "#22c55e22", border: "1px solid #22c55e", color: "#86efac", padding: "0.75rem 1rem", borderRadius: "6px", fontSize: "13px" }}>
+            <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #86efac", color: "#15803d", padding: "0.75rem 1rem", borderRadius: "6px", fontSize: "13px" }}>
               {success}
             </div>
           )}
@@ -314,10 +319,10 @@ export function RolesPermissionsPage() {
               alignItems: "center",
               flexWrap: "wrap",
               gap: "1rem",
-              background: "rgba(255,255,255,0.02)",
+              background: "#ffffff",
               padding: "0.75rem 1rem",
               borderRadius: "8px",
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: "1px solid var(--stone, #e2e8f0)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
@@ -329,15 +334,15 @@ export function RolesPermissionsPage() {
                 style={{
                   padding: "0.45rem 0.8rem",
                   borderRadius: "6px",
-                  background: "#0f172a",
-                  border: "1px solid #334155",
-                  color: "#fff",
+                  background: "#ffffff",
+                  border: "1px solid #cbd5e1",
+                  color: "#0f172a",
                   fontSize: "13px",
                   minWidth: "220px",
                 }}
               />
-              <span style={{ fontSize: "13px", color: "#94a3b8" }}>
-                Active: <strong style={{ color: "#fff" }}>{assignedKeys.size}</strong> / {allPermissions.length}
+              <span style={{ fontSize: "13px", color: "#64748b" }}>
+                Active: <strong style={{ color: "#0f172a" }}>{assignedKeys.size}</strong> / {allPermissions.length}
               </span>
             </div>
 
@@ -346,7 +351,7 @@ export function RolesPermissionsPage() {
                 type="button"
                 onClick={selectAll}
                 className="ghost"
-                style={{ padding: "0.4rem 0.75rem", fontSize: "12px", borderRadius: "4px", background: "rgba(255,255,255,0.06)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer" }}
+                style={{ padding: "0.4rem 0.75rem", fontSize: "12px", borderRadius: "4px", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", cursor: "pointer", fontWeight: 600 }}
               >
                 Select All
               </button>
@@ -354,7 +359,7 @@ export function RolesPermissionsPage() {
                 type="button"
                 onClick={deselectAll}
                 className="ghost"
-                style={{ padding: "0.4rem 0.75rem", fontSize: "12px", borderRadius: "4px", background: "rgba(255,255,255,0.06)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer" }}
+                style={{ padding: "0.4rem 0.75rem", fontSize: "12px", borderRadius: "4px", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", cursor: "pointer", fontWeight: 600 }}
               >
                 Deselect All
               </button>
@@ -363,7 +368,7 @@ export function RolesPermissionsPage() {
                   type="button"
                   onClick={resetToSaved}
                   className="ghost"
-                  style={{ padding: "0.4rem 0.75rem", fontSize: "12px", borderRadius: "4px", background: "transparent", color: "#94a3b8", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer" }}
+                  style={{ padding: "0.4rem 0.75rem", fontSize: "12px", borderRadius: "4px", background: "#ffffff", color: "#64748b", border: "1px solid #cbd5e1", cursor: "pointer", fontWeight: 600 }}
                 >
                   Reset
                 </button>
@@ -382,7 +387,6 @@ export function RolesPermissionsPage() {
                   background: hasUnsavedChanges ? "#6366f1" : "rgba(99, 102, 241, 0.4)",
                   color: "#fff",
                   border: "none",
-                  boxShadow: hasUnsavedChanges ? "0 2px 10px rgba(99, 102, 241, 0.4)" : "none",
                 }}
               >
                 {saving ? "Saving..." : `Save Permissions (${assignedKeys.size})`}
@@ -392,7 +396,7 @@ export function RolesPermissionsPage() {
 
           {/* Grouped Permission Categories */}
           {loading ? (
-            <div style={{ padding: "3rem", textAlign: "center", color: "#94a3b8" }}>Loading permissions...</div>
+            <div style={{ padding: "3rem", textAlign: "center", color: "#64748b" }}>Loading permissions...</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               {grouped.map(([catKey, group]) => {
@@ -406,8 +410,8 @@ export function RolesPermissionsPage() {
                     className="surface"
                     style={{
                       borderRadius: "8px",
-                      background: "rgba(30, 36, 43, 0.5)",
-                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      background: "#ffffff",
+                      border: "1px solid var(--stone, #e2e8f0)",
                       overflow: "hidden",
                     }}
                   >
@@ -415,8 +419,8 @@ export function RolesPermissionsPage() {
                     <div
                       style={{
                         padding: "0.75rem 1.25rem",
-                        background: "rgba(255, 255, 255, 0.03)",
-                        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                        background: "#f8fafc",
+                        borderBottom: "1px solid #e2e8f0",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
@@ -424,8 +428,8 @@ export function RolesPermissionsPage() {
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                         <span style={{ fontSize: "1.1rem" }}>{group.icon}</span>
-                        <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 600 }}>{group.label}</h4>
-                        <span style={{ fontSize: "11px", color: "#94a3b8", background: "rgba(255,255,255,0.06)", padding: "1px 8px", borderRadius: "10px" }}>
+                        <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 600, color: "#0f172a" }}>{group.label}</h4>
+                        <span style={{ fontSize: "11px", color: "#64748b", background: "#e2e8f0", padding: "1px 8px", borderRadius: "10px", fontWeight: 600 }}>
                           {assignedInGroup} / {groupKeys.length} granted
                         </span>
                       </div>
@@ -448,7 +452,7 @@ export function RolesPermissionsPage() {
                           border: "none",
                           color: "#6366f1",
                           fontSize: "12px",
-                          fontWeight: 500,
+                          fontWeight: 600,
                           cursor: "pointer",
                           padding: "2px 6px",
                         }}
@@ -480,8 +484,8 @@ export function RolesPermissionsPage() {
                               borderRadius: "6px",
                               cursor: "pointer",
                               transition: "all 0.15s ease",
-                              background: isGranted ? "rgba(99, 102, 241, 0.12)" : "rgba(255, 255, 255, 0.02)",
-                              border: isGranted ? "1px solid rgba(99, 102, 241, 0.4)" : "1px solid rgba(255, 255, 255, 0.05)",
+                              background: isGranted ? "#eef2ff" : "#f8fafc",
+                              border: isGranted ? "1px solid #818cf8" : "1px solid #e2e8f0",
                             }}
                           >
                             <input
@@ -496,15 +500,15 @@ export function RolesPermissionsPage() {
                                   style={{
                                     fontFamily: "monospace",
                                     fontSize: "12px",
-                                    color: isGranted ? "#c7d2fe" : "#94a3b8",
-                                    fontWeight: 600,
+                                    color: isGranted ? "#4338ca" : "#334155",
+                                    fontWeight: 700,
                                   }}
                                 >
                                   {item.key}
                                 </code>
                               </div>
-                              <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: isGranted ? "#e2e8f0" : "#64748b", lineHeight: 1.4 }}>
-                                {item.description || "System permission key for platform API access."}
+                              <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: isGranted ? "#312e81" : "#64748b", lineHeight: 1.4 }}>
+                                {item.description || "Permission key for access."}
                               </p>
                             </div>
                           </div>

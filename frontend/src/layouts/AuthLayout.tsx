@@ -24,7 +24,7 @@ export function AuthLayout() {
           </div>
           <div>
             <div className="auth-panel-logo-text">VIBHA · Science on Wheels</div>
-            <div className="auth-panel-logo-sub">Enterprise Resource Planning (ERP)</div>
+            <div className="auth-panel-logo-sub">Mobile Science Laboratory Management</div>
           </div>
         </div>
 
@@ -73,7 +73,7 @@ export function AuthLayout() {
 
         {/* Footer */}
         <div className="auth-panel-footer">
-          VIBHA · Science on Wheels · Enterprise Resource Planning (ERP) Platform
+          VIBHA · Science on Wheels
         </div>
       </div>
 

@@ -92,7 +92,7 @@ export function ResourceView({
     <section className="module-view">
       <div className="module-head">
         <div>
-          <div className="section-kicker">SUPER ADMIN / {config.key.toUpperCase()}</div>
+          <div className="section-kicker">{config.key.toUpperCase()}</div>
           <h2>{title}</h2>
           <p>{description}</p>
         </div>
@@ -170,10 +170,10 @@ export function ResourceView({
                                 fontSize: "11px",
                                 padding: "3px 8px",
                                 borderRadius: "4px",
-                                background: "rgba(255,255,255,0.06)",
-                                color: "#94a3b8",
+                                background: "#f1f5f9",
+                                color: "#64748b",
                                 cursor: "default",
-                                border: "1px solid rgba(255,255,255,0.1)"
+                                border: "1px solid #cbd5e1"
                               }}
                               title="Core system record is protected from deletion"
                             >

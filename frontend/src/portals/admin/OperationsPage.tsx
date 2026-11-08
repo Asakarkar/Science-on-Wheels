@@ -21,7 +21,7 @@ export function OperationsPage() {
   return (
     <div className="portal-module">
       <div style={{ marginBottom: "20px" }}>
-        <div className="section-kicker">ERP / FIELD OPERATIONS EXECUTION</div>
+        <div className="section-kicker">FIELD OPERATIONS</div>
         <h2 style={{ fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.02em", margin: "4px 0 8px" }}>
           School Visits, Routes & Trip Operations
         </h2>

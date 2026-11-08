@@ -95,7 +95,7 @@ export const router = createBrowserRouter([
     element: <RootRedirect />
   },
 
-  // Protected Super Admin Portal (/admin)
+  // Protected Administration Portal (/admin)
   {
     path: "/admin",
     element: <AuthGuard />,
