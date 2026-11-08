@@ -72,7 +72,7 @@ export function DashboardPage() {
 
   const metrics = [
     { label: "Regions", value: overview.kpis.regions, detail: "Organization footprint", tone: "violet" },
-    { label: "Active Labs", value: overview.kpis.labs, detail: "Mobile laboratories", tone: "violet" },
+    { label: "Active Labs", value: `${overview.kpis.labs} / 5`, detail: "Max 5 mobile laboratories", tone: "violet" },
     { label: "Field Staff", value: overview.kpis.fieldStaff, detail: "Active communicators" },
     { label: "Schools Covered", value: overview.kpis.schools, detail: "Connected school records" },
     { label: "Students Reached", value: overview.kpis.students, detail: "Students in platform" },
@@ -192,7 +192,7 @@ export function DashboardPage() {
             <div className="map-caption">NETWORK TOPOLOGY / SCHEMATIC</div>
             <div className="map-route route-a" />
             <div className="map-route route-b" />
-            {overview.liveLabs.slice(0, 8).map((lab, i) => (
+            {overview.liveLabs.slice(0, 5).map((lab, i) => (
               <button
                 className={`map-pin p${i + 1}`}
                 key={lab.id}

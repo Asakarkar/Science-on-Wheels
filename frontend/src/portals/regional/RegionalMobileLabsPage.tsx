@@ -213,7 +213,7 @@ export function RegionalMobileLabsPage() {
           </select>
         </div>
         <div className="text-charcoal-muted font-mono">
-          Showing <strong>{filteredBuses.length}</strong> of {buses.length} vehicles
+          Showing <strong>{filteredBuses.length}</strong> of {buses.length} vehicles (Max 5 Capacity)
         </div>
       </div>
 

@@ -118,7 +118,7 @@ export function AnalyticsPage() {
             subtitle="Live database aggregation of institutional network and mobile laboratories"
             data={[
               { label: "Schools Connected", value: summary.schools || 0, color: "#4f46e5" },
-              { label: "Mobile Science Labs", value: summary.labs || 0, color: "#10b981" },
+              { label: "Mobile Science Labs", value: summary.labs || 0, total: 5, color: "#10b981", detail: `${summary.labs || 0} / 5 max capacity` },
               { label: "Field Visits Hosted", value: summary.events || 0, color: "#06b6d4", detail: `${summary.completedEvents || 0} completed` },
               { label: "Active Field Personnel", value: summary.users || 0, color: "#f59e0b" }
             ]}

@@ -300,6 +300,13 @@ export async function createResource(req: Request, res: Response, next: NextFunc
     data.updatedAt = new Date();
   }
   if (resource === "labs") {
+    const currentLabCount = await prisma.bus.count();
+    if (currentLabCount >= 5) {
+      res.status(400).json({
+        message: "Maximum fleet capacity reached: The platform accommodates a maximum of 5 mobile laboratories."
+      });
+      return;
+    }
     if (!data.insuranceExpiry) data.insuranceExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
     if (!data.fitnessExpiry) data.fitnessExpiry = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
     if (data.driverId) {

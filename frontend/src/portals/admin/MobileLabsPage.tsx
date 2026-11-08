@@ -263,24 +263,43 @@ export function MobileLabsPage() {
             >
               Export CSV
             </button>
-            <button
-              type="button"
-              className="primary"
-              onClick={() => {
-                setEditingBus(null);
-                setShowAddEditModal(true);
-              }}
-              style={{
-                cursor: "pointer",
-                background: "var(--charcoal-dark, #1E242B)",
-                color: "#fff",
-                fontWeight: 600,
-                padding: "0.5rem 1rem",
-                borderRadius: "6px"
-              }}
-            >
-              + Register Bus
-            </button>
+            {buses.length >= 5 ? (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "0.5rem 0.85rem",
+                  borderRadius: "6px",
+                  background: "rgba(100, 116, 139, 0.12)",
+                  color: "var(--charcoal-muted)",
+                  fontSize: "12.5px",
+                  fontWeight: 600,
+                  border: "1px solid var(--stone)"
+                }}
+              >
+                Fleet at Capacity (5/5 Labs)
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="primary"
+                onClick={() => {
+                  setEditingBus(null);
+                  setShowAddEditModal(true);
+                }}
+                style={{
+                  cursor: "pointer",
+                  background: "var(--charcoal-dark, #1E242B)",
+                  color: "#fff",
+                  fontWeight: 600,
+                  padding: "0.5rem 1rem",
+                  borderRadius: "6px"
+                }}
+              >
+                + Register Bus ({buses.length}/5)
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -317,7 +336,7 @@ export function MobileLabsPage() {
                 transition: "all 0.15s ease"
               }}
             >
-              {opt === "All Labs" ? `Fleet Directory (${buses.length})` : opt}
+              {opt === "All Labs" ? `Fleet Directory (${buses.length}/5)` : opt}
             </button>
           );
         })}
@@ -344,8 +363,12 @@ export function MobileLabsPage() {
               <div style={{ fontSize: "0.75rem", fontFamily: "var(--mono)", color: "var(--charcoal-subtle)", textTransform: "uppercase" }}>
                 Total Fleet Size
               </div>
-              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--charcoal)" }}>{metrics.total}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>Registered mobile labs</div>
+              <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--charcoal)" }}>
+                {metrics.total} <span style={{ fontSize: "1rem", fontWeight: 500, color: "var(--charcoal-muted)" }}>/ 5</span>
+              </div>
+              <div style={{ fontSize: "0.75rem", color: "var(--charcoal-muted)", marginTop: "0.25rem" }}>
+                Max 5 mobile laboratories
+              </div>
             </div>
 
             <div className="surface metric-card" style={{ padding: "1rem", border: "1px solid var(--stone)", borderRadius: "8px" }}>
@@ -688,6 +711,7 @@ export function MobileLabsPage() {
       {showAddEditModal && (
         <BusFormModal
           bus={editingBus}
+          totalBuses={buses.length}
           regions={regions}
           staffUsers={staffUsers}
           onClose={() => setShowAddEditModal(false)}
@@ -741,13 +765,14 @@ export function MobileLabsPage() {
 // -------------------------------------------------------------
 interface BusFormModalProps {
   bus: BusRecord | null;
+  totalBuses?: number;
   regions: RegionOption[];
   staffUsers: UserOption[];
   onClose: () => void;
   onSaved: () => void;
 }
 
-function BusFormModal({ bus, regions, staffUsers, onClose, onSaved }: BusFormModalProps) {
+function BusFormModal({ bus, totalBuses = 0, regions, staffUsers, onClose, onSaved }: BusFormModalProps) {
   const isEdit = Boolean(bus);
 
   const [form, setForm] = useState({
@@ -770,6 +795,12 @@ function BusFormModal({ bus, regions, staffUsers, onClose, onSaved }: BusFormMod
     e.preventDefault();
     setSaving(true);
     setError("");
+
+    if (!isEdit && totalBuses >= 5) {
+      setError("Fleet capacity limit reached: The platform accommodates a maximum of 5 mobile laboratories.");
+      setSaving(false);
+      return;
+    }
 
     if (!form.registrationNumber.trim()) {
       setError("Vehicle registration number is required.");

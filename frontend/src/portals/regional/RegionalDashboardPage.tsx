@@ -240,8 +240,8 @@ export function RegionalDashboardPage() {
         />
         <StatCard
           label="Active Mobile Labs"
-          value={k.activeBuses}
-          subtext={`${k.maintenanceBuses} in maintenance`}
+          value={`${k.activeBuses} / ${Math.min(Math.max(k.totalBuses, 1), 5)}`}
+          subtext={`${k.maintenanceBuses} in maintenance (Max 5 Fleet)`}
           onClick={() => navigate("/regional/mobile-labs")}
         />
         <StatCard

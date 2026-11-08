@@ -43,7 +43,7 @@ export function AuthLayout() {
           {/* Floating Orbiting STEM Badges */}
           <div className="auth-float-node pos-a">
             <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#38BDF8" }} />
-            <span>120+ Active Mobile Labs</span>
+            <span>Mobile Science Fleet (Max 5 Labs)</span>
           </div>
 
           <div className="auth-float-node pos-b">
