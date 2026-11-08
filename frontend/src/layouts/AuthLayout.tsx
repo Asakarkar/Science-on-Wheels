@@ -13,18 +13,12 @@ export function AuthLayout() {
           <div className="login-header-left">
             <div className="login-header-brand">
               <span className="login-status-indicator-sq" />
-              <span className="login-status-title">SOW // FLEET OPERATIONS</span>
+              <span className="login-status-title">Science on Wheels</span>
             </div>
-            <span className="login-header-divider">|</span>
-            <span className="login-header-sub">System Node: MH-CENTRAL-01</span>
           </div>
 
           <div className="login-header-right">
-            <span className="login-telemetry-badge">
-              <span className="login-telemetry-dot" />
-              <span className="login-telemetry-text">CORE TELEMETRY: NOMINAL</span>
-            </span>
-            <span className="login-header-build">FLEET CAPACITY: 5 LABS</span>
+            <span className="login-header-version">Version 1.26.1</span>
           </div>
         </div>
       </header>

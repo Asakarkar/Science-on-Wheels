@@ -465,12 +465,12 @@ img, svg {
   color: rgb(5, 150, 105);
 }
 
-.login-header-build {
-  font-size: 11px;
+.login-header-build,
+.login-header-version {
+  font-size: 11.5px;
+  font-weight: 500;
   color: #788286;
-  border-left: 1px solid #DDD7CD;
-  padding-left: 12px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 .login-main-container {
