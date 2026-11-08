@@ -1,91 +1,43 @@
 import { Outlet } from "react-router-dom";
-import { BrandLogo } from "../shared/components/BrandLogo";
-import { NavIcon } from "../shared/components/NavIcon";
-
-const FEATURES = [
-  "Multi-region mobile science laboratory dispatch",
-  "Real-time GPS bus tracking & telemetry",
-  "Automated school visit scheduling & monitoring",
-  "Standardized STEM curriculum delivery tracking",
-];
+import { InteractiveScienceBlueprint } from "../shared/components/InteractiveScienceBlueprint";
 
 export function AuthLayout() {
   return (
-    <div className="auth-shell">
-      {/* Left Creative Animated STEM Universe Panel (visible on desktop) */}
-      <div className="auth-panel">
-        <div className="auth-panel-bg" />
-        <div className="auth-panel-grid" />
+    <div className="login-shell bg-grid-warm">
+      {/* Three.js Interactive Science Blueprint Background Scene */}
+      <InteractiveScienceBlueprint />
 
-        {/* Top Branding */}
-        <div className="auth-panel-logo">
-          <div className="auth-panel-logo-mark" style={{ backgroundColor: "#FFFFFF", padding: "4px" }}>
-            <BrandLogo size={36} />
-          </div>
-          <div>
-            <div className="auth-panel-logo-text">VIBHA · Science on Wheels</div>
-            <div className="auth-panel-logo-sub">Mobile Science Laboratory Management</div>
-          </div>
-        </div>
-
-        {/* Center: 3D Orbital STEM Simulation */}
-        <div className="auth-stem-stage">
-          {/* Orbital Rings */}
-          <div className="auth-orbit-ring auth-orbit-1" />
-          <div className="auth-orbit-ring auth-orbit-2" />
-          <div className="auth-orbit-ring auth-orbit-3" />
-
-          {/* Central Pulsing Energy Core */}
-          <div className="auth-atom-core">
-            <NavIcon name="Microscope" size={26} color="#FFFFFF" />
+      {/* Top System Status Bar */}
+      <header className="login-system-header" data-purpose="system-header">
+        <div className="login-system-header-inner">
+          <div className="login-header-left">
+            <div className="login-header-brand">
+              <span className="login-status-indicator-sq" />
+              <span className="login-status-title">SOW // FLEET OPERATIONS</span>
+            </div>
+            <span className="login-header-divider">|</span>
+            <span className="login-header-sub">System Node: MH-CENTRAL-01</span>
           </div>
 
-          {/* Floating Orbiting STEM Badges */}
-          <div className="auth-float-node pos-a">
-            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#38BDF8" }} />
-            <span>Mobile Science Fleet (Max 5 Labs)</span>
-          </div>
-
-          <div className="auth-float-node pos-b">
-            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#34D399" }} />
-            <span>10,000+ Students Reached</span>
-          </div>
-
-          <div className="auth-float-node pos-c">
-            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#F59E0B" }} />
-            <span>Interactive STEM Modules</span>
+          <div className="login-header-right">
+            <span className="login-telemetry-badge">
+              <span className="login-telemetry-dot" />
+              <span className="login-telemetry-text">CORE TELEMETRY: NOMINAL</span>
+            </span>
+            <span className="login-header-build">FLEET CAPACITY: 5 LABS</span>
           </div>
         </div>
+      </header>
 
-        {/* Text & Mission */}
-        <div>
-          <h1 className="auth-panel-heading">
-            Empowering curious minds through mobile science
-          </h1>
-          <p className="auth-panel-desc">
-            Vijnana Bharati (VIBHA) centralized intelligent coordination platform connecting regional hubs, field communicators, and rural schools across India.
-          </p>
-
-          <div className="auth-panel-features">
-            {FEATURES.map((feature) => (
-              <div key={feature} className="auth-panel-feature">
-                <div className="auth-panel-feature-dot" />
-                <span>{feature}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="auth-panel-footer">
-          VIBHA · Science on Wheels
-        </div>
-      </div>
-
-      {/* Right Login Area */}
-      <div className="auth-form-panel">
+      {/* Main Centered Login Terminal Container */}
+      <main className="login-main-container" data-purpose="login-container">
         <Outlet />
-      </div>
+      </main>
+
+      {/* Bottom Baseline Bar */}
+      <footer className="login-footer">
+        VIBHA · Science on Wheels Mobile Laboratory Platform
+      </footer>
     </div>
   );
 }
