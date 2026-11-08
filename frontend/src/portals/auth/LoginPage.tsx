@@ -2,17 +2,26 @@ import { useState, type FormEvent } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../app/providers/AuthProvider";
 import { BrandLogo } from "../../shared/components/BrandLogo";
+import { NavIcon } from "../../shared/components/NavIcon";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Quick fill helper for testers
+  function fillDemo(userEmail: string, userPass: string) {
+    setEmail(userEmail);
+    setPassword(userPass);
+    setError(null);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +61,7 @@ export function LoginPage() {
       navigate(target, { replace: true });
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Unable to sign in. Please try again."
+        err instanceof Error ? err.message : "Unable to sign in. Please verify your credentials."
       );
     } finally {
       setLoading(false);
@@ -61,47 +70,69 @@ export function LoginPage() {
 
   return (
     <div className="auth-form-container">
-      {/* Mobile logo (shown only on mobile, panel is hidden) */}
-      <div className="auth-form-logo-mobile">
-        <div className="auth-form-logo-mark-mobile">
-          <BrandLogo size={20} color="#fff" />
+      {/* Mobile Branding (only displayed when left panel is hidden on mobile screens) */}
+      <div className="auth-form-logo-mobile" style={{ display: "none", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
+        <div style={{ width: 38, height: 38, borderRadius: "var(--r-md)", backgroundColor: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFF" }}>
+          <BrandLogo size={22} color="#FFF" />
         </div>
-        <span className="auth-form-logo-text-mobile">Science on Wheels</span>
+        <div>
+          <strong style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)" }}>Science on Wheels</strong>
+          <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-subtle)" }}>Operations Portal</span>
+        </div>
       </div>
 
       {/* Header */}
       <div className="auth-form-header">
         <h2 className="auth-form-title">Sign in to your account</h2>
         <p className="auth-form-subtitle">
-          Enter your credentials to access the operations management platform.
+          Enter your authorized credentials to access regional coordination and fleet management.
         </p>
+      </div>
+
+      {/* Quick Demo Role Selector Pills */}
+      <div style={{ marginBottom: "20px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px", fontWeight: 600, color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+          Quick Demo Accounts:
+        </div>
+        <div className="quick-roles">
+          <button
+            type="button"
+            className="quick-role-pill"
+            onClick={() => fillDemo("regional@scienceonwheels.com", "RegionalAdmin@123456")}
+          >
+            🏢 Regional Admin
+          </button>
+          <button
+            type="button"
+            className="quick-role-pill"
+            onClick={() => fillDemo("field@scienceonwheels.com", "FieldOperator@123456")}
+          >
+            🔬 Field Staff
+          </button>
+        </div>
       </div>
 
       {/* Form */}
       <form className="auth-form" onSubmit={handleSubmit} noValidate={false}>
-        {/* Error */}
+        {/* Error Alert */}
         {error && (
           <div className="auth-error" role="alert" aria-live="polite">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: "1px" }}>
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
+            <NavIcon name="AlertCircle" size={18} style={{ flexShrink: 0, marginTop: "2px", color: "var(--error)" }} />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Email */}
+        {/* Email Address */}
         <div className="auth-field">
           <label className="auth-field-label" htmlFor="email">
-            Email address
+            Email Address
           </label>
           <input
             className="auth-input"
             id="email"
             name="email"
             type="email"
-            placeholder="operator@sow.org"
+            placeholder="operator@scienceonwheels.com"
             autoComplete="username"
             autoCapitalize="none"
             spellCheck={false}
@@ -111,7 +142,7 @@ export function LoginPage() {
           />
         </div>
 
-        {/* Password */}
+        {/* Password with Show/Hide Toggle */}
         <div className="auth-field">
           <div className="auth-label-row">
             <label className="auth-field-label" htmlFor="password">
@@ -121,26 +152,47 @@ export function LoginPage() {
               type="button"
               className="auth-link"
               onClick={() =>
-                setError("Contact your system administrator to reset your password.")
+                setError("Please contact your central system administrator to reset or re-issue your credentials.")
               }
             >
               Forgot password?
             </button>
           </div>
-          <input
-            className="auth-input"
-            id="password"
-            name="password"
-            type="password"
-            placeholder="Enter your password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              className="auth-input"
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••••••"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ paddingRight: "44px" }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "var(--text-subtle)",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              <NavIcon name={showPassword ? "Eye" : "Eye"} size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Remember */}
+        {/* Keep signed in */}
         <div className="auth-remember">
           <input
             id="remember"
@@ -149,28 +201,30 @@ export function LoginPage() {
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
           />
-          <label htmlFor="remember">Keep me signed in</label>
+          <label htmlFor="remember" style={{ cursor: "pointer", userSelect: "none" }}>
+            Remember this terminal session
+          </label>
         </div>
 
-        {/* Submit */}
+        {/* Submit Button */}
         <button className="auth-submit" type="submit" disabled={loading}>
           {loading ? (
-            "Verifying credentials…"
+            <>
+              <div className="loader-ring" style={{ width: 18, height: 18, borderWidth: 2, borderTopColor: "#FFF" }} />
+              <span>Authenticating…</span>
+            </>
           ) : (
             <>
-              <span>Sign in</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
+              <span>Sign in to Platform</span>
+              <NavIcon name="ArrowRightLeft" size={16} />
             </>
           )}
         </button>
       </form>
 
-      {/* Footer */}
+      {/* Footer info */}
       <div className="auth-footer">
-        Science on Wheels · Secure Operations Platform · v1.26
+        Science on Wheels · Autonomous STEM Logistics Management · 2026
       </div>
     </div>
   );

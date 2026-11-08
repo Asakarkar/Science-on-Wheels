@@ -46,19 +46,19 @@ export function RegionalLayout() {
   }
 
   return (
-    <div className="admin-shell regional-shell" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* System status bar */}
+    <div className="admin-shell regional-shell">
+      {/* Top System Status Bar */}
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">Regional Operations</span>
-          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "10px" }}>·</span>
-          <span style={{ fontSize: "10px" }}>Regional Administrator Portal</span>
+          <span className="status-bar-label">Regional Operations Command</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span>Regional Administrator Hub</span>
         </div>
         <div className="status-bar-right">
           <span>Science on Wheels MIS</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>v1.26</span>
+          <span>Assigned Territory Scoped</span>
         </div>
       </div>
 
@@ -71,27 +71,23 @@ export function RegionalLayout() {
           />
         )}
 
-        {/* Sidebar */}
+        {/* Regional Sidebar */}
         <aside className={`admin-sidebar regional-sidebar ${mobileNav ? "open" : ""}`}>
           {/* Brand */}
           <div className="sidebar-brand">
             <div className="brand-mark regional-mark" style={{ backgroundColor: "var(--brand)" }}>
-              <BrandLogo size={20} color="#fff" />
+              <BrandLogo size={22} color="#FFFFFF" />
             </div>
-            <div className="sidebar-brand-text" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">Science on Wheels</div>
-              <div className="sidebar-brand-role">Regional Operations</div>
+              <div className="sidebar-brand-role">Regional Hub</div>
             </div>
           </div>
 
-          {/* Role tag */}
+          {/* Role badge */}
           <div className="command-role regional-role">
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 600, color: "var(--brand)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              Regional Admin
-            </span>
-            <b style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>
-              Plan · Assign · Coordinate
-            </b>
+            <span>REGIONAL ADMIN</span>
+            <b>Plan · Coordinate · Dispatch</b>
           </div>
 
           {/* Nav */}
@@ -117,7 +113,7 @@ export function RegionalLayout() {
                           className={`nav-item ${isActive ? "active" : ""}`}
                           onClick={() => handleSelect(item.path)}
                         >
-                          <NavIcon name={item.icon} size={15} className="nav-icon" />
+                          <NavIcon name={item.icon} size={17} className="nav-icon" />
                           <span>{item.label}</span>
                         </button>
                       );
@@ -128,8 +124,7 @@ export function RegionalLayout() {
 
               const isExpanded = expanded[section.key] ?? true;
               const hasActiveChild = visibleItems.some(
-                (item) =>
-                  currentPath === item.path || currentPath.startsWith(item.path)
+                (item) => currentPath === item.path || currentPath.startsWith(item.path)
               );
 
               return (
@@ -140,18 +135,17 @@ export function RegionalLayout() {
                     onClick={() => toggleSection(section.key)}
                     aria-expanded={isExpanded}
                   >
-                    <NavIcon name={section.icon || "ChevronDown"} size={14} className="nav-icon" />
-                    <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.08em" }}>
+                    <NavIcon name={section.icon || "ChevronDown"} size={16} className="nav-icon" />
+                    <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
                       {section.label}
                     </span>
                     <NavIcon
                       name="ChevronDown"
-                      size={13}
-                      className="nav-chevron"
+                      size={14}
                       style={{
                         transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                        transition: "transform 180ms ease",
-                        opacity: 0.5,
+                        transition: "transform 200ms ease",
+                        opacity: 0.6,
                       }}
                     />
                   </button>
@@ -169,7 +163,7 @@ export function RegionalLayout() {
                             className={`nav-sub-item ${isActive ? "active" : ""}`}
                             onClick={() => handleSelect(item.path)}
                           >
-                            <NavIcon name={item.icon} size={13} className="nav-icon" />
+                            <NavIcon name={item.icon} size={15} className="nav-icon" />
                             <span>{item.label}</span>
                           </button>
                         );
@@ -184,17 +178,17 @@ export function RegionalLayout() {
           {/* Sidebar footer */}
           <div className="sidebar-bottom">
             <div className="sync-indicator">
-              <span style={{ backgroundColor: "var(--success)" }} />
-              Region-scoped live data
+              <span />
+              Regional Synced Data
             </div>
             <button className="logout" onClick={() => void logout()}>
-              <NavIcon name="LogOut" size={14} style={{ opacity: 0.65 }} />
-              Sign out
+              <NavIcon name="LogOut" size={16} style={{ opacity: 0.8 }} />
+              <span>Sign out</span>
             </button>
           </div>
         </aside>
 
-        {/* Main content */}
+        {/* Main Content */}
         <main className="admin-main">
           {/* Top bar */}
           <header className="admin-topbar">
@@ -203,19 +197,19 @@ export function RegionalLayout() {
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Toggle navigation menu"
             >
-              <NavIcon name="Menu" size={18} />
+              <NavIcon name="Menu" size={20} />
             </button>
 
             <div className="breadcrumbs">
               <span>Science on Wheels</span>
-              <span style={{ color: "var(--text-disabled)" }}>›</span>
+              <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
               {activeSection && activeSection.type === "dropdown" && (
                 <>
                   <span style={{ color: "var(--text-muted)" }}>{activeSection.label}</span>
-                  <span style={{ color: "var(--text-disabled)" }}>›</span>
+                  <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
                 </>
               )}
-              <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+              <strong>
                 {activeItem?.label || "Operations"}
               </strong>
             </div>
@@ -225,9 +219,9 @@ export function RegionalLayout() {
                 className="top-search"
                 onClick={() => navigate("/regional/schools")}
               >
-                <NavIcon name="Search" size={13} />
-                <span>Search regional…</span>
-                <kbd style={{ fontFamily: "var(--font-mono)", fontSize: "9px", padding: "1px 4px", border: "1px solid var(--border-strong)", borderRadius: "3px", backgroundColor: "var(--surface-2)", color: "var(--text-subtle)" }}>
+                <NavIcon name="Search" size={15} />
+                <span>Search regional records…</span>
+                <kbd style={{ fontFamily: "var(--font-mono)", fontSize: "11px", padding: "2px 6px", border: "1px solid var(--border-strong)", borderRadius: "4px", backgroundColor: "var(--surface-2)", color: "var(--text-muted)" }}>
                   ⌘ K
                 </kbd>
               </button>
@@ -237,11 +231,11 @@ export function RegionalLayout() {
                   {(user?.name || "RA").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <strong style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  <strong style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
                     {user?.name || "Regional Admin"}
                   </strong>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-subtle)", display: "block" }}>
-                    {user?.email || "regional@sow.org"}
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
+                    {user?.email || "regional@scienceonwheels.com"}
                   </span>
                 </div>
               </div>

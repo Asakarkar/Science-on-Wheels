@@ -41,19 +41,19 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="admin-shell" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* System status bar */}
+    <div className="admin-shell">
+      {/* Top System Status Bar */}
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
           <span className="status-bar-label">Central Command</span>
-          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "10px" }}>·</span>
-          <span style={{ fontSize: "10px" }}>Super Administrator Portal</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span>Super Administrator Workspace</span>
         </div>
         <div className="status-bar-right">
           <span>Science on Wheels MIS</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>v1.26</span>
+          <span>Live Region Link Active</span>
         </div>
       </div>
 
@@ -71,25 +71,21 @@ export function AdminLayout() {
           {/* Brand */}
           <div className="sidebar-brand">
             <div className="brand-mark" style={{ backgroundColor: "var(--brand)" }}>
-              <BrandLogo size={20} color="#fff" />
+              <BrandLogo size={22} color="#FFFFFF" />
             </div>
-            <div className="sidebar-brand-text" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">Science on Wheels</div>
-              <div className="sidebar-brand-role">Administration</div>
+              <div className="sidebar-brand-role">Central Command</div>
             </div>
           </div>
 
-          {/* Role tag */}
+          {/* Role badge */}
           <div className="command-role">
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 600, color: "var(--brand)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              Super Admin
-            </span>
-            <b style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>
-              Control · Manage · Analyse
-            </b>
+            <span>SUPER ADMIN</span>
+            <b>Control · Allocate · Inspect</b>
           </div>
 
-          {/* Nav */}
+          {/* Navigation */}
           <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
             {ADMIN_NAV_SECTIONS.map((section) => {
               const visibleItems = section.items.filter(
@@ -112,7 +108,7 @@ export function AdminLayout() {
                           className={`nav-item ${isActive ? "active" : ""}`}
                           onClick={() => handleSelect(item.path)}
                         >
-                          <NavIcon name={item.icon} size={15} className="nav-icon" />
+                          <NavIcon name={item.icon} size={17} className="nav-icon" />
                           <span>{item.label}</span>
                         </button>
                       );
@@ -141,18 +137,17 @@ export function AdminLayout() {
                     }
                     aria-expanded={isExpanded}
                   >
-                    <NavIcon name={section.icon || "ChevronDown"} size={14} className="nav-icon" />
-                    <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.08em" }}>
+                    <NavIcon name={section.icon || "ChevronDown"} size={16} className="nav-icon" />
+                    <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>
                       {section.label}
                     </span>
                     <NavIcon
                       name="ChevronDown"
-                      size={13}
-                      className="nav-chevron"
+                      size={14}
                       style={{
                         transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                        transition: "transform 180ms ease",
-                        opacity: 0.5,
+                        transition: "transform 200ms ease",
+                        opacity: 0.6,
                       }}
                     />
                   </button>
@@ -170,7 +165,7 @@ export function AdminLayout() {
                             className={`nav-sub-item ${isActive ? "active" : ""}`}
                             onClick={() => handleSelect(item.path)}
                           >
-                            <NavIcon name={item.icon} size={13} className="nav-icon" />
+                            <NavIcon name={item.icon} size={15} className="nav-icon" />
                             <span>{item.label}</span>
                           </button>
                         );
@@ -182,41 +177,41 @@ export function AdminLayout() {
             })}
           </nav>
 
-          {/* Sidebar footer */}
+          {/* Sidebar Footer */}
           <div className="sidebar-bottom">
             <div className="sync-indicator">
-              <span style={{ backgroundColor: "var(--success)" }} />
-              Authenticated workspace
+              <span />
+              Encrypted Session Active
             </div>
             <button className="logout" onClick={() => void logout()}>
-              <NavIcon name="LogOut" size={14} style={{ opacity: 0.65 }} />
-              Sign out
+              <NavIcon name="LogOut" size={16} style={{ opacity: 0.8 }} />
+              <span>Sign out</span>
             </button>
           </div>
         </aside>
 
-        {/* Main content */}
+        {/* Main Content Area */}
         <main className="admin-main">
-          {/* Top bar */}
+          {/* Top Bar */}
           <header className="admin-topbar">
             <button
               className="mobile-menu"
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Toggle navigation menu"
             >
-              <NavIcon name="Menu" size={18} />
+              <NavIcon name="Menu" size={20} />
             </button>
 
             <div className="breadcrumbs">
               <span>Science on Wheels</span>
-              <span style={{ color: "var(--text-disabled)" }}>›</span>
+              <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
               {activeSection && activeSection.type === "dropdown" && (
                 <>
                   <span style={{ color: "var(--text-muted)" }}>{activeSection.label}</span>
-                  <span style={{ color: "var(--text-disabled)" }}>›</span>
+                  <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
                 </>
               )}
-              <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+              <strong>
                 {activeItem?.label || "Dashboard"}
               </strong>
             </div>
@@ -226,9 +221,9 @@ export function AdminLayout() {
                 className="top-search"
                 onClick={() => navigate("/admin/inventory")}
               >
-                <NavIcon name="Search" size={13} />
+                <NavIcon name="Search" size={15} />
                 <span>Search modules…</span>
-                <kbd style={{ fontFamily: "var(--font-mono)", fontSize: "9px", padding: "1px 4px", border: "1px solid var(--border-strong)", borderRadius: "3px", backgroundColor: "var(--surface-2)", color: "var(--text-subtle)" }}>
+                <kbd style={{ fontFamily: "var(--font-mono)", fontSize: "11px", padding: "2px 6px", border: "1px solid var(--border-strong)", borderRadius: "4px", backgroundColor: "var(--surface-2)", color: "var(--text-muted)" }}>
                   ⌘ K
                 </kbd>
               </button>
@@ -238,11 +233,11 @@ export function AdminLayout() {
                   {(user?.name || "SA").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <strong style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
+                  <strong style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
                     {user?.name || "Super Admin"}
                   </strong>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-subtle)", display: "block" }}>
-                    {user?.email || "admin@sow.org"}
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
+                    {user?.email || "admin@scienceonwheels.com"}
                   </span>
                 </div>
               </div>

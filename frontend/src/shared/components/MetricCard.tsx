@@ -24,10 +24,10 @@ export function MetricCard({ label, value, detail, tone, accent, icon, onClick }
           <strong
             style={{
               display: "block",
-              fontSize: "26px",
+              fontSize: "30px",
               fontWeight: 800,
               color: "var(--text-primary)",
-              lineHeight: 1.1,
+              lineHeight: 1.15,
               letterSpacing: "-0.02em",
               marginTop: "6px",
               fontFamily: "var(--font-sans)",
@@ -42,11 +42,11 @@ export function MetricCard({ label, value, detail, tone, accent, icon, onClick }
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "36px",
-              height: "36px",
+              width: "40px",
+              height: "40px",
               borderRadius: "var(--r-md)",
-              backgroundColor: "var(--brand-light)",
-              color: "var(--brand)",
+              backgroundColor: "var(--accent-soft)",
+              color: "var(--accent)",
               flexShrink: 0,
             }}
           >
@@ -55,17 +55,17 @@ export function MetricCard({ label, value, detail, tone, accent, icon, onClick }
         )}
       </div>
       {detail && (
-        <small
+        <div
           style={{
             fontFamily: "var(--font-mono)",
-            fontSize: "10px",
+            fontSize: "12.5px",
             color: "var(--text-subtle)",
-            display: "block",
-            lineHeight: 1.4,
+            lineHeight: 1.45,
+            marginTop: "4px",
           }}
         >
           {detail}
-        </small>
+        </div>
       )}
     </article>
   );

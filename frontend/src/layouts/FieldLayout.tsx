@@ -27,19 +27,19 @@ export function FieldLayout() {
   }
 
   return (
-    <div className="field-shell instructor-shell" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* System status bar */}
+    <div className="field-shell instructor-shell">
+      {/* Top System Status Bar */}
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">Field Operations</span>
-          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "10px" }}>·</span>
-          <span style={{ fontSize: "10px" }}>Science Communicator Portal</span>
+          <span className="status-bar-label">Field Operations Console</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span>Science Communicator Terminal</span>
         </div>
         <div className="status-bar-right">
           <span>Science on Wheels MIS</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>v1.26</span>
+          <span>Mobile Lab Linked</span>
         </div>
       </div>
 
@@ -52,32 +52,28 @@ export function FieldLayout() {
           />
         )}
 
-        {/* Sidebar */}
+        {/* Field Sidebar */}
         <aside className={`admin-sidebar field-sidebar ${mobileNav ? "open" : ""}`}>
           {/* Brand */}
           <div className="sidebar-brand field-brand">
-            <div className="brand-mark field-logo" style={{ backgroundColor: "var(--accent)" }}>
-              <BrandLogo size={20} color="#fff" />
+            <div className="brand-mark field-logo" style={{ backgroundColor: "var(--brand)" }}>
+              <BrandLogo size={22} color="#FFFFFF" />
             </div>
-            <div className="sidebar-brand-text" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+            <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
               <div className="sidebar-brand-name">Science on Wheels</div>
               <div className="sidebar-brand-role">Field Operations</div>
             </div>
           </div>
 
-          {/* Role tag */}
-          <div className="command-role field-role" style={{ borderColor: "var(--accent-soft)", backgroundColor: "var(--accent-light)" }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 600, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              Science Communicator
-            </span>
-            <b style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>
-              Explore · Teach · Discover
-            </b>
+          {/* Role badge */}
+          <div className="command-role field-role">
+            <span style={{ color: "var(--field-accent)" }}>SCIENCE COMMUNICATOR</span>
+            <b>Explore · Teach · Discover</b>
           </div>
 
-          {/* Nav */}
+          {/* Navigation */}
           <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
-            <div className="nav-section-heading">Navigation</div>
+            <div className="nav-section-heading">Modules</div>
             {visibleNav.map((item) => {
               const isActive = activeNav?.key === item.key;
               return (
@@ -85,9 +81,8 @@ export function FieldLayout() {
                   <button
                     className={`nav-item field-nav ${isActive ? "active" : ""}`}
                     onClick={() => handleSelect(item.path)}
-                    style={{ "--active-color": "var(--accent)" } as React.CSSProperties}
                   >
-                    <NavIcon name={item.icon} size={15} className="nav-icon" />
+                    <NavIcon name={item.icon} size={17} className="nav-icon" />
                     <span>{item.label}</span>
                   </button>
                 </div>
@@ -98,46 +93,44 @@ export function FieldLayout() {
           {/* Sidebar footer */}
           <div className="sidebar-bottom field-bottom">
             <div className="sync-indicator">
-              <span style={{ backgroundColor: "var(--success)" }} />
-              Active Field Shift
+              <span />
+              Active Shift Connected
             </div>
             <button className="logout" onClick={() => void logout()}>
-              <NavIcon name="LogOut" size={14} style={{ opacity: 0.65 }} />
-              Sign out
+              <NavIcon name="LogOut" size={16} style={{ opacity: 0.8 }} />
+              <span>Sign out</span>
             </button>
           </div>
         </aside>
 
-        {/* Main content */}
+        {/* Main Content Area */}
         <main className="admin-main field-main">
-          {/* Top bar */}
+          {/* Top Bar */}
           <header className="admin-topbar field-top">
             <button
               className="mobile-menu field-mobile"
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Toggle navigation menu"
             >
-              <NavIcon name="Menu" size={18} />
+              <NavIcon name="Menu" size={20} />
             </button>
 
             <div className="breadcrumbs">
               <span>Science on Wheels</span>
-              <span style={{ color: "var(--text-disabled)" }}>›</span>
-              <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                {activeNav?.label || "Field"}
-              </strong>
+              <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
+              <strong>{activeNav?.label || "Field"}</strong>
             </div>
 
             <div className="top-actions">
               <div className="profile field-user">
-                <div className="avatar" style={{ backgroundColor: "var(--accent)" }}>
+                <div className="avatar" style={{ backgroundColor: "var(--brand)" }}>
                   {(user?.name || "SC").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <strong style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
-                    {user?.name || "Field User"}
+                  <strong style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
+                    {user?.name || "Field Officer"}
                   </strong>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-subtle)", display: "block" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
                     Science Communicator
                   </span>
                 </div>
