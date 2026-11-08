@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/providers/AuthProvider";
 import { BrandLogo } from "../shared/components/BrandLogo";
-import { ADMIN_NAV_SECTIONS, AdminNavSection, NavSubItem } from "../shared/constants/navigation";
+import { NavIcon } from "../shared/components/NavIcon";
+import { ADMIN_NAV_SECTIONS, type AdminNavSection, type NavSubItem } from "../shared/constants/navigation";
 
 export function AdminLayout() {
   const { user, logout, hasPermission } = useAuth();
@@ -17,7 +18,6 @@ export function AdminLayout() {
 
   const currentPath = location.pathname;
 
-  // Resolve active navigation item and parent section for breadcrumb & active styling
   let activeItem: NavSubItem | undefined;
   let activeSection: AdminNavSection | undefined;
 
@@ -41,61 +41,56 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="admin-shell bg-grid-warm">
-      {/* Top System Status Bar matching unified aesthetic */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
-        <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 font-semibold text-charcoal">
-              <span
-                className="inline-block h-2 w-2 rounded-xs"
-                style={{ backgroundColor: "#176B50" }}
-              />
-              <span className="tracking-tight">CENTRAL COMMAND</span>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 text-charcoal-muted">
-            <span className="hidden border-l border-stone pl-3 text-[11px] text-charcoal-subtle md:inline">
-              Version 1.26.1
-            </span>
-          </div>
+    <div className="admin-shell" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {/* System status bar */}
+      <div className="status-bar">
+        <div className="status-bar-left">
+          <div className="status-bar-dot" />
+          <span className="status-bar-label">Central Command</span>
+          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "10px" }}>·</span>
+          <span style={{ fontSize: "10px" }}>Super Administrator Portal</span>
         </div>
-      </header>
+        <div className="status-bar-right">
+          <span>Science on Wheels MIS</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span>v1.26</span>
+        </div>
+      </div>
 
-      <div className="portal-body flex flex-1 overflow-hidden relative">
+      <div className="portal-body">
         {/* Mobile backdrop */}
         {mobileNav && (
           <div
-            className="sidebar-backdrop fixed inset-0 z-40 bg-charcoal/40 backdrop-blur-xs lg:hidden"
+            className="sidebar-backdrop"
             onClick={() => setMobileNav(false)}
           />
         )}
 
         {/* Sidebar */}
         <aside className={`admin-sidebar ${mobileNav ? "open" : ""}`}>
+          {/* Brand */}
           <div className="sidebar-brand">
-            <div className="brand-mark" style={{ backgroundColor: "#176B50" }}>
-              <BrandLogo />
+            <div className="brand-mark" style={{ backgroundColor: "var(--brand)" }}>
+              <BrandLogo size={20} color="#fff" />
             </div>
-            <div>
-              <strong className="font-sans text-sm font-bold text-charcoal">Science on Wheels</strong>
-              <span className="font-mono text-[10px] text-charcoal-muted uppercase tracking-wider">
-                Super Administrator
-              </span>
+            <div className="sidebar-brand-text" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <div className="sidebar-brand-name">Science on Wheels</div>
+              <div className="sidebar-brand-role">Administration</div>
             </div>
           </div>
 
+          {/* Role tag */}
           <div className="command-role">
-            <span className="font-mono text-[9px] font-bold tracking-widest text-[#176B50]">
-              SUPER ADMIN
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 600, color: "var(--brand)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              Super Admin
             </span>
-            <b className="font-mono text-[8px] text-charcoal-subtle uppercase">
-              COMMAND / CONTROL / ANALYSE
+            <b style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>
+              Control · Manage · Analyse
             </b>
           </div>
 
-          <nav>
+          {/* Nav */}
+          <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
             {ADMIN_NAV_SECTIONS.map((section) => {
               const visibleItems = section.items.filter(
                 (item) => !item.permission || hasPermission(item.permission)
@@ -117,7 +112,7 @@ export function AdminLayout() {
                           className={`nav-item ${isActive ? "active" : ""}`}
                           onClick={() => handleSelect(item.path)}
                         >
-                          <i>{item.icon}</i>
+                          <NavIcon name={item.icon} size={15} className="nav-icon" />
                           <span>{item.label}</span>
                         </button>
                       );
@@ -126,7 +121,6 @@ export function AdminLayout() {
                 );
               }
 
-              // Dropdown collapsible section
               const isExpanded = expanded[section.key] ?? true;
               const hasActiveChild = visibleItems.some(
                 (item) =>
@@ -147,9 +141,20 @@ export function AdminLayout() {
                     }
                     aria-expanded={isExpanded}
                   >
-                    <i>{section.icon}</i>
-                    <span>{section.label}</span>
-                    <b className="font-mono text-xs">{isExpanded ? "▾" : "▸"}</b>
+                    <NavIcon name={section.icon || "ChevronDown"} size={14} className="nav-icon" />
+                    <span style={{ flex: 1, fontFamily: "var(--font-mono)", fontSize: "9.5px", fontWeight: 600, letterSpacing: "0.08em" }}>
+                      {section.label}
+                    </span>
+                    <NavIcon
+                      name="ChevronDown"
+                      size={13}
+                      className="nav-chevron"
+                      style={{
+                        transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 180ms ease",
+                        opacity: 0.5,
+                      }}
+                    />
                   </button>
 
                   {isExpanded && (
@@ -165,7 +170,7 @@ export function AdminLayout() {
                             className={`nav-sub-item ${isActive ? "active" : ""}`}
                             onClick={() => handleSelect(item.path)}
                           >
-                            <i>{item.icon}</i>
+                            <NavIcon name={item.icon} size={13} className="nav-icon" />
                             <span>{item.label}</span>
                           </button>
                         );
@@ -177,56 +182,66 @@ export function AdminLayout() {
             })}
           </nav>
 
+          {/* Sidebar footer */}
           <div className="sidebar-bottom">
-            <div className="sync-indicator font-mono text-[10px]">
-              <span style={{ backgroundColor: "#176B50" }} /> Authenticated workspace
+            <div className="sync-indicator">
+              <span style={{ backgroundColor: "var(--success)" }} />
+              Authenticated workspace
             </div>
-            <button className="logout font-mono text-xs" onClick={() => void logout()}>
-              ↪ Sign out
+            <button className="logout" onClick={() => void logout()}>
+              <NavIcon name="LogOut" size={14} style={{ opacity: 0.65 }} />
+              Sign out
             </button>
           </div>
         </aside>
 
-        {/* Main Content Area */}
+        {/* Main content */}
         <main className="admin-main">
+          {/* Top bar */}
           <header className="admin-topbar">
             <button
               className="mobile-menu"
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Toggle navigation menu"
             >
-              ☰
+              <NavIcon name="Menu" size={18} />
             </button>
-            <div className="breadcrumbs font-mono text-xs">
+
+            <div className="breadcrumbs">
               <span>Science on Wheels</span>
-              <b className="text-stone">›</b>
+              <span style={{ color: "var(--text-disabled)" }}>›</span>
               {activeSection && activeSection.type === "dropdown" && (
                 <>
-                  <span className="text-charcoal-muted">{activeSection.label}</span>
-                  <b className="text-stone">›</b>
+                  <span style={{ color: "var(--text-muted)" }}>{activeSection.label}</span>
+                  <span style={{ color: "var(--text-disabled)" }}>›</span>
                 </>
               )}
-              <strong className="text-charcoal font-semibold">{activeItem?.label || "Dashboard"}</strong>
+              <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                {activeItem?.label || "Dashboard"}
+              </strong>
             </div>
 
             <div className="top-actions">
               <button
-                className="top-search font-mono text-xs"
+                className="top-search"
                 onClick={() => navigate("/admin/inventory")}
               >
-                ⌕ <span>Search modules...</span>
-                <kbd className="font-mono text-[9px]">⌘ K</kbd>
+                <NavIcon name="Search" size={13} />
+                <span>Search modules…</span>
+                <kbd style={{ fontFamily: "var(--font-mono)", fontSize: "9px", padding: "1px 4px", border: "1px solid var(--border-strong)", borderRadius: "3px", backgroundColor: "var(--surface-2)", color: "var(--text-subtle)" }}>
+                  ⌘ K
+                </kbd>
               </button>
 
               <div className="profile">
-                <div className="avatar font-mono" style={{ backgroundColor: "#176B50" }}>
+                <div className="avatar" style={{ backgroundColor: "var(--brand)" }}>
                   {(user?.name || "SA").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <strong className="text-xs text-charcoal font-medium">
+                  <strong style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
                     {user?.name || "Super Admin"}
                   </strong>
-                  <span className="font-mono text-[10px] text-charcoal-subtle">
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-subtle)", display: "block" }}>
                     {user?.email || "admin@sow.org"}
                   </span>
                 </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/providers/AuthProvider";
 import { BrandLogo } from "../shared/components/BrandLogo";
+import { NavIcon } from "../shared/components/NavIcon";
 import { FIELD_NAVIGATION } from "../shared/constants/navigation";
 
 export function FieldLayout() {
@@ -9,10 +10,6 @@ export function FieldLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileNav, setMobileNav] = useState(false);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    assignments: true,
-    experiments: true,
-  });
 
   const visibleNav = FIELD_NAVIGATION.filter(
     (item) => !item.permission || hasPermission(item.permission)
@@ -24,139 +21,123 @@ export function FieldLayout() {
       (item) => currentPath === item.path || currentPath.startsWith(item.path + "/")
     ) || visibleNav[0];
 
-  function handleSelect(path: string, childKey?: string) {
-    navigate(childKey ? `${path}?sub=${encodeURIComponent(childKey)}` : path);
+  function handleSelect(path: string) {
+    navigate(path);
     setMobileNav(false);
   }
 
   return (
-    <div className="field-shell instructor-shell bg-grid-warm">
-      {/* Top System Status Bar */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone px-4 py-1.5 backdrop-blur-md sm:px-6 lg:px-8">
-        <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 font-semibold text-charcoal">
-              <span
-                className="inline-block h-2 w-2 rounded-xs"
-                style={{ backgroundColor: "#176B50" }}
-              />
-              <span className="tracking-tight">FIELD OPERATIONS COMMAND</span>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 text-charcoal-muted">
-            <span className="hidden border-l border-stone pl-3 text-[11px] text-charcoal-subtle md:inline">
-              Version 1.26.1
-            </span>
-          </div>
+    <div className="field-shell instructor-shell" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {/* System status bar */}
+      <div className="status-bar">
+        <div className="status-bar-left">
+          <div className="status-bar-dot" />
+          <span className="status-bar-label">Field Operations</span>
+          <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "10px" }}>·</span>
+          <span style={{ fontSize: "10px" }}>Science Communicator Portal</span>
         </div>
-      </header>
+        <div className="status-bar-right">
+          <span>Science on Wheels MIS</span>
+          <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+          <span>v1.26</span>
+        </div>
+      </div>
 
-      <div className="portal-body flex flex-1 overflow-hidden relative">
+      <div className="portal-body">
         {/* Mobile backdrop */}
         {mobileNav && (
           <div
-            className="sidebar-backdrop fixed inset-0 z-40 bg-charcoal/40 backdrop-blur-xs lg:hidden"
+            className="sidebar-backdrop"
             onClick={() => setMobileNav(false)}
           />
         )}
 
-        {/* Field Operations Sidebar */}
+        {/* Sidebar */}
         <aside className={`admin-sidebar field-sidebar ${mobileNav ? "open" : ""}`}>
+          {/* Brand */}
           <div className="sidebar-brand field-brand">
-            <div className="brand-mark field-logo" style={{ backgroundColor: "#176B50" }}>
-              <BrandLogo />
+            <div className="brand-mark field-logo" style={{ backgroundColor: "var(--accent)" }}>
+              <BrandLogo size={20} color="#fff" />
             </div>
-            <div>
-              <strong className="font-sans text-sm font-bold text-charcoal">Science on Wheels</strong>
-              <span className="font-mono text-[10px] text-charcoal-muted uppercase tracking-wider">
-                Field Operations
-              </span>
+            <div className="sidebar-brand-text" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
+              <div className="sidebar-brand-name">Science on Wheels</div>
+              <div className="sidebar-brand-role">Field Operations</div>
             </div>
           </div>
 
-          <div className="command-role field-role">
-            <span className="font-mono text-[9px] font-bold tracking-widest text-[#176B50]">
-              SCIENCE COMMUNICATOR
+          {/* Role tag */}
+          <div className="command-role field-role" style={{ borderColor: "var(--accent-soft)", backgroundColor: "var(--accent-light)" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "9px", fontWeight: 600, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              Science Communicator
             </span>
-            <b className="font-mono text-[8px] text-charcoal-subtle uppercase">
-              EXPLORE / TEACH / EXPERIMENT / DISCOVER
+            <b style={{ fontFamily: "var(--font-mono)", fontSize: "8px", color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 400 }}>
+              Explore · Teach · Discover
             </b>
           </div>
 
-          <nav>
+          {/* Nav */}
+          <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
+            <div className="nav-section-heading">Navigation</div>
             {visibleNav.map((item) => {
               const isActive = activeNav?.key === item.key;
               return (
                 <div key={item.key} className="nav-section-group field-nav-group">
                   <button
                     className={`nav-item field-nav ${isActive ? "active" : ""}`}
-                    onClick={() => {
-                      if (item.children && item.children.length > 0) {
-                        setExpanded((p) => ({ ...p, [item.key]: !p[item.key] }));
-                      }
-                      handleSelect(item.path);
-                    }}
+                    onClick={() => handleSelect(item.path)}
+                    style={{ "--active-color": "var(--accent)" } as React.CSSProperties}
                   >
-                    <i>{item.icon}</i>
+                    <NavIcon name={item.icon} size={15} className="nav-icon" />
                     <span>{item.label}</span>
-                    {item.children && item.children.length > 0 && (
-                      <b className="font-mono text-xs">{expanded[item.key] ? "▾" : "▸"}</b>
-                    )}
                   </button>
-                  {expanded[item.key] && item.children && item.children.length > 0 && (
-                    <div className="subnav field-subnav">
-                      {item.children.map((c) => (
-                        <button
-                          key={c}
-                          type="button"
-                          className={`nav-sub-item ${location.search.includes(encodeURIComponent(c)) ? "active" : ""}`}
-                          onClick={() => handleSelect(item.path, c)}
-                        >
-                          <span>{c}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
               );
             })}
           </nav>
 
+          {/* Sidebar footer */}
           <div className="sidebar-bottom field-bottom">
-            <div className="sync-indicator font-mono text-[10px]">
-              <span style={{ backgroundColor: "#176B50" }} /> Active Field Shift
+            <div className="sync-indicator">
+              <span style={{ backgroundColor: "var(--success)" }} />
+              Active Field Shift
             </div>
-            <button className="logout font-mono text-xs" onClick={() => void logout()}>
-              ↪ Sign out
+            <button className="logout" onClick={() => void logout()}>
+              <NavIcon name="LogOut" size={14} style={{ opacity: 0.65 }} />
+              Sign out
             </button>
           </div>
         </aside>
 
-        {/* Main Content Area */}
+        {/* Main content */}
         <main className="admin-main field-main">
+          {/* Top bar */}
           <header className="admin-topbar field-top">
             <button
               className="mobile-menu field-mobile"
               onClick={() => setMobileNav(!mobileNav)}
               aria-label="Toggle navigation menu"
             >
-              ☰
+              <NavIcon name="Menu" size={18} />
             </button>
-            <div className="breadcrumbs font-mono text-xs">
+
+            <div className="breadcrumbs">
               <span>Science on Wheels</span>
-              <b className="text-stone">›</b>
-              <strong className="text-charcoal font-semibold">{activeNav?.label || "Field"}</strong>
+              <span style={{ color: "var(--text-disabled)" }}>›</span>
+              <strong style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                {activeNav?.label || "Field"}
+              </strong>
             </div>
 
             <div className="top-actions">
               <div className="profile field-user">
-                <div className="avatar font-mono" style={{ backgroundColor: "#176B50" }}>
+                <div className="avatar" style={{ backgroundColor: "var(--accent)" }}>
                   {(user?.name || "SC").slice(0, 1).toUpperCase()}
                 </div>
                 <div>
-                  <strong className="text-xs text-charcoal font-medium">{user?.name || "Field User"}</strong>
-                  <span className="font-mono text-[10px] text-charcoal-subtle block">
+                  <strong style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "var(--text-primary)" }}>
+                    {user?.name || "Field User"}
+                  </strong>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-subtle)", display: "block" }}>
                     Science Communicator
                   </span>
                 </div>

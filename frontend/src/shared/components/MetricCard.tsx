@@ -4,27 +4,69 @@ export interface MetricCardProps {
   detail?: string;
   tone?: string;
   accent?: string;
+  icon?: React.ReactNode;
   onClick?: () => void;
 }
 
-export function MetricCard({ label, value, detail, tone, accent, onClick }: MetricCardProps) {
-  const displayValue = typeof value === "number" ? value.toLocaleString() : value ?? "—";
+export function MetricCard({ label, value, detail, tone, accent, icon, onClick }: MetricCardProps) {
+  const displayValue = typeof value === "number" ? value.toLocaleString() : (value ?? "—");
   const modifier = accent || tone || "";
 
   return (
     <article
       className={`metric-card ${modifier} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
+      style={{ cursor: onClick ? "pointer" : undefined }}
     >
-      <div>
-        <div className="metric-label font-mono text-[10px] uppercase tracking-wider text-charcoal-muted">
-          {label}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="metric-label">{label}</div>
+          <strong
+            style={{
+              display: "block",
+              fontSize: "26px",
+              fontWeight: 800,
+              color: "var(--text-primary)",
+              lineHeight: 1.1,
+              letterSpacing: "-0.02em",
+              marginTop: "6px",
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            {displayValue}
+          </strong>
         </div>
-        <strong className="font-sans text-2xl font-bold tracking-tight text-charcoal sm:text-3xl">
-          {displayValue}
-        </strong>
+        {icon && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "36px",
+              height: "36px",
+              borderRadius: "var(--r-md)",
+              backgroundColor: "var(--brand-light)",
+              color: "var(--brand)",
+              flexShrink: 0,
+            }}
+          >
+            {icon}
+          </div>
+        )}
       </div>
-      {detail && <small className="font-mono text-[10px] text-charcoal-subtle block mt-1">{detail}</small>}
+      {detail && (
+        <small
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "10px",
+            color: "var(--text-subtle)",
+            display: "block",
+            lineHeight: 1.4,
+          }}
+        >
+          {detail}
+        </small>
+      )}
     </article>
   );
 }

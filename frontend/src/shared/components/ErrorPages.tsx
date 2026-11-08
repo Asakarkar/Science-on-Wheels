@@ -1,94 +1,138 @@
 import { useNavigate } from "react-router-dom";
 import { BrandLogo } from "./BrandLogo";
 
-export function NotFoundPage() {
-  const navigate = useNavigate();
-
+function ErrorLayout({
+  code,
+  title,
+  description,
+  actionLabel,
+  onAction,
+}: {
+  code: string;
+  title: string;
+  description: string;
+  actionLabel: string;
+  onAction: () => void;
+}) {
   return (
     <div
       style={{
         minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: "2rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+        backgroundColor: "var(--canvas)",
+        fontFamily: "var(--font-sans)",
         textAlign: "center",
-        background: "var(--color-bg, #0b0f19)",
-        color: "var(--color-text, #f3f4f6)"
       }}
     >
-      <div style={{ maxWidth: "480px" }}>
-        <div style={{ width: "64px", height: "64px", margin: "0 auto 1.5rem" }}>
-          <BrandLogo />
-        </div>
-        <div className="section-kicker" style={{ color: "#ec4899", marginBottom: "0.5rem" }}>
-          404 / NOT FOUND
-        </div>
-        <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Page not found</h1>
-        <p style={{ opacity: 0.7, marginBottom: "2rem", lineHeight: 1.6 }}>
-          The requested route does not exist or has been moved to a new role-based portal location.
-        </p>
-        <button
-          className="primary"
-          onClick={() => navigate("/")}
+      <div style={{ maxWidth: "420px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+        {/* Logo */}
+        <div
           style={{
-            padding: "0.6rem 1.4rem",
-            fontSize: "0.95rem",
-            borderRadius: "6px",
-            background: "var(--color-primary, #6366f1)",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer"
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "56px",
+            height: "56px",
+            borderRadius: "var(--r-xl)",
+            backgroundColor: "var(--brand)",
+            marginBottom: "8px",
           }}
         >
-          Return to Dashboard
+          <BrandLogo size={28} color="#fff" />
+        </div>
+
+        {/* Error code */}
+        <div
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "72px",
+            fontWeight: 800,
+            color: "var(--border-strong)",
+            lineHeight: 1,
+            letterSpacing: "-0.04em",
+          }}
+        >
+          {code}
+        </div>
+
+        {/* Title */}
+        <h1
+          style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            lineHeight: 1.3,
+          }}
+        >
+          {title}
+        </h1>
+
+        {/* Description */}
+        <p
+          style={{
+            fontSize: "14px",
+            color: "var(--text-muted)",
+            lineHeight: 1.6,
+            maxWidth: "360px",
+          }}
+        >
+          {description}
+        </p>
+
+        {/* Action */}
+        <button
+          onClick={onAction}
+          style={{
+            marginTop: "8px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "10px 20px",
+            fontSize: "14px",
+            fontWeight: 600,
+            color: "#fff",
+            backgroundColor: "var(--brand)",
+            border: "1px solid var(--brand)",
+            borderRadius: "var(--r-md)",
+            cursor: "pointer",
+            transition: "background-color 120ms ease",
+          }}
+          onMouseEnter={(e) => ((e.target as HTMLButtonElement).style.backgroundColor = "var(--brand-hover)")}
+          onMouseLeave={(e) => ((e.target as HTMLButtonElement).style.backgroundColor = "var(--brand)")}
+        >
+          {actionLabel}
         </button>
       </div>
     </div>
   );
 }
 
+export function NotFoundPage() {
+  const navigate = useNavigate();
+  return (
+    <ErrorLayout
+      code="404"
+      title="Page not found"
+      description="The requested route does not exist or has been moved to a new location in the role-based portal."
+      actionLabel="Return to Dashboard"
+      onAction={() => navigate("/")}
+    />
+  );
+}
+
 export function ForbiddenPage() {
   const navigate = useNavigate();
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        padding: "2rem",
-        textAlign: "center",
-        background: "var(--color-bg, #0b0f19)",
-        color: "var(--color-text, #f3f4f6)"
-      }}
-    >
-      <div style={{ maxWidth: "480px" }}>
-        <div style={{ width: "64px", height: "64px", margin: "0 auto 1.5rem" }}>
-          <BrandLogo />
-        </div>
-        <div className="section-kicker" style={{ color: "#f43f5e", marginBottom: "0.5rem" }}>
-          403 / ACCESS FORBIDDEN
-        </div>
-        <h1 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Access Denied</h1>
-        <p style={{ opacity: 0.7, marginBottom: "2rem", lineHeight: 1.6 }}>
-          You do not have the required role or regional authorization to access this portal or resource.
-        </p>
-        <button
-          className="primary"
-          onClick={() => navigate("/")}
-          style={{
-            padding: "0.6rem 1.4rem",
-            fontSize: "0.95rem",
-            borderRadius: "6px",
-            background: "var(--color-primary, #6366f1)",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer"
-          }}
-        >
-          Go to Your Portal
-        </button>
-      </div>
-    </div>
+    <ErrorLayout
+      code="403"
+      title="Access denied"
+      description="You do not have the required role or regional authorization to access this portal or resource."
+      actionLabel="Go to Your Portal"
+      onAction={() => navigate("/")}
+    />
   );
 }

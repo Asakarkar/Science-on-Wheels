@@ -1,34 +1,60 @@
 import { Outlet } from "react-router-dom";
-import { ThreeBackground } from "../shared/components/ThreeBackground";
+import { BrandLogo } from "../shared/components/BrandLogo";
+
+const FEATURES = [
+  "Multi-region mobile laboratory coordination",
+  "Real-time bus & inventory tracking",
+  "Field staff scheduling & visit management",
+  "STEM curriculum delivery reporting",
+];
 
 export function AuthLayout() {
   return (
-    <div className="sow-login-shell relative flex min-h-screen w-full flex-col overflow-x-hidden bg-grid-warm font-sans text-charcoal antialiased selection:bg-terracotta selection:text-white">
-      {/* Three.js Interactive Scientific Blueprint Animation */}
-      <ThreeBackground />
+    <div className="auth-shell">
+      {/* Left decorative panel (hidden on mobile) */}
+      <div className="auth-panel">
+        <div className="auth-panel-bg" />
+        <div className="auth-panel-grid" />
 
-      {/* Top System Status Bar */}
-      <header className="sow-login-header relative z-20 w-full shrink-0 border-b border-stone bg-porcelain/90 px-4 py-2.5 backdrop-blur-md sm:px-6 lg:px-8">
-        <div className="sow-login-header-inner mx-auto flex w-full max-w-7xl items-center justify-between text-xs font-mono">
-          <div className="flex items-center space-x-2 font-semibold text-charcoal">
-            <span className="tracking-tight">Science On Wheel</span>
+        {/* Logo */}
+        <div className="auth-panel-logo">
+          <div className="auth-panel-logo-mark">
+            <BrandLogo size={22} color="#fff" />
           </div>
-
-          <div className="flex items-center space-x-4 text-charcoal-muted">
-            <span
-              className="hidden border-l border-stone pl-3 text-[11px] text-charcoal-subtle md:inline"
-              style={{ color: "#788286", borderColor: "#DDD7CD" }}
-            >
-              Version 1.26.1
-            </span>
+          <div>
+            <div className="auth-panel-logo-text">Science on Wheels</div>
+            <div className="auth-panel-logo-sub">Operations Platform</div>
           </div>
         </div>
-      </header>
 
-      {/* Main Login & Hero Layout */}
-      <main className="sow-login-main relative z-10 flex w-full flex-1 flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12 lg:px-10">
+        {/* Content */}
+        <div className="auth-panel-content">
+          <h1 className="auth-panel-heading">
+            Bringing STEM education to every school
+          </h1>
+          <p className="auth-panel-desc">
+            A unified platform for managing mobile science laboratories, field staff, regional operations, and educational outcomes across India.
+          </p>
+          <div className="auth-panel-features">
+            {FEATURES.map((f) => (
+              <div key={f} className="auth-panel-feature">
+                <div className="auth-panel-feature-dot" />
+                <span>{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="auth-panel-footer">
+          Science on Wheels NGO · Operations Management System · v1.26
+        </div>
+      </div>
+
+      {/* Right: login form */}
+      <div className="auth-form-panel">
         <Outlet />
-      </main>
+      </div>
     </div>
   );
 }

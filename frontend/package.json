@@ -5,6 +5,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "lucide-react": "^1.70.0",
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest"

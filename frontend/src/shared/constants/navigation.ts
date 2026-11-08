@@ -1,7 +1,10 @@
+// Navigation icon name type (maps to Lucide icon)
+export type NavIconName = string;
+
 export interface NavItem {
   key: string;
   label: string;
-  icon: string;
+  icon: NavIconName;
   path: string;
   permission?: string;
   children?: string[];
@@ -10,7 +13,7 @@ export interface NavItem {
 export interface NavSubItem {
   key: string;
   label: string;
-  icon: string;
+  icon: NavIconName;
   path: string;
   permission?: string;
 }
@@ -19,57 +22,57 @@ export interface AdminNavSection {
   key: string;
   label: string;
   type: "heading" | "dropdown";
-  icon?: string;
+  icon?: NavIconName;
   items: NavSubItem[];
 }
 
 export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
   {
     key: "overview",
-    label: "OVERVIEW",
+    label: "Overview",
     type: "heading",
     items: [
-      { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/admin/dashboard", permission: "dashboard.view" }
+      { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/admin/dashboard", permission: "dashboard.view" }
     ]
   },
   {
     key: "organization",
-    label: "ORGANIZATION",
+    label: "Organization",
     type: "dropdown",
-    icon: "◎",
+    icon: "Building2",
     items: [
-      { key: "users", label: "User Management", icon: "◉", path: "/admin/users", permission: "people.view" },
-      { key: "organization", label: "Regional Management", icon: "◎", path: "/admin/organization", permission: "organization.view" },
-      { key: "mobile-labs", label: "Bus Management", icon: "▣", path: "/admin/mobile-labs", permission: "labs.view" },
-      { key: "schools", label: "School Management", icon: "⌁", path: "/admin/schools", permission: "schools.view" }
+      { key: "users", label: "User Management", icon: "Users", path: "/admin/users", permission: "people.view" },
+      { key: "organization", label: "Regional Management", icon: "MapPin", path: "/admin/organization", permission: "organization.view" },
+      { key: "mobile-labs", label: "Bus Management", icon: "Bus", path: "/admin/mobile-labs", permission: "labs.view" },
+      { key: "schools", label: "School Management", icon: "School", path: "/admin/schools", permission: "schools.view" }
     ]
   },
   {
     key: "inventory-ops",
-    label: "INVENTORY OPERATIONS",
+    label: "Inventory",
     type: "dropdown",
-    icon: "◈",
+    icon: "Package",
     items: [
-      { key: "inventory", label: "Inventory Management", icon: "◈", path: "/admin/inventory", permission: "resources.view" },
-      { key: "inventory-allocation", label: "Inventory Allocation", icon: "⇄", path: "/admin/inventory-allocation", permission: "resources.view" }
+      { key: "inventory", label: "Inventory Management", icon: "Package", path: "/admin/inventory", permission: "resources.view" },
+      { key: "inventory-allocation", label: "Inventory Allocation", icon: "ArrowRightLeft", path: "/admin/inventory-allocation", permission: "resources.view" }
     ]
   },
   {
     key: "monitoring",
-    label: "MONITORING",
+    label: "Monitoring",
     type: "dropdown",
-    icon: "▥",
+    icon: "BarChart3",
     items: [
-      { key: "reports", label: "Reports & Analytics", icon: "▥", path: "/admin/reports", permission: "analytics.view" },
-      { key: "audit-logs", label: "Audit Logs", icon: "🛡", path: "/admin/audit-logs", permission: "security.view" }
+      { key: "reports", label: "Reports & Analytics", icon: "BarChart3", path: "/admin/reports", permission: "analytics.view" },
+      { key: "audit-logs", label: "Audit Logs", icon: "ShieldCheck", path: "/admin/audit-logs", permission: "security.view" }
     ]
   },
   {
     key: "settings-group",
-    label: "SYSTEM",
+    label: "System",
     type: "heading",
     items: [
-      { key: "settings", label: "Settings", icon: "⚙", path: "/admin/settings", permission: "organization.view" }
+      { key: "settings", label: "Settings", icon: "Settings", path: "/admin/settings", permission: "organization.view" }
     ]
   }
 ];
@@ -88,63 +91,63 @@ export const ADMIN_NAVIGATION: NavItem[] = ADMIN_NAV_SECTIONS.flatMap((section) 
 export const REGIONAL_NAV_SECTIONS: AdminNavSection[] = [
   {
     key: "overview",
-    label: "OVERVIEW",
+    label: "Overview",
     type: "heading",
     items: [
-      { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/regional/dashboard", permission: "dashboard.view" }
+      { key: "dashboard", label: "Dashboard", icon: "LayoutDashboard", path: "/regional/dashboard", permission: "dashboard.view" }
     ]
   },
   {
     key: "regional-management",
-    label: "REGIONAL MANAGEMENT",
+    label: "Regional Management",
     type: "dropdown",
-    icon: "◎",
+    icon: "Building2",
     items: [
-      { key: "schools", label: "School Management", icon: "⌁", path: "/regional/schools", permission: "schools.view" },
-      { key: "mobile-labs", label: "Bus Management", icon: "▣", path: "/regional/mobile-labs", permission: "labs.view" },
-      { key: "staff", label: "Field Staff Management", icon: "◉", path: "/regional/staff", permission: "people.view" }
+      { key: "schools", label: "School Management", icon: "School", path: "/regional/schools", permission: "schools.view" },
+      { key: "mobile-labs", label: "Bus Management", icon: "Bus", path: "/regional/mobile-labs", permission: "labs.view" },
+      { key: "staff", label: "Field Staff Management", icon: "Users", path: "/regional/staff", permission: "people.view" }
     ]
   },
   {
     key: "inventory-ops",
-    label: "INVENTORY OPERATIONS",
+    label: "Inventory",
     type: "dropdown",
-    icon: "◈",
+    icon: "Package",
     items: [
-      { key: "inventory", label: "Regional Inventory", icon: "◈", path: "/regional/inventory", permission: "resources.view" },
-      { key: "inventory-allocation", label: "Inventory Allocation", icon: "⇄", path: "/regional/inventory-allocation", permission: "resources.view" },
-      { key: "inventory-transactions", label: "Inventory Transactions", icon: "📋", path: "/regional/inventory-transactions", permission: "resources.view" },
-      { key: "equipment", label: "Equipment Management", icon: "🔬", path: "/regional/equipment", permission: "resources.view" }
+      { key: "inventory", label: "Regional Inventory", icon: "Package", path: "/regional/inventory", permission: "resources.view" },
+      { key: "inventory-allocation", label: "Inventory Allocation", icon: "ArrowRightLeft", path: "/regional/inventory-allocation", permission: "resources.view" },
+      { key: "inventory-transactions", label: "Inventory Transactions", icon: "Receipt", path: "/regional/inventory-transactions", permission: "resources.view" },
+      { key: "equipment", label: "Equipment Management", icon: "Microscope", path: "/regional/equipment", permission: "resources.view" }
     ]
   },
   {
     key: "field-ops",
-    label: "FIELD OPERATIONS",
+    label: "Field Operations",
     type: "dropdown",
-    icon: "➜",
+    icon: "MapPin",
     items: [
-      { key: "schedules", label: "School Visit Scheduling", icon: "➜", path: "/regional/schedules", permission: "operations.view" },
-      { key: "visits", label: "Visit Monitoring", icon: "◎", path: "/regional/visits", permission: "operations.view" },
-      { key: "field-reports", label: "Field Reports", icon: "📝", path: "/regional/field-reports", permission: "operations.view" }
+      { key: "schedules", label: "Visit Scheduling", icon: "CalendarDays", path: "/regional/schedules", permission: "operations.view" },
+      { key: "visits", label: "Visit Monitoring", icon: "ClipboardCheck", path: "/regional/visits", permission: "operations.view" },
+      { key: "field-reports", label: "Field Reports", icon: "FileText", path: "/regional/field-reports", permission: "operations.view" }
     ]
   },
   {
     key: "monitoring",
-    label: "MONITORING",
+    label: "Monitoring",
     type: "dropdown",
-    icon: "▥",
+    icon: "BarChart3",
     items: [
-      { key: "reports", label: "Reports & Analytics", icon: "▥", path: "/regional/reports", permission: "analytics.view" },
-      { key: "notifications", label: "Notifications", icon: "🔔", path: "/regional/notifications", permission: "dashboard.view" }
+      { key: "reports", label: "Reports & Analytics", icon: "BarChart3", path: "/regional/reports", permission: "analytics.view" },
+      { key: "notifications", label: "Notifications", icon: "Bell", path: "/regional/notifications", permission: "dashboard.view" }
     ]
   },
   {
     key: "account",
-    label: "ACCOUNT",
+    label: "Account",
     type: "heading",
     items: [
-      { key: "profile", label: "My Profile", icon: "👤", path: "/regional/profile", permission: "dashboard.view" },
-      { key: "settings", label: "Settings", icon: "⚙", path: "/regional/settings", permission: "dashboard.view" }
+      { key: "profile", label: "My Profile", icon: "UserCircle", path: "/regional/profile", permission: "dashboard.view" },
+      { key: "settings", label: "Settings", icon: "Settings", path: "/regional/settings", permission: "dashboard.view" }
     ]
   }
 ];
@@ -161,12 +164,12 @@ export const REGIONAL_NAVIGATION: NavItem[] = REGIONAL_NAV_SECTIONS.flatMap((sec
 );
 
 export const FIELD_NAVIGATION: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: "⌂", path: "/field/dashboard", permission: "dashboard.view", children: [] },
-  { key: "schedule", label: "My Schedule", icon: "📅", path: "/field/schedule", permission: "field.schedule.view", children: [] },
-  { key: "visits", label: "School Visits", icon: "🏫", path: "/field/visits", permission: "field.visit.view", children: [] },
-  { key: "inventory", label: "Bus Inventory", icon: "🚌", path: "/field/inventory", permission: "field.inventory.view", children: [] },
-  { key: "reports", label: "Visit Reports", icon: "📝", path: "/field/reports", permission: "field.session.view", children: [] },
-  { key: "issues", label: "Report an Issue", icon: "⚠️", path: "/field/issues", permission: "field.issue.report", children: [] },
-  { key: "notifications", label: "Notifications", icon: "🔔", path: "/field/notifications", permission: "dashboard.view", children: [] },
-  { key: "profile", label: "My Profile", icon: "👤", path: "/field/profile", permission: "dashboard.view", children: [] }
+  { key: "dashboard",    label: "Dashboard",      icon: "LayoutDashboard", path: "/field/dashboard",     permission: "dashboard.view",        children: [] },
+  { key: "schedule",     label: "My Schedule",    icon: "CalendarDays",    path: "/field/schedule",      permission: "field.schedule.view",   children: [] },
+  { key: "visits",       label: "School Visits",  icon: "School",          path: "/field/visits",        permission: "field.visit.view",      children: [] },
+  { key: "inventory",    label: "Bus Inventory",  icon: "Package",         path: "/field/inventory",     permission: "field.inventory.view",  children: [] },
+  { key: "reports",      label: "Visit Reports",  icon: "FileText",        path: "/field/reports",       permission: "field.session.view",    children: [] },
+  { key: "issues",       label: "Report an Issue",icon: "AlertTriangle",   path: "/field/issues",        permission: "field.issue.report",    children: [] },
+  { key: "notifications",label: "Notifications",  icon: "Bell",            path: "/field/notifications", permission: "dashboard.view",        children: [] },
+  { key: "profile",      label: "My Profile",     icon: "UserCircle",      path: "/field/profile",       permission: "dashboard.view",        children: [] }
 ];
