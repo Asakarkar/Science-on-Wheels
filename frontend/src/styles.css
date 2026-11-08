@@ -226,12 +226,10 @@ svg {
 @keyframes pageEntrance {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -4434,17 +4432,18 @@ div[class*="fixed inset-0"] {
   width: 100vw !important;
   height: 100vh !important;
   height: 100svh !important;
-  background-color: rgba(15, 23, 42, 0.65) !important;
-  backdrop-filter: blur(6px) !important;
-  -webkit-backdrop-filter: blur(6px) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  z-index: 1000 !important;
+  z-index: 99999 !important;
   padding: 16px !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
-  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  animation: modalFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 div[class*="fixed inset-0"].justify-end {
@@ -4464,24 +4463,25 @@ div[class*="fixed inset-0"].justify-end {
 @keyframes modalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: scale(1);
   }
 }
 
 div[class*="fixed inset-0"] > .surface,
 div[class*="fixed inset-0"] > div {
   position: relative !important;
+  margin: auto !important;
   background-color: #FFFFFF !important;
   border-radius: 12px !important;
   border: 1px solid #DDD7CD !important;
-  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.28), 0 8px 16px -4px rgba(15, 23, 42, 0.12) !important;
-  animation: modalSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  max-height: calc(100vh - 32px) !important;
-  max-height: calc(100svh - 32px) !important;
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  animation: modalSlideUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  max-height: calc(100vh - 40px) !important;
+  max-height: calc(100svh - 40px) !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
 }

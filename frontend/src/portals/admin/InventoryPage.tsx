@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiClient } from "../../services/api-client";
@@ -891,6 +892,68 @@ export function InventoryPage() {
   );
 }
 
+
+// -------------------------------------------------------------
+// REUSABLE CENTERED MODAL PORTAL (Zero black background, dead center)
+// -------------------------------------------------------------
+function CenteredModal({
+  children,
+  onClose,
+  maxWidth = "560px",
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  maxWidth?: string;
+}) {
+  return createPortal(
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 99999,
+        background: "transparent",
+        backgroundColor: "transparent",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
+        overflowY: "auto",
+        boxSizing: "border-box",
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          margin: "auto",
+          background: "#ffffff",
+          borderRadius: "12px",
+          width: "100%",
+          maxWidth: maxWidth,
+          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+          border: "1px solid #DDD7CD",
+          maxHeight: "calc(100vh - 40px)",
+          overflowY: "auto",
+          boxSizing: "border-box",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 // -------------------------------------------------------------
 // SUBCOMPONENT: Add Item to Catalogue Modal
 // -------------------------------------------------------------
@@ -959,31 +1022,7 @@ function AddItemModal({
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(15, 23, 42, 0.65)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: "1rem"
-      }}
-    >
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "10px",
-          width: "100%",
-          maxWidth: "560px",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)"
-        }}
-      >
+    <CenteredModal onClose={onClose} maxWidth="560px">
         <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, color: "#0f172a" }}>
@@ -1197,8 +1236,7 @@ function AddItemModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </CenteredModal>
   );
 }
 
@@ -1251,31 +1289,7 @@ function StockAdjustmentModal({
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(15, 23, 42, 0.65)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: "1rem"
-      }}
-    >
-      <div
-        style={{
-          background: "#ffffff",
-          borderRadius: "10px",
-          width: "100%",
-          maxWidth: "520px",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)"
-        }}
-      >
+    <CenteredModal onClose={onClose} maxWidth="520px">
         <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700, color: "#0f172a" }}>
@@ -1389,8 +1403,7 @@ function StockAdjustmentModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </CenteredModal>
   );
 }
 
@@ -1405,31 +1418,11 @@ function QrAssetModal({
   onClose: () => void;
 }) {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(15, 23, 42, 0.65)",
-        backdropFilter: "blur(4px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: "1rem"
-      }}
-    >
+    <CenteredModal onClose={onClose} maxWidth="420px">
       <div
         style={{
-          background: "#ffffff",
-          borderRadius: "10px",
-          width: "100%",
-          maxWidth: "420px",
           textAlign: "center",
           padding: "2rem 1.5rem",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)"
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
@@ -1490,6 +1483,6 @@ function QrAssetModal({
           </button>
         </div>
       </div>
-    </div>
+    </CenteredModal>
   );
 }

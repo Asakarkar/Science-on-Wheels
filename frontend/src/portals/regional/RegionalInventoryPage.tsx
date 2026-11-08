@@ -1,5 +1,64 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { apiClient } from "../../services/api-client";
+
+function CenteredModal({
+  children,
+  onClose,
+  maxWidth = "max-w-md",
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  maxWidth?: string;
+}) {
+  return createPortal(
+    <div
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 99999,
+        background: "transparent",
+        backgroundColor: "transparent",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "16px",
+        overflowY: "auto",
+        boxSizing: "border-box",
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className={`surface w-full ${maxWidth} p-6 rounded-lg border border-stone shadow-xl`}
+        style={{
+          position: "relative",
+          margin: "auto",
+          backgroundColor: "#FFFFFF",
+          borderRadius: "12px",
+          border: "1px solid #DDD7CD",
+          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+          maxHeight: "calc(100vh - 40px)",
+          overflowY: "auto",
+          boxSizing: "border-box",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 interface ConsumableItem {
   id: string;
@@ -496,373 +555,176 @@ export function RegionalInventoryPage() {
 
       {/* ADD CONSUMABLE MODAL */}
       {showAddConsumable && (
-        <div
-          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowAddConsumable(false);
-          }}
-        >
-          <div className="surface w-full max-w-md p-6 rounded-lg border border-stone shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone mb-4">
-              <h3 className="text-base font-bold text-charcoal">Register Consumable Item</h3>
-              <button
-                className="font-mono text-sm text-charcoal-muted hover:text-charcoal"
-                onClick={() => setShowAddConsumable(false)}
-              >
-                ✕
-              </button>
+        <CenteredModal onClose={() => setShowAddConsumable(false)} maxWidth="max-w-md">
+          <div className="flex items-center justify-between pb-3 border-b border-stone mb-4">
+            <h3 className="text-base font-bold text-charcoal">Register Consumable Item</h3>
+            <button
+              className="font-mono text-sm text-charcoal-muted hover:text-charcoal"
+              onClick={() => setShowAddConsumable(false)}
+            >
+              ✕
+            </button>
+          </div>
+
+          {formError && (
+            <div className="p-3 mb-4 bg-red-50 text-red-800 border border-red-200 rounded text-xs font-mono">
+              {formError}
+            </div>
+          )}
+
+          <form onSubmit={handleAddConsumable} className="space-y-3 text-xs font-mono">
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Item Name *</label>
+              <input
+                type="text"
+                required
+                value={consumableForm.name}
+                onChange={(e) => setConsumableForm({ ...consumableForm, name: e.target.value })}
+                className="input w-full p-2 border border-stone rounded font-sans text-xs"
+                placeholder="e.g. Copper Sulfate Powder"
+              />
             </div>
 
-            {formError && (
-              <div className="p-3 mb-4 bg-red-50 text-red-800 border border-red-200 rounded text-xs font-mono">
-                {formError}
-              </div>
-            )}
-
-            <form onSubmit={handleAddConsumable} className="space-y-3 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-charcoal font-semibold mb-1">Item Name *</label>
+                <label className="block text-charcoal font-semibold mb-1">Category</label>
+                <select
+                  value={consumableForm.category}
+                  onChange={(e) => setConsumableForm({ ...consumableForm, category: e.target.value })}
+                  className="input w-full p-2 border border-stone rounded text-xs"
+                >
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Physics">Physics</option>
+                  <option value="Biology">Biology</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Stationery">Stationery</option>
+                  <option value="Safety">Safety / First Aid</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-charcoal font-semibold mb-1">Unit Metric</label>
                 <input
                   type="text"
                   required
-                  value={consumableForm.name}
-                  onChange={(e) => setConsumableForm({ ...consumableForm, name: e.target.value })}
-                  className="input w-full p-2 border border-stone rounded font-sans text-xs"
-                  placeholder="e.g. Copper Sulfate Powder"
+                  value={consumableForm.unitMetric}
+                  onChange={(e) => setConsumableForm({ ...consumableForm, unitMetric: e.target.value })}
+                  className="input w-full p-2 border border-stone rounded text-xs"
+                  placeholder="e.g. grams, bottles, pieces"
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Category</label>
-                  <select
-                    value={consumableForm.category}
-                    onChange={(e) => setConsumableForm({ ...consumableForm, category: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  >
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Biology">Biology</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Stationery">Stationery</option>
-                    <option value="Safety">Safety / First Aid</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Unit Metric</label>
-                  <input
-                    type="text"
-                    required
-                    value={consumableForm.unitMetric}
-                    onChange={(e) => setConsumableForm({ ...consumableForm, unitMetric: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                    placeholder="e.g. grams, bottles, pieces"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Initial Stock</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={consumableForm.currentStock}
-                    onChange={(e) => setConsumableForm({ ...consumableForm, currentStock: Number(e.target.value) })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Min Threshold</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={consumableForm.minimumStock}
-                    onChange={(e) => setConsumableForm({ ...consumableForm, minimumStock: Number(e.target.value) })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  />
-                </div>
-              </div>
-
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-charcoal font-semibold mb-1">Expiry Date (Optional)</label>
+                <label className="block text-charcoal font-semibold mb-1">Initial Stock</label>
                 <input
-                  type="date"
-                  value={consumableForm.expiryDate}
-                  onChange={(e) => setConsumableForm({ ...consumableForm, expiryDate: e.target.value })}
+                  type="number"
+                  min={0}
+                  value={consumableForm.currentStock}
+                  onChange={(e) => setConsumableForm({ ...consumableForm, currentStock: Number(e.target.value) })}
                   className="input w-full p-2 border border-stone rounded text-xs"
                 />
               </div>
-
-              <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
-                <button
-                  type="button"
-                  className="btn ghost px-4 py-1.5 text-xs font-mono"
-                  onClick={() => setShowAddConsumable(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" disabled={submitting} className="btn primary px-4 py-1.5 text-xs font-mono">
-                  {submitting ? "Saving..." : "Register"}
-                </button>
+              <div>
+                <label className="block text-charcoal font-semibold mb-1">Min Threshold</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={consumableForm.minimumStock}
+                  onChange={(e) => setConsumableForm({ ...consumableForm, minimumStock: Number(e.target.value) })}
+                  className="input w-full p-2 border border-stone rounded text-xs"
+                />
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Expiry Date (Optional)</label>
+              <input
+                type="date"
+                value={consumableForm.expiryDate}
+                onChange={(e) => setConsumableForm({ ...consumableForm, expiryDate: e.target.value })}
+                className="input w-full p-2 border border-stone rounded text-xs"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
+              <button
+                type="button"
+                className="btn ghost px-4 py-1.5 text-xs font-mono"
+                onClick={() => setShowAddConsumable(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" disabled={submitting} className="btn primary px-4 py-1.5 text-xs font-mono">
+                {submitting ? "Saving..." : "Register"}
+              </button>
+            </div>
+          </form>
+        </CenteredModal>
       )}
 
       {/* ADD EQUIPMENT MODAL */}
       {showAddEquipment && (
-        <div
-          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowAddEquipment(false);
-          }}
-        >
-          <div className="surface w-full max-w-md p-6 rounded-lg border border-stone shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone mb-4">
-              <h3 className="text-base font-bold text-charcoal">Add Reusable Equipment Asset</h3>
-              <button
-                className="font-mono text-sm text-charcoal-muted hover:text-charcoal"
-                onClick={() => setShowAddEquipment(false)}
-              >
-                ✕
-              </button>
-            </div>
+        <CenteredModal onClose={() => setShowAddEquipment(false)} maxWidth="max-w-md">
+          <div className="flex items-center justify-between pb-3 border-b border-stone mb-4">
+            <h3 className="text-base font-bold text-charcoal">Add Reusable Equipment Asset</h3>
+            <button
+              className="font-mono text-sm text-charcoal-muted hover:text-charcoal"
+              onClick={() => setShowAddEquipment(false)}
+            >
+              ✕
+            </button>
+          </div>
 
-            <form onSubmit={handleAddEquipment} className="space-y-3 text-xs font-mono">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Asset Tag *</label>
-                  <input
-                    type="text"
-                    required
-                    value={equipmentForm.assetTag}
-                    onChange={(e) => setEquipmentForm({ ...equipmentForm, assetTag: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded font-mono text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Category</label>
-                  <select
-                    value={equipmentForm.category}
-                    onChange={(e) => setEquipmentForm({ ...equipmentForm, category: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  >
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Biology">Biology</option>
-                    <option value="Astronomy">Astronomy</option>
-                    <option value="Robotics">Robotics</option>
-                  </select>
-                </div>
-              </div>
-
+          <form onSubmit={handleAddEquipment} className="space-y-3 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-charcoal font-semibold mb-1">Equipment Name *</label>
+                <label className="block text-charcoal font-semibold mb-1">Asset Tag *</label>
                 <input
                   type="text"
                   required
-                  value={equipmentForm.name}
-                  onChange={(e) => setEquipmentForm({ ...equipmentForm, name: e.target.value })}
-                  className="input w-full p-2 border border-stone rounded font-sans text-xs"
-                  placeholder="e.g. Monocular Compound Microscope 1000x"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Initial Location</label>
-                  <select
-                    value={equipmentForm.busId}
-                    onChange={(e) => setEquipmentForm({ ...equipmentForm, busId: e.target.value })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  >
-                    <option value="">Regional Depot</option>
-                    {buses.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.busCode || b.registrationNumber}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-charcoal font-semibold mb-1">Valuation Cost (₹)</label>
-                  <input
-                    type="number"
-                    value={equipmentForm.cost}
-                    onChange={(e) => setEquipmentForm({ ...equipmentForm, cost: Number(e.target.value) })}
-                    className="input w-full p-2 border border-stone rounded text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
-                <button
-                  type="button"
-                  className="btn ghost px-4 py-1.5 text-xs font-mono"
-                  onClick={() => setShowAddEquipment(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" disabled={submitting} className="btn primary px-4 py-1.5 text-xs font-mono">
-                  {submitting ? "Saving..." : "Add Asset"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ADJUST CONSUMABLE STOCK MODAL */}
-      {editingConsumable && (
-        <div
-          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setEditingConsumable(null);
-          }}
-        >
-          <div className="surface w-full max-w-sm p-6 rounded-lg border border-stone shadow-xl">
-            <h3 className="text-base font-bold text-charcoal mb-2">Adjust Consumable Stock</h3>
-            <p className="text-xs text-charcoal-muted mb-4 font-mono">{editingConsumable.name}</p>
-
-            <form onSubmit={handleUpdateConsumable} className="space-y-3 text-xs font-mono">
-              <div>
-                <label className="block text-charcoal font-semibold mb-1">Current Stock Quantity</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={editingConsumable.currentStock}
-                  onChange={(e) =>
-                    setEditingConsumable({ ...editingConsumable, currentStock: Number(e.target.value) })
-                  }
-                  className="input w-full p-2 border border-stone rounded text-xs"
+                  value={equipmentForm.assetTag}
+                  onChange={(e) => setEquipmentForm({ ...equipmentForm, assetTag: e.target.value })}
+                  className="input w-full p-2 border border-stone rounded font-mono text-xs"
                 />
               </div>
               <div>
-                <label className="block text-charcoal font-semibold mb-1">Minimum Alert Threshold</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={editingConsumable.minimumStock}
-                  onChange={(e) =>
-                    setEditingConsumable({ ...editingConsumable, minimumStock: Number(e.target.value) })
-                  }
-                  className="input w-full p-2 border border-stone rounded text-xs"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
-                <button
-                  type="button"
-                  className="btn ghost px-3 py-1.5 text-xs font-mono"
-                  onClick={() => setEditingConsumable(null)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" disabled={submitting} className="btn primary px-3 py-1.5 text-xs font-mono">
-                  {submitting ? "Saving..." : "Update Stock"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* UPDATE EQUIPMENT CONDITION MODAL */}
-      {editingEquipment && (
-        <div
-          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setEditingEquipment(null);
-          }}
-        >
-          <div className="surface w-full max-w-sm p-6 rounded-lg border border-stone shadow-xl">
-            <h3 className="text-base font-bold text-charcoal mb-2">Update Asset Condition</h3>
-            <p className="text-xs text-charcoal-muted mb-4 font-mono">
-              {editingEquipment.name} ({editingEquipment.assetTag})
-            </p>
-
-            <form onSubmit={handleUpdateEquipment} className="space-y-3 text-xs font-mono">
-              <div>
-                <label className="block text-charcoal font-semibold mb-1">Condition Status</label>
+                <label className="block text-charcoal font-semibold mb-1">Category</label>
                 <select
-                  value={editingEquipment.status}
-                  onChange={(e) => setEditingEquipment({ ...editingEquipment, status: e.target.value })}
+                  value={equipmentForm.category}
+                  onChange={(e) => setEquipmentForm({ ...equipmentForm, category: e.target.value })}
                   className="input w-full p-2 border border-stone rounded text-xs"
                 >
-                  <option value="AVAILABLE">AVAILABLE (Operational)</option>
-                  <option value="ASSIGNED_TO_BUS">ASSIGNED_TO_BUS</option>
-                  <option value="IN_MAINTENANCE">IN_MAINTENANCE (Repair required)</option>
-                  <option value="DAMAGED">DAMAGED</option>
-                  <option value="MISSING">MISSING / LOST</option>
+                  <option value="Physics">Physics</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Biology">Biology</option>
+                  <option value="Astronomy">Astronomy</option>
+                  <option value="Robotics">Robotics</option>
                 </select>
               </div>
+            </div>
 
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Equipment Name *</label>
+              <input
+                type="text"
+                required
+                value={equipmentForm.name}
+                onChange={(e) => setEquipmentForm({ ...equipmentForm, name: e.target.value })}
+                className="input w-full p-2 border border-stone rounded font-sans text-xs"
+                placeholder="e.g. Monocular Compound Microscope 1000x"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-charcoal font-semibold mb-1">Assigned Vehicle</label>
+                <label className="block text-charcoal font-semibold mb-1">Initial Location</label>
                 <select
-                  value={editingEquipment.busId || ""}
-                  onChange={(e) => setEditingEquipment({ ...editingEquipment, busId: e.target.value || null })}
+                  value={equipmentForm.busId}
+                  onChange={(e) => setEquipmentForm({ ...equipmentForm, busId: e.target.value })}
                   className="input w-full p-2 border border-stone rounded text-xs"
                 >
-                  <option value="">Regional Depot (Unassigned)</option>
+                  <option value="">Regional Depot</option>
                   {buses.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.busCode || b.registrationNumber}
@@ -870,47 +732,141 @@ export function RegionalInventoryPage() {
                   ))}
                 </select>
               </div>
-
-              <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
-                <button
-                  type="button"
-                  className="btn ghost px-3 py-1.5 text-xs font-mono"
-                  onClick={() => setEditingEquipment(null)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" disabled={submitting} className="btn primary px-3 py-1.5 text-xs font-mono">
-                  {submitting ? "Saving..." : "Save"}
-                </button>
+              <div>
+                <label className="block text-charcoal font-semibold mb-1">Valuation Cost (₹)</label>
+                <input
+                  type="number"
+                  value={equipmentForm.cost}
+                  onChange={(e) => setEquipmentForm({ ...equipmentForm, cost: Number(e.target.value) })}
+                  className="input w-full p-2 border border-stone rounded text-xs"
+                />
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
+              <button
+                type="button"
+                className="btn ghost px-4 py-1.5 text-xs font-mono"
+                onClick={() => setShowAddEquipment(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" disabled={submitting} className="btn primary px-4 py-1.5 text-xs font-mono">
+                {submitting ? "Saving..." : "Add Asset"}
+              </button>
+            </div>
+          </form>
+        </CenteredModal>
+      )}
+
+      {/* ADJUST CONSUMABLE STOCK MODAL */}
+      {editingConsumable && (
+        <CenteredModal onClose={() => setEditingConsumable(null)} maxWidth="max-w-sm">
+          <h3 className="text-base font-bold text-charcoal mb-2">Adjust Consumable Stock</h3>
+          <p className="text-xs text-charcoal-muted mb-4 font-mono">{editingConsumable.name}</p>
+
+          <form onSubmit={handleUpdateConsumable} className="space-y-3 text-xs font-mono">
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Current Stock Quantity</label>
+              <input
+                type="number"
+                min={0}
+                value={editingConsumable.currentStock}
+                onChange={(e) =>
+                  setEditingConsumable({ ...editingConsumable, currentStock: Number(e.target.value) })
+                }
+                className="input w-full p-2 border border-stone rounded text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Minimum Alert Threshold</label>
+              <input
+                type="number"
+                min={0}
+                value={editingConsumable.minimumStock}
+                onChange={(e) =>
+                  setEditingConsumable({ ...editingConsumable, minimumStock: Number(e.target.value) })
+                }
+                className="input w-full p-2 border border-stone rounded text-xs"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
+              <button
+                type="button"
+                className="btn ghost px-3 py-1.5 text-xs font-mono"
+                onClick={() => setEditingConsumable(null)}
+              >
+                Cancel
+              </button>
+              <button type="submit" disabled={submitting} className="btn primary px-3 py-1.5 text-xs font-mono">
+                {submitting ? "Saving..." : "Update Stock"}
+              </button>
+            </div>
+          </form>
+        </CenteredModal>
+      )}
+
+      {/* UPDATE EQUIPMENT CONDITION MODAL */}
+      {editingEquipment && (
+        <CenteredModal onClose={() => setEditingEquipment(null)} maxWidth="max-w-sm">
+          <h3 className="text-base font-bold text-charcoal mb-2">Update Asset Condition</h3>
+          <p className="text-xs text-charcoal-muted mb-4 font-mono">
+            {editingEquipment.name} ({editingEquipment.assetTag})
+          </p>
+
+          <form onSubmit={handleUpdateEquipment} className="space-y-3 text-xs font-mono">
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Condition Status</label>
+              <select
+                value={editingEquipment.status}
+                onChange={(e) => setEditingEquipment({ ...editingEquipment, status: e.target.value })}
+                className="input w-full p-2 border border-stone rounded text-xs"
+              >
+                <option value="AVAILABLE">AVAILABLE (Operational)</option>
+                <option value="ASSIGNED_TO_BUS">ASSIGNED_TO_BUS</option>
+                <option value="IN_MAINTENANCE">IN_MAINTENANCE (Repair required)</option>
+                <option value="DAMAGED">DAMAGED</option>
+                <option value="MISSING">MISSING / LOST</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-charcoal font-semibold mb-1">Assigned Vehicle</label>
+              <select
+                value={editingEquipment.busId || ""}
+                onChange={(e) => setEditingEquipment({ ...editingEquipment, busId: e.target.value || null })}
+                className="input w-full p-2 border border-stone rounded text-xs"
+              >
+                <option value="">Regional Depot (Unassigned)</option>
+                {buses.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.busCode || b.registrationNumber}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-3 border-t border-stone">
+              <button
+                type="button"
+                className="btn ghost px-3 py-1.5 text-xs font-mono"
+                onClick={() => setEditingEquipment(null)}
+              >
+                Cancel
+              </button>
+              <button type="submit" disabled={submitting} className="btn primary px-3 py-1.5 text-xs font-mono">
+                {submitting ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </form>
+        </CenteredModal>
       )}
 
       {/* QR CODE VIEWER MODAL */}
       {viewingQrAsset && (
-        <div
-          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
-            backgroundColor: "rgba(15, 23, 42, 0.65)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setViewingQrAsset(null);
-          }}
-        >
-          <div className="surface w-full max-w-xs p-6 rounded-lg border border-stone shadow-xl text-center">
+        <CenteredModal onClose={() => setViewingQrAsset(null)} maxWidth="max-w-xs">
+          <div className="text-center">
             <h3 className="text-base font-bold text-charcoal mb-1">{viewingQrAsset.name}</h3>
             <span className="font-mono text-xs text-charcoal-muted block mb-4">
               Asset Tag: {viewingQrAsset.assetTag}
@@ -938,7 +894,7 @@ export function RegionalInventoryPage() {
               Close
             </button>
           </div>
-        </div>
+        </CenteredModal>
       )}
     </div>
   );
