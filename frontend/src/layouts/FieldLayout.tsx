@@ -95,9 +95,9 @@ export function FieldLayout() {
             </button>
 
             <div className="breadcrumbs">
-              <span>VIBHA · Science on Wheels</span>
-              <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
-              <strong>{activeNav?.label || "Field"}</strong>
+              <span className="breadcrumb-brand">VIBHA · Science on Wheels</span>
+              <span className="breadcrumb-brand-sep" style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
+              <strong className="breadcrumb-current">{activeNav?.label || "Field"}</strong>
             </div>
 
             <div className="top-actions">
@@ -105,11 +105,11 @@ export function FieldLayout() {
                 <div className="avatar" style={{ backgroundColor: "var(--brand)" }}>
                   {(user?.name || "SC").slice(0, 1).toUpperCase()}
                 </div>
-                <div>
-                  <strong style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
+                <div className="profile-details">
+                  <strong className="profile-name" style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
                     {user?.name || "Field Officer"}
                   </strong>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
+                  <span className="profile-email" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
                     Science Communicator
                   </span>
                 </div>

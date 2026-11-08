@@ -112,7 +112,7 @@ export function AnalyticsPage() {
       )}
 
       {summary && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem", margin: "1.5rem 0" }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
           <HorizontalBarChart
             title="Operational Reach & Resource Metrics"
             subtitle="Live database aggregation of institutional network and mobile laboratories"

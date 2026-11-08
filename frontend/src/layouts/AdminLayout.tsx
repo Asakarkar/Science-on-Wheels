@@ -187,15 +187,15 @@ export function AdminLayout() {
             </button>
 
             <div className="breadcrumbs">
-              <span>VIBHA · Science on Wheels</span>
-              <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
+              <span className="breadcrumb-brand">VIBHA · Science on Wheels</span>
+              <span className="breadcrumb-brand-sep" style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
               {activeSection && activeSection.type === "dropdown" && (
-                <>
+                <span className="breadcrumb-section" style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
                   <span style={{ color: "var(--text-muted)" }}>{activeSection.label}</span>
                   <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
-                </>
+                </span>
               )}
-              <strong>
+              <strong className="breadcrumb-current">
                 {activeItem?.label || "Dashboard"}
               </strong>
             </div>
@@ -216,11 +216,11 @@ export function AdminLayout() {
                 <div className="avatar" style={{ backgroundColor: "var(--brand)" }}>
                   {(user?.name || "SA").slice(0, 1).toUpperCase()}
                 </div>
-                <div>
-                  <strong style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
+                <div className="profile-details">
+                  <strong className="profile-name" style={{ display: "block", fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
                     {user?.name || "Administrator"}
                   </strong>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
+                  <span className="profile-email" style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)", display: "block" }}>
                     {user?.email || "admin@scienceonwheels.com"}
                   </span>
                 </div>

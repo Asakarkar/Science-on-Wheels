@@ -2585,8 +2585,64 @@ textarea:focus {
 }
 
 /* =========================================================
-   RESPONSIVE MEDIA OVERRIDES
+   RESPONSIVE MEDIA OVERRIDES & SCREEN SIZE ADAPTATION
    ========================================================= */
+
+/* Mobile backdrop for off-canvas drawer navigation */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 38;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Ensure portal shell and main scroll containers prevent horizontal page blowout */
+.portal-body {
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-main,
+.field-main,
+.app-main {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Universal table responsiveness protection */
+.table-wrap,
+.overflow-x-auto,
+[class*="overflow-x-auto"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+table,
+.data-table {
+  min-width: 580px;
+}
+
+/* Operational calendar base layout grid */
+.operational-calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 960px) {
+  .operational-calendar-layout {
+    grid-template-columns: 1.35fr 1fr;
+  }
+}
+
+/* ---------------------------------------------------------
+   BREAKPOINT: Large Tablets & Laptops (<= 1024px)
+   --------------------------------------------------------- */
 @media (max-width: 1024px) {
   .mobile-menu,
   .field-mobile {
@@ -2604,6 +2660,13 @@ textarea:focus {
     transform: translateX(-100%);
     z-index: 40;
     box-shadow: var(--shadow-lg);
+  }
+
+  .admin-topbar,
+  .field-top,
+  .app-topbar {
+    padding: 0 18px;
+    gap: 14px;
   }
 
   .auth-panel {
@@ -2652,27 +2715,324 @@ textarea:focus {
   }
 }
 
+/* ---------------------------------------------------------
+   BREAKPOINT: Tablets & Small Screens (<= 768px)
+   --------------------------------------------------------- */
 @media (max-width: 768px) {
   .page-content,
   .field-content {
-    padding: 18px;
+    padding: 16px 14px;
   }
 
   .metric-grid,
   .kpi-grid,
   .field-stats {
     grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
   .top-search {
     display: none;
   }
+
+  .breadcrumb-brand,
+  .breadcrumb-brand-sep {
+    display: none !important;
+  }
+
+  .module-head {
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+  }
+
+  .module-head h2 {
+    font-size: 21px;
+  }
 }
 
+/* ---------------------------------------------------------
+   BREAKPOINT: Phablets & Mobile Devices (<= 640px)
+   --------------------------------------------------------- */
+@media (max-width: 640px) {
+  .admin-topbar,
+  .field-top,
+  .app-topbar {
+    padding: 0 12px;
+    gap: 10px;
+    height: 54px;
+  }
+
+  .profile-email {
+    display: none !important;
+  }
+
+  .profile,
+  .field-user {
+    padding: 3px 10px 3px 3px;
+    gap: 6px;
+  }
+
+  .breadcrumbs {
+    font-size: 12.5px;
+  }
+
+  .command-hero {
+    padding: 20px 16px;
+    gap: 18px;
+    border-radius: var(--r-xl);
+  }
+
+  .hero-visual {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+
+  .hero-orbit.one {
+    width: 95px;
+    height: 95px;
+  }
+
+  .hero-orbit.two {
+    width: 70px;
+    height: 70px;
+  }
+
+  .hero-core {
+    width: 48px;
+    height: 48px;
+    padding: 4px;
+  }
+
+  .module-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .module-actions button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  /* Form & Toolbar responsive stacking */
+  .toolbar {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .toolbar input {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .toolbar button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Responsive Subnav Horizontal Touch Scrolling */
+  .subnav-tabs {
+    padding: 0 12px;
+    gap: 2px;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .subnav-tabs button,
+  .subnav-tab {
+    padding: 11px 14px 10px;
+    font-size: 13px;
+  }
+
+  /* Modal Responsive Sheet */
+  .modal-backdrop {
+    padding: 8px !important;
+  }
+
+  .modal {
+    padding: 18px 14px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: var(--r-xl) !important;
+    max-height: 94vh !important;
+  }
+
+  .modal form [style*="gridTemplateColumns"],
+  .modal form [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .modal-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Operational Calendar on Mobile */
+  .operational-calendar-container {
+    padding: 12px 10px !important;
+  }
+
+  .operational-calendar-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .operational-calendar-controls {
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 0.5rem !important;
+  }
+
+  .operational-calendar-month-selector {
+    flex: 1;
+    justify-content: space-between;
+  }
+}
+
+/* ---------------------------------------------------------
+   BREAKPOINT: Compact Mobile Phones (<= 480px)
+   --------------------------------------------------------- */
 @media (max-width: 480px) {
+  .admin-sidebar,
+  .regional-sidebar,
+  .field-sidebar {
+    width: min(280px, 85vw);
+    min-width: min(280px, 85vw);
+  }
+
+  .page-content,
+  .field-content {
+    padding: 12px 10px;
+  }
+
+  .breadcrumb-section {
+    display: none !important;
+  }
+
+  .breadcrumb-current {
+    font-size: 12px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    display: block;
+  }
+
+  .profile-details {
+    display: none !important;
+  }
+
+  .profile,
+  .field-user {
+    padding: 2px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 11.5px;
+  }
+
+  .mobile-menu,
+  .field-mobile {
+    width: 32px;
+    height: 32px;
+  }
+
   .metric-grid,
   .kpi-grid,
   .field-stats {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .metric-card,
+  .kpi-card {
+    padding: 16px 16px;
+  }
+
+  .metric-value {
+    font-size: 26px;
+  }
+
+  .module-head h2 {
+    font-size: 18px;
+  }
+
+  .module-head p {
+    font-size: 12.5px;
+  }
+
+  .operational-calendar-cell {
+    height: 38px !important;
+  }
+
+  .operational-calendar-cell span {
+    font-size: 11px !important;
+  }
+
+  .network-map {
+    height: 240px;
+  }
+
+  .map-legend {
+    padding: 6px 10px;
+    font-size: 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .auth-form-panel {
+    padding: 16px 10px;
+  }
+
+  .auth-form-container {
+    padding: 22px 16px;
+    border-radius: var(--r-lg);
+  }
+
+  .auth-form-title {
+    font-size: 20px;
+  }
+}
+
+/* ---------------------------------------------------------
+   BREAKPOINT: Ultra-Compact Screens (<= 360px)
+   --------------------------------------------------------- */
+@media (max-width: 360px) {
+  .breadcrumb-current {
+    max-width: 110px;
+  }
+
+  .operational-calendar-cell {
+    height: 32px !important;
+  }
+
+  .operational-calendar-cell span {
+    font-size: 10px !important;
+  }
+
+  .operational-calendar-month-selector span {
+    min-width: 90px !important;
+    font-size: 11px !important;
+  }
+
+  .metric-value {
+    font-size: 23px;
   }
 }

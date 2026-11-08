@@ -130,8 +130,8 @@ export function DashboardPage() {
       </section>
 
       {/* Visual Charts & Analytics (Required operational view) */}
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem", margin: "1.25rem 0" }}>
-        <div style={{ flex: "2 1 450px" }}>
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-5">
+        <div style={{ minWidth: 0 }}>
           <AreaTrendChart
             title="Mobile Science Outreach Trends"
             subtitle="Monthly completed school laboratory sessions and student reach velocity"
@@ -148,7 +148,7 @@ export function DashboardPage() {
             height={210}
           />
         </div>
-        <div style={{ flex: "1 1 300px" }}>
+        <div style={{ minWidth: 0 }}>
           <DonutChart
             title="Field Session Execution"
             subtitle="Breakdown of completed, scheduled, and active school visits"

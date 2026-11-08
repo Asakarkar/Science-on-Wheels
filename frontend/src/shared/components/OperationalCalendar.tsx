@@ -104,9 +104,9 @@ export function OperationalCalendar({
   }
 
   return (
-    <div style={{ background: "#ffffff", borderRadius: "10px", border: "1px solid var(--stone, #e2e8f0)", padding: "1.25rem", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" }}>
+    <div className="operational-calendar-container" style={{ background: "#ffffff", borderRadius: "10px", border: "1px solid var(--stone, #e2e8f0)", padding: "1.25rem", boxShadow: "0 1px 3px rgba(0,0,0,0.02)" }}>
       {/* Header bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.25rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "1rem" }}>
+      <div className="operational-calendar-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "1.25rem", borderBottom: "1px solid #f1f5f9", paddingBottom: "1rem" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <CalendarIcon size={18} style={{ color: "#6366f1" }} />
@@ -116,7 +116,7 @@ export function OperationalCalendar({
         </div>
 
         {/* Month Navigation & Filter controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+        <div className="operational-calendar-controls" style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
           {/* Status filter pills */}
           <div style={{ display: "inline-flex", background: "#f8fafc", borderRadius: "6px", border: "1px solid #e2e8f0", padding: "2px" }}>
             {["ALL", "SCHEDULED", "COMPLETED"].map((st) => (
@@ -142,7 +142,7 @@ export function OperationalCalendar({
           </div>
 
           {/* Month selector */}
-          <div style={{ display: "flex", alignItems: "center", gap: "4px", background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "2px" }}>
+          <div className="operational-calendar-month-selector" style={{ display: "flex", alignItems: "center", gap: "4px", background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "6px", padding: "2px" }}>
             <button
               type="button"
               onClick={prevMonth}
@@ -184,9 +184,9 @@ export function OperationalCalendar({
       </div>
 
       {/* Main layout: Grid on left, Selected Day agenda on right */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem" }}>
+      <div className="operational-calendar-layout">
         {/* Calendar Grid Container */}
-        <div>
+        <div style={{ minWidth: 0, width: "100%" }}>
           {/* Day of week labels */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px", textAlign: "center", marginBottom: "6px" }}>
             {DAY_NAMES.map((d) => (
@@ -202,8 +202,9 @@ export function OperationalCalendar({
             {prevMonthDays.map((d) => (
               <div
                 key={`prev-${d}`}
+                className="operational-calendar-cell operational-calendar-cell-faded"
                 style={{
-                  height: "46px",
+                  height: "44px",
                   borderRadius: "6px",
                   background: "#f8fafc",
                   color: "#cbd5e1",
@@ -231,8 +232,9 @@ export function OperationalCalendar({
                 <div
                   key={`day-${d}`}
                   onClick={() => setSelectedDate(dateObj)}
+                  className="operational-calendar-cell"
                   style={{
-                    height: "46px",
+                    height: "44px",
                     borderRadius: "6px",
                     cursor: "pointer",
                     position: "relative",
@@ -258,7 +260,7 @@ export function OperationalCalendar({
                 >
                   <span
                     style={{
-                      fontSize: "12.5px",
+                      fontSize: "12px",
                       fontWeight: isSelected || isToday ? 700 : 500,
                       color: isSelected ? "#4338ca" : isToday ? "#1d4ed8" : "#1e293b"
                     }}
@@ -300,8 +302,9 @@ export function OperationalCalendar({
             {nextMonthDays.map((d) => (
               <div
                 key={`next-${d}`}
+                className="operational-calendar-cell operational-calendar-cell-faded"
                 style={{
-                  height: "46px",
+                  height: "44px",
                   borderRadius: "6px",
                   background: "#f8fafc",
                   color: "#cbd5e1",
@@ -318,7 +321,7 @@ export function OperationalCalendar({
           </div>
 
           {/* Color legend */}
-          <div style={{ display: "flex", gap: "1rem", marginTop: "10px", fontSize: "11px", color: "#64748b", alignItems: "center" }}>
+          <div className="operational-calendar-legend" style={{ display: "flex", gap: "1rem", marginTop: "10px", fontSize: "11px", color: "#64748b", alignItems: "center", flexWrap: "wrap" }}>
             <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#6366f1" }} />
               Scheduled
@@ -335,7 +338,7 @@ export function OperationalCalendar({
         </div>
 
         {/* Selected Date Agenda / Detail Drawer */}
-        <div style={{ background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0", padding: "1rem", display: "flex", flexDirection: "column" }}>
+        <div style={{ background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0", padding: "1rem", display: "flex", flexDirection: "column", minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem", borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
             <div>
               <span style={{ fontSize: "11px", textTransform: "uppercase", fontWeight: 700, color: "#64748b" }}>
