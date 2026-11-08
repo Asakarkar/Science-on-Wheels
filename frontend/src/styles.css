@@ -1,16 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700&display=swap');
 
 /* =========================================================
    VIBHA — SCIENCE ON WHEELS DESIGN SYSTEM
-   Version 3.2 — Production MIS Architecture & Complete Layout System
+   Typography: Roboto Font Only
    ========================================================= */
 
 :root {
   color-scheme: light;
 
-  /* ── Typography (Outfit + DM Mono) ── */
-  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'DM Mono', 'Space Mono', Consolas, monospace;
+  /* ── Typography (Roboto Only) ── */
+  --font-sans: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'Roboto', sans-serif;
+  --font-body: 'Roboto', sans-serif;
+  --font-heading: 'Roboto', sans-serif;
 
   /* ── Minimalist Core Palette ── */
   --canvas:         #F8FAFC;   /* Crisp porcelain slate background */
@@ -110,7 +113,7 @@
 }
 
 /* =========================================================
-   GLOBAL RESET
+   GLOBAL RESET — ROBOTO ONLY
    ========================================================= */
 *,
 *::before,
@@ -118,6 +121,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
 html,
@@ -127,29 +131,49 @@ body,
   min-height: 100svh;
   background-color: var(--canvas);
   color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 15px;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: 14.5px;
   line-height: 1.5;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
 }
 
 button,
 input,
 textarea,
-select {
-  font-family: var(--font-sans);
-  font-size: 14px;
+select,
+table,
+th,
+td,
+code,
+pre,
+kbd,
+span,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+small,
+label,
+.font-mono,
+.font-sans,
+[class*="font-"] {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+a {
   color: inherit;
+  text-decoration: none;
+  font-family: inherit;
 }
 
 button {
   cursor: pointer;
   border: none;
   background: none;
+  font-family: inherit;
   transition:
     background-color var(--dur-fast) var(--ease),
     border-color var(--dur-fast) var(--ease),
@@ -2502,8 +2526,11 @@ textarea:focus {
 .text-2xl { font-size: 24px !important; font-weight: 700 !important; }
 .text-3xl { font-size: 32px !important; font-weight: 800 !important; }
 
-.font-mono { font-family: var(--font-mono) !important; }
-.font-sans { font-family: var(--font-sans) !important; }
+.font-mono,
+.font-sans,
+[class*="font-"] {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
 .uppercase { text-transform: uppercase; }
 .font-bold { font-weight: 700; }
 .font-semibold { font-weight: 600; }
