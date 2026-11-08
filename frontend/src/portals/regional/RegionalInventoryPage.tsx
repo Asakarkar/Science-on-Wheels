@@ -496,7 +496,26 @@ export function RegionalInventoryPage() {
 
       {/* ADD CONSUMABLE MODAL */}
       {showAddConsumable && (
-        <div className="fixed inset-0 z-50 bg-charcoal/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            backgroundColor: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddConsumable(false);
+          }}
+        >
           <div className="surface w-full max-w-md p-6 rounded-lg border border-stone shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone mb-4">
               <h3 className="text-base font-bold text-charcoal">Register Consumable Item</h3>
@@ -608,7 +627,26 @@ export function RegionalInventoryPage() {
 
       {/* ADD EQUIPMENT MODAL */}
       {showAddEquipment && (
-        <div className="fixed inset-0 z-50 bg-charcoal/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            backgroundColor: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddEquipment(false);
+          }}
+        >
           <div className="surface w-full max-w-md p-6 rounded-lg border border-stone shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-stone mb-4">
               <h3 className="text-base font-bold text-charcoal">Add Reusable Equipment Asset</h3>
@@ -706,7 +744,26 @@ export function RegionalInventoryPage() {
 
       {/* ADJUST CONSUMABLE STOCK MODAL */}
       {editingConsumable && (
-        <div className="fixed inset-0 z-50 bg-charcoal/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            backgroundColor: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingConsumable(null);
+          }}
+        >
           <div className="surface w-full max-w-sm p-6 rounded-lg border border-stone shadow-xl">
             <h3 className="text-base font-bold text-charcoal mb-2">Adjust Consumable Stock</h3>
             <p className="text-xs text-charcoal-muted mb-4 font-mono">{editingConsumable.name}</p>
@@ -756,7 +813,26 @@ export function RegionalInventoryPage() {
 
       {/* UPDATE EQUIPMENT CONDITION MODAL */}
       {editingEquipment && (
-        <div className="fixed inset-0 z-50 bg-charcoal/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            backgroundColor: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingEquipment(null);
+          }}
+        >
           <div className="surface w-full max-w-sm p-6 rounded-lg border border-stone shadow-xl">
             <h3 className="text-base font-bold text-charcoal mb-2">Update Asset Condition</h3>
             <p className="text-xs text-charcoal-muted mb-4 font-mono">
@@ -814,7 +890,26 @@ export function RegionalInventoryPage() {
 
       {/* QR CODE VIEWER MODAL */}
       {viewingQrAsset && (
-        <div className="fixed inset-0 z-50 bg-charcoal/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+            backgroundColor: "rgba(15, 23, 42, 0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setViewingQrAsset(null);
+          }}
+        >
           <div className="surface w-full max-w-xs p-6 rounded-lg border border-stone shadow-xl text-center">
             <h3 className="text-base font-bold text-charcoal mb-1">{viewingQrAsset.name}</h3>
             <span className="font-mono text-xs text-charcoal-muted block mb-4">

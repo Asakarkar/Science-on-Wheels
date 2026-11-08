@@ -4419,3 +4419,99 @@ tbody tr:hover {
 .alert-row.warning .alert-icon {
   animation: gentlePulse 2.4s ease-in-out infinite;
 }
+
+/* =========================================================
+   UNIVERSAL MODAL & DIALOG OVERLAY SYSTEM
+   ========================================================= */
+.modal-overlay,
+.fixed.inset-0,
+div[class*="fixed inset-0"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100svh !important;
+  background-color: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1000 !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+div[class*="fixed inset-0"].justify-end {
+  justify-content: flex-end !important;
+  padding: 0 !important;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+div[class*="fixed inset-0"] > .surface,
+div[class*="fixed inset-0"] > div {
+  position: relative !important;
+  background-color: #FFFFFF !important;
+  border-radius: 12px !important;
+  border: 1px solid #DDD7CD !important;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.28), 0 8px 16px -4px rgba(15, 23, 42, 0.12) !important;
+  animation: modalSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  max-height: calc(100vh - 32px) !important;
+  max-height: calc(100svh - 32px) !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+}
+
+div[class*="fixed inset-0"].justify-end > div {
+  height: 100vh !important;
+  height: 100svh !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+  border-left: 1px solid #DDD7CD !important;
+  animation: modalSlideLeft 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes modalSlideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Modal max-width utility classes */
+.max-w-xs { max-width: 320px !important; width: 100% !important; }
+.max-w-sm { max-width: 384px !important; width: 100% !important; }
+.max-w-md { max-width: 448px !important; width: 100% !important; }
+.max-w-lg { max-width: 512px !important; width: 100% !important; }
+.max-w-xl { max-width: 576px !important; width: 100% !important; }
+.max-w-2xl { max-width: 672px !important; width: 100% !important; }
+.max-w-3xl { max-width: 768px !important; width: 100% !important; }
+.max-w-4xl { max-width: 896px !important; width: 100% !important; }
