@@ -121,7 +121,7 @@ export function AreaTrendChart({
           })}
 
           {/* Shaded Area */}
-          <path d={areaPath} fill={`url(#areaGrad-${color.replace("#", "")})`} />
+          <path d={areaPath} fill={`url(#areaGrad-${color.replace("#", "")})`} className="chart-area-path" />
 
           {/* Main Trend Line */}
           <path
@@ -131,6 +131,7 @@ export function AreaTrendChart({
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
+            className="chart-line-path"
           />
 
           {/* Data Points */}
@@ -150,7 +151,8 @@ export function AreaTrendChart({
                   fill="#ffffff"
                   stroke={color}
                   strokeWidth={isHover ? 3 : 2}
-                  style={{ transition: "all 0.15s ease" }}
+                  className="chart-data-point"
+                  style={{ transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)" }}
                 />
                 {/* X-axis label */}
                 <text
@@ -171,6 +173,7 @@ export function AreaTrendChart({
         {/* Floating Tooltip */}
         {hoverIndex !== null && points[hoverIndex] && (
           <div
+            className="chart-tooltip"
             style={{
               position: "absolute",
               top: `${(points[hoverIndex].y / chartHeight) * 100}%`,
@@ -275,7 +278,8 @@ export function DonutChart({
                   strokeWidth={thickness}
                   strokeDasharray={strokeDasharray}
                   strokeDashoffset={strokeDashoffset}
-                  style={{ transition: "stroke-dashoffset 0.4s ease, stroke-dasharray 0.4s ease" }}
+                  className="donut-segment"
+                  style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke-dasharray 0.8s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.2s ease", cursor: "pointer" }}
                 />
               );
             })}
@@ -363,7 +367,7 @@ export function HorizontalBarChart({ data, title, subtitle }: HorizontalBarChart
           const pct = Math.min(Math.round((item.value / (item.total || maxVal)) * 100), 100);
           const barColor = item.color || "#6366f1";
           return (
-            <div key={i}>
+            <div key={i} className="horizontal-bar-row">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12.5px", marginBottom: "4px" }}>
                 <span style={{ fontWeight: 600, color: "#1e293b" }}>{item.label}</span>
                 <span style={{ fontFamily: "monospace", fontSize: "12px", color: "#475569" }}>
@@ -373,12 +377,13 @@ export function HorizontalBarChart({ data, title, subtitle }: HorizontalBarChart
               </div>
               <div style={{ width: "100%", height: "8px", background: "#f1f5f9", borderRadius: "4px", overflow: "hidden" }}>
                 <div
+                  className="bar-fill-animated"
                   style={{
                     width: `${pct}%`,
                     height: "100%",
                     background: barColor,
                     borderRadius: "4px",
-                    transition: "width 0.4s ease"
+                    transition: "width 0.9s cubic-bezier(0.16, 1, 0.3, 1)"
                   }}
                 />
               </div>

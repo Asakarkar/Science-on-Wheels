@@ -284,6 +284,70 @@ img, svg {
   50% { opacity: 0.5; }
 }
 
+@keyframes sonarPing {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes radarBeacon {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.75);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@keyframes drawChartPath {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes fadeInArea {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes floatDriftC {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes routePulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
 .animate-spin { animation: spin 1s linear infinite !important; }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important; }
 
@@ -483,6 +547,12 @@ img, svg {
   bottom: 18px;
   left: -24px;
   animation: floatDriftB 6.5s ease-in-out infinite 0.6s;
+}
+
+.auth-float-node.pos-c {
+  top: 135px;
+  right: -32px;
+  animation: floatDriftC 6.2s ease-in-out infinite 1.2s;
 }
 
 .auth-panel-heading {
@@ -1196,6 +1266,7 @@ img, svg {
   display: inline-block;
   flex-shrink: 0;
   background-color: var(--success);
+  animation: radarBeacon 2.2s infinite;
 }
 
 .logout {
@@ -1492,6 +1563,40 @@ img, svg {
   justify-content: center;
   box-shadow: var(--shadow-md);
   z-index: 2;
+  animation: auraPulse 4.5s ease-in-out infinite;
+}
+
+.hero-node {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.hero-node.node-a {
+  background-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  top: 14px;
+  left: 26px;
+  animation: floatDriftA 4s ease-in-out infinite;
+}
+
+.hero-node.node-b {
+  background-color: #10B981;
+  box-shadow: 0 0 10px #10B981;
+  bottom: 16px;
+  right: 22px;
+  animation: floatDriftB 5s ease-in-out infinite;
+}
+
+.hero-node.node-c {
+  background-color: #F59E0B;
+  box-shadow: 0 0 10px #F59E0B;
+  top: 26px;
+  right: 18px;
+  animation: floatDriftA 6s ease-in-out infinite reverse;
 }
 
 /* =========================================================
@@ -1505,6 +1610,21 @@ img, svg {
   gap: 18px;
   margin-bottom: 28px;
 }
+
+.metric-grid > *,
+.kpi-grid > *,
+.field-stats > * {
+  animation: cardEntrance var(--dur-base) var(--ease) both;
+}
+
+.metric-grid > *:nth-child(1), .kpi-grid > *:nth-child(1), .field-stats > *:nth-child(1) { animation-delay: 0.03s; }
+.metric-grid > *:nth-child(2), .kpi-grid > *:nth-child(2), .field-stats > *:nth-child(2) { animation-delay: 0.07s; }
+.metric-grid > *:nth-child(3), .kpi-grid > *:nth-child(3), .field-stats > *:nth-child(3) { animation-delay: 0.11s; }
+.metric-grid > *:nth-child(4), .kpi-grid > *:nth-child(4), .field-stats > *:nth-child(4) { animation-delay: 0.15s; }
+.metric-grid > *:nth-child(5), .kpi-grid > *:nth-child(5), .field-stats > *:nth-child(5) { animation-delay: 0.19s; }
+.metric-grid > *:nth-child(6), .kpi-grid > *:nth-child(6), .field-stats > *:nth-child(6) { animation-delay: 0.23s; }
+.metric-grid > *:nth-child(7), .kpi-grid > *:nth-child(7), .field-stats > *:nth-child(7) { animation-delay: 0.27s; }
+.metric-grid > *:nth-child(8), .kpi-grid > *:nth-child(8), .field-stats > *:nth-child(8) { animation-delay: 0.31s; }
 
 .metric-card,
 .kpi-card {
@@ -1522,6 +1642,23 @@ img, svg {
     border-color var(--dur-base) var(--ease);
   position: relative;
   overflow: hidden;
+}
+
+.metric-card::after,
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2.5px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.metric-card:hover::after,
+.kpi-card:hover::after {
+  left: 100%;
 }
 
 .metric-card:hover,
@@ -1650,6 +1787,7 @@ img, svg {
   width: 60%;
   height: 180px;
   border-radius: 50%;
+  animation: routePulse 8s ease-in-out infinite;
 }
 
 .map-route.route-b {
@@ -1659,6 +1797,7 @@ img, svg {
   height: 120px;
   border-radius: 40%;
   border-color: #CBD5E1;
+  animation: routePulse 11s ease-in-out infinite reverse;
 }
 
 .map-pin {
@@ -1681,6 +1820,17 @@ img, svg {
   z-index: 5;
 }
 
+.map-pin::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  animation: sonarPing 2.6s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  pointer-events: none;
+}
+
 .map-pin:hover {
   transform: scale(1.18);
   background-color: var(--accent);
@@ -1688,10 +1838,20 @@ img, svg {
 }
 
 .map-pin.p1 { left: 24%; top: 38%; }
+.map-pin.p1::after { animation-delay: 0s; }
+
 .map-pin.p2 { left: 45%; top: 25%; }
+.map-pin.p2::after { animation-delay: 0.5s; }
+
 .map-pin.p3 { left: 62%; top: 48%; }
+.map-pin.p3::after { animation-delay: 1.0s; }
+
 .map-pin.p4 { left: 35%; top: 68%; }
+.map-pin.p4::after { animation-delay: 1.5s; }
+
 .map-pin.p5 { left: 75%; top: 32%; }
+.map-pin.p5::after { animation-delay: 2.0s; }
+
 .map-pin.p6 { left: 82%; top: 62%; }
 .map-pin.p7 { left: 18%; top: 58%; }
 .map-pin.p8 { left: 52%; top: 78%; }
@@ -1895,9 +2055,21 @@ img, svg {
   color: #065F46;
   background: #ECFDF5;
   border: 1px solid #A7F3D0;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: var(--r-full);
   letter-spacing: 0.06em;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.live-pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10B981;
+  animation: radarBeacon 1.8s infinite;
 }
 
 .text-button {
@@ -2134,6 +2306,14 @@ tbody tr:hover {
   transform: translateY(-1px);
 }
 
+.primary:active:not(:disabled),
+.btn-primary:active:not(:disabled),
+.ghost:active:not(:disabled),
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.97) !important;
+  box-shadow: none !important;
+}
+
 .btn-sm {
   padding: 7px 12px !important;
   font-size: 13px !important;
@@ -2234,7 +2414,7 @@ textarea:focus {
   max-width: 620px;
   max-height: 90vh;
   overflow-y: auto;
-  animation: cardEntrance var(--dur-base) var(--ease);
+  animation: modalPopIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
   padding: 28px;
 }
 
@@ -3035,4 +3215,109 @@ table,
   .metric-value {
     font-size: 23px;
   }
+}
+
+/* =========================================================
+   ANIMATED VISUAL & INTERACTIVE ELEMENTS
+   ========================================================= */
+
+/* SVG Area & Trend Chart Line Drawing */
+.chart-line-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawChartPath 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.chart-area-path {
+  animation: fadeInArea 1.2s ease-out forwards;
+}
+
+.chart-data-point {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), r 0.2s ease;
+}
+
+.chart-tooltip {
+  animation: modalPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Donut Chart Segment Interactive Pop */
+.donut-segment {
+  transform-origin: center;
+  transition: stroke-width 0.25s ease, filter 0.25s ease !important;
+}
+
+.donut-segment:hover {
+  stroke-width: 27px !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.18));
+}
+
+/* Horizontal Bar Comparison Hover Shift */
+.horizontal-bar-row {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.horizontal-bar-row:hover {
+  background-color: var(--surface-1);
+  transform: translateX(4px);
+}
+
+.bar-fill-animated {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Interactive Operational Calendar Hover & Active Touch */
+.operational-calendar-cell {
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease, background-color 0.15s ease !important;
+}
+
+.operational-calendar-cell:hover:not(.operational-calendar-cell-faded) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15) !important;
+  z-index: 2;
+}
+
+.operational-calendar-cell:active:not(.operational-calendar-cell-faded) {
+  transform: scale(0.96) !important;
+}
+
+.operational-calendar-legend span {
+  transition: transform 0.15s ease;
+  cursor: default;
+}
+
+.operational-calendar-legend span:hover {
+  transform: translateY(-1px);
+}
+
+/* Skeleton Loading Shimmer Placeholder */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--r-md);
+}
+
+/* Table Row Smooth Micro-Interaction */
+tbody tr {
+  transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+
+tbody tr:hover {
+  background-color: rgba(241, 245, 249, 0.7);
+}
+
+/* Alert Row Interactive Hover Shift */
+.alert-row {
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.alert-row:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+}
+
+.alert-row.warning .alert-icon {
+  animation: gentlePulse 2.4s ease-in-out infinite;
 }

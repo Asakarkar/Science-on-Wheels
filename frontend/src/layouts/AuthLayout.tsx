@@ -50,6 +50,11 @@ export function AuthLayout() {
             <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#34D399" }} />
             <span>10,000+ Students Reached</span>
           </div>
+
+          <div className="auth-float-node pos-c">
+            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#F59E0B" }} />
+            <span>Interactive STEM Modules</span>
+          </div>
         </div>
 
         {/* Text & Mission */}
