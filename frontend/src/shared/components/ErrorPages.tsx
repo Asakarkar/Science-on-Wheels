@@ -28,21 +28,24 @@ function ErrorLayout({
         textAlign: "center",
       }}
     >
-      <div style={{ maxWidth: "420px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-        {/* Logo */}
+      <div style={{ maxWidth: "440px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+        {/* VIBHA Logo Container */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "56px",
-            height: "56px",
+            width: "64px",
+            height: "64px",
             borderRadius: "var(--r-xl)",
-            backgroundColor: "var(--brand)",
+            backgroundColor: "#FFFFFF",
+            border: "1px solid var(--border)",
+            padding: "8px",
+            boxShadow: "var(--shadow-xs)",
             marginBottom: "8px",
           }}
         >
-          <BrandLogo size={28} color="#fff" />
+          <BrandLogo size={48} />
         </div>
 
         {/* Error code */}
@@ -62,8 +65,8 @@ function ErrorLayout({
         {/* Title */}
         <h1
           style={{
-            fontSize: "20px",
-            fontWeight: 700,
+            fontSize: "22px",
+            fontWeight: 800,
             color: "var(--text-primary)",
             lineHeight: 1.3,
           }}
@@ -74,35 +77,20 @@ function ErrorLayout({
         {/* Description */}
         <p
           style={{
-            fontSize: "14px",
+            fontSize: "14.5px",
             color: "var(--text-muted)",
             lineHeight: 1.6,
-            maxWidth: "360px",
+            maxWidth: "380px",
           }}
         >
           {description}
         </p>
 
-        {/* Action */}
+        {/* Action Button */}
         <button
           onClick={onAction}
-          style={{
-            marginTop: "8px",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            padding: "10px 20px",
-            fontSize: "14px",
-            fontWeight: 600,
-            color: "#fff",
-            backgroundColor: "var(--brand)",
-            border: "1px solid var(--brand)",
-            borderRadius: "var(--r-md)",
-            cursor: "pointer",
-            transition: "background-color 120ms ease",
-          }}
-          onMouseEnter={(e) => ((e.target as HTMLButtonElement).style.backgroundColor = "var(--brand-hover)")}
-          onMouseLeave={(e) => ((e.target as HTMLButtonElement).style.backgroundColor = "var(--brand)")}
+          className="primary"
+          style={{ marginTop: "10px" }}
         >
           {actionLabel}
         </button>
@@ -117,7 +105,7 @@ export function NotFoundPage() {
     <ErrorLayout
       code="404"
       title="Page not found"
-      description="The requested route does not exist or has been moved to a new location in the role-based portal."
+      description="The requested route does not exist or has been relocated in the VIBHA Science on Wheels portal."
       actionLabel="Return to Dashboard"
       onAction={() => navigate("/")}
     />
@@ -131,7 +119,7 @@ export function ForbiddenPage() {
       code="403"
       title="Access denied"
       description="You do not have the required role or regional authorization to access this portal or resource."
-      actionLabel="Go to Your Portal"
+      actionLabel="Go to Authorized Hub"
       onAction={() => navigate("/")}
     />
   );

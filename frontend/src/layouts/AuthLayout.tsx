@@ -19,11 +19,11 @@ export function AuthLayout() {
 
         {/* Top Branding */}
         <div className="auth-panel-logo">
-          <div className="auth-panel-logo-mark">
-            <BrandLogo size={24} color="#FFFFFF" />
+          <div className="auth-panel-logo-mark" style={{ backgroundColor: "#FFFFFF", padding: "4px" }}>
+            <BrandLogo size={36} />
           </div>
           <div>
-            <div className="auth-panel-logo-text">Science on Wheels</div>
+            <div className="auth-panel-logo-text">VIBHA · Science on Wheels</div>
             <div className="auth-panel-logo-sub">Operations & Management System</div>
           </div>
         </div>
@@ -42,12 +42,12 @@ export function AuthLayout() {
 
           {/* Floating Orbiting STEM Badges */}
           <div className="auth-float-node pos-a">
-            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#38BDF8" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#38BDF8" }} />
             <span>120+ Active Mobile Labs</span>
           </div>
 
           <div className="auth-float-node pos-b">
-            <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#34D399" }} />
+            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#34D399" }} />
             <span>10,000+ Students Reached</span>
           </div>
         </div>
@@ -58,7 +58,7 @@ export function AuthLayout() {
             Empowering curious minds through mobile science
           </h1>
           <p className="auth-panel-desc">
-            Centralized intelligent coordination platform connecting regional hubs, field communicators, and rural schools across India.
+            Vijnana Bharati (VIBHA) centralized intelligent coordination platform connecting regional hubs, field communicators, and rural schools across India.
           </p>
 
           <div className="auth-panel-features">
@@ -73,7 +73,7 @@ export function AuthLayout() {
 
         {/* Footer */}
         <div className="auth-panel-footer">
-          Science on Wheels · Enterprise Operations Platform · v3.0
+          VIBHA · Science on Wheels · Enterprise Operations Platform
         </div>
       </div>
 

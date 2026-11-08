@@ -16,13 +16,6 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Quick fill helper for testers
-  function fillDemo(userEmail: string, userPass: string) {
-    setEmail(userEmail);
-    setPassword(userPass);
-    setError(null);
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
@@ -71,13 +64,13 @@ export function LoginPage() {
   return (
     <div className="auth-form-container">
       {/* Mobile Branding (only displayed when left panel is hidden on mobile screens) */}
-      <div className="auth-form-logo-mobile" style={{ display: "none", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-        <div style={{ width: 38, height: 38, borderRadius: "var(--r-md)", backgroundColor: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center", color: "#FFF" }}>
-          <BrandLogo size={22} color="#FFF" />
+      <div className="auth-form-logo-mobile" style={{ display: "none", alignItems: "center", gap: "14px", marginBottom: "28px" }}>
+        <div style={{ width: 44, height: 44, borderRadius: "var(--r-md)", backgroundColor: "#FFFFFF", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", padding: "4px", boxShadow: "var(--shadow-xs)" }}>
+          <BrandLogo size={36} />
         </div>
         <div>
-          <strong style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)" }}>Science on Wheels</strong>
-          <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-subtle)" }}>Operations Portal</span>
+          <strong style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", display: "block" }}>VIBHA · Science on Wheels</strong>
+          <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-subtle)" }}>Operations Management Platform</span>
         </div>
       </div>
 
@@ -87,29 +80,6 @@ export function LoginPage() {
         <p className="auth-form-subtitle">
           Enter your authorized credentials to access regional coordination and fleet management.
         </p>
-      </div>
-
-      {/* Quick Demo Role Selector Pills */}
-      <div style={{ marginBottom: "20px" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11.5px", fontWeight: 600, color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-          Quick Demo Accounts:
-        </div>
-        <div className="quick-roles">
-          <button
-            type="button"
-            className="quick-role-pill"
-            onClick={() => fillDemo("regional@scienceonwheels.com", "RegionalAdmin@123456")}
-          >
-            🏢 Regional Admin
-          </button>
-          <button
-            type="button"
-            className="quick-role-pill"
-            onClick={() => fillDemo("field@scienceonwheels.com", "FieldOperator@123456")}
-          >
-            🔬 Field Staff
-          </button>
-        </div>
       </div>
 
       {/* Form */}
@@ -187,7 +157,7 @@ export function LoginPage() {
               }}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              <NavIcon name={showPassword ? "Eye" : "Eye"} size={16} />
+              <NavIcon name="Eye" size={16} />
             </button>
           </div>
         </div>
@@ -224,7 +194,7 @@ export function LoginPage() {
 
       {/* Footer info */}
       <div className="auth-footer">
-        Science on Wheels · Autonomous STEM Logistics Management · 2026
+        VIBHA · Science on Wheels · Autonomous STEM Logistics Management
       </div>
     </div>
   );

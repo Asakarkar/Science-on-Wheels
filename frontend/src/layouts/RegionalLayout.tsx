@@ -51,7 +51,7 @@ export function RegionalLayout() {
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">Regional Operations Command</span>
+          <span className="status-bar-label">VIBHA · Regional Operations Command</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
           <span>Regional Administrator Hub</span>
         </div>
@@ -75,11 +75,11 @@ export function RegionalLayout() {
         <aside className={`admin-sidebar regional-sidebar ${mobileNav ? "open" : ""}`}>
           {/* Brand */}
           <div className="sidebar-brand">
-            <div className="brand-mark regional-mark" style={{ backgroundColor: "var(--brand)" }}>
-              <BrandLogo size={22} color="#FFFFFF" />
+            <div className="brand-mark regional-mark">
+              <BrandLogo size={32} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-              <div className="sidebar-brand-name">Science on Wheels</div>
+              <div className="sidebar-brand-name">VIBHA · SciMove</div>
               <div className="sidebar-brand-role">Regional Hub</div>
             </div>
           </div>
@@ -201,7 +201,7 @@ export function RegionalLayout() {
             </button>
 
             <div className="breadcrumbs">
-              <span>Science on Wheels</span>
+              <span>VIBHA · Science on Wheels</span>
               <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
               {activeSection && activeSection.type === "dropdown" && (
                 <>

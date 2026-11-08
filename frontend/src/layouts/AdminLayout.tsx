@@ -46,14 +46,14 @@ export function AdminLayout() {
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">Central Command</span>
+          <span className="status-bar-label">VIBHA · Central Command</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
           <span>Super Administrator Workspace</span>
         </div>
         <div className="status-bar-right">
           <span>Science on Wheels MIS</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
-          <span>Live Region Link Active</span>
+          <span>Live Hub Telemetry Active</span>
         </div>
       </div>
 
@@ -70,12 +70,12 @@ export function AdminLayout() {
         <aside className={`admin-sidebar ${mobileNav ? "open" : ""}`}>
           {/* Brand */}
           <div className="sidebar-brand">
-            <div className="brand-mark" style={{ backgroundColor: "var(--brand)" }}>
-              <BrandLogo size={22} color="#FFFFFF" />
+            <div className="brand-mark">
+              <BrandLogo size={32} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-              <div className="sidebar-brand-name">Science on Wheels</div>
-              <div className="sidebar-brand-role">Central Command</div>
+              <div className="sidebar-brand-name">VIBHA · SciMove</div>
+              <div className="sidebar-brand-role">Science on Wheels</div>
             </div>
           </div>
 
@@ -203,7 +203,7 @@ export function AdminLayout() {
             </button>
 
             <div className="breadcrumbs">
-              <span>Science on Wheels</span>
+              <span>VIBHA · Science on Wheels</span>
               <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
               {activeSection && activeSection.type === "dropdown" && (
                 <>

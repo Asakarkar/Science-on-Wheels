@@ -32,7 +32,7 @@ export function FieldLayout() {
       <div className="status-bar">
         <div className="status-bar-left">
           <div className="status-bar-dot" />
-          <span className="status-bar-label">Field Operations Console</span>
+          <span className="status-bar-label">VIBHA · Field Operations Console</span>
           <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
           <span>Science Communicator Terminal</span>
         </div>
@@ -56,11 +56,11 @@ export function FieldLayout() {
         <aside className={`admin-sidebar field-sidebar ${mobileNav ? "open" : ""}`}>
           {/* Brand */}
           <div className="sidebar-brand field-brand">
-            <div className="brand-mark field-logo" style={{ backgroundColor: "var(--brand)" }}>
-              <BrandLogo size={22} color="#FFFFFF" />
+            <div className="brand-mark field-logo">
+              <BrandLogo size={32} />
             </div>
             <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-              <div className="sidebar-brand-name">Science on Wheels</div>
+              <div className="sidebar-brand-name">VIBHA · SciMove</div>
               <div className="sidebar-brand-role">Field Operations</div>
             </div>
           </div>
@@ -116,7 +116,7 @@ export function FieldLayout() {
             </button>
 
             <div className="breadcrumbs">
-              <span>Science on Wheels</span>
+              <span>VIBHA · Science on Wheels</span>
               <span style={{ color: "var(--text-subtle)", opacity: 0.6 }}>/</span>
               <strong>{activeNav?.label || "Field"}</strong>
             </div>
