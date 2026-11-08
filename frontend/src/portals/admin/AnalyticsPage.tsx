@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiClient, API_BASE_URL } from "../../services/api-client";
+import { HorizontalBarChart, DonutChart } from "../../shared/components/Charts";
 
 const analyticsResource: Record<string, string> = {
   Organization: "regions",
@@ -107,6 +108,31 @@ export function AnalyticsPage() {
                 <strong>{String(v)}</strong>
               </div>
             ))}
+        </div>
+      )}
+
+      {summary && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.25rem", margin: "1.5rem 0" }}>
+          <HorizontalBarChart
+            title="Operational Reach & Resource Metrics"
+            subtitle="Live database aggregation of institutional network and mobile laboratories"
+            data={[
+              { label: "Schools Connected", value: summary.schools || 0, color: "#4f46e5" },
+              { label: "Mobile Science Labs", value: summary.labs || 0, color: "#10b981" },
+              { label: "Field Visits Hosted", value: summary.events || 0, color: "#06b6d4", detail: `${summary.completedEvents || 0} completed` },
+              { label: "Active Field Personnel", value: summary.users || 0, color: "#f59e0b" }
+            ]}
+          />
+          <DonutChart
+            title="Field Session Delivery"
+            subtitle="Ratio of completed visits to scheduled mobile stops"
+            centerLabel="Total Visits"
+            centerValue={summary.events || 0}
+            data={[
+              { label: "Completed", value: summary.completedEvents || 0, color: "#10b981" },
+              { label: "Scheduled / In Progress", value: Math.max((summary.events || 0) - (summary.completedEvents || 0), 0), color: "#4f46e5" }
+            ]}
+          />
         </div>
       )}
 

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../services/api-client";
 import { BrandLogo } from "../../shared/components/BrandLogo";
+import { OperationalCalendar, type CalendarEvent } from "../../shared/components/OperationalCalendar";
+import { HorizontalBarChart, DonutChart } from "../../shared/components/Charts";
 
 interface RegionalDashboardData {
   region: {
@@ -84,6 +86,7 @@ function StatCard({
 
 export function RegionalDashboardPage() {
   const [data, setData] = useState<RegionalDashboardData | null>(null);
+  const [schedules, setSchedules] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -92,8 +95,26 @@ export function RegionalDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiClient<RegionalDashboardData>("/regional-admin/overview");
+      const [res, schedRes] = await Promise.all([
+        apiClient<RegionalDashboardData>("/regional-admin/overview"),
+        apiClient<{ rows: any[] }>("/regional-admin/schedules").catch(() => ({ rows: [] }))
+      ]);
       setData(res);
+      setSchedules(
+        (schedRes.rows || []).map((ev: any) => ({
+          id: ev.id,
+          eventCode: ev.eventCode,
+          title: ev.School?.name || ev.eventCode || "School Visit",
+          schoolName: ev.School?.name || "School Visit",
+          eventDate: ev.eventDate,
+          startTime: ev.startTime,
+          endTime: ev.endTime,
+          busCode: ev.Bus?.busCode || ev.Bus?.registrationNumber,
+          status: ev.status,
+          location: ev.School?.address,
+          communicators: ev.EventsOnCommunicator?.map((c: any) => c.User?.name).filter(Boolean)
+        }))
+      );
     } catch (err: any) {
       console.error("Unable to load regional overview", err);
       setError(err?.message || "Failed to load regional overview data");
@@ -263,6 +284,39 @@ export function RegionalDashboardPage() {
           onClick={() => navigate("/regional/inventory")}
         />
       </div>
+
+      {/* SECTION: VISUAL OPERATIONS CHARTS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <HorizontalBarChart
+          title="Regional Operations & Outreach Progress"
+          subtitle="Key performance metrics across regional schools and mobile fleet"
+          data={[
+            { label: "Active Mobile Labs", value: k.activeBuses, total: Math.max(k.totalBuses, 1), color: "#10b981", detail: `${k.maintenanceBuses} in maintenance` },
+            { label: "Schools Visited", value: k.completedVisits, total: Math.max(k.totalSchools, 1), color: "#4f46e5" },
+            { label: "Staff Deployed", value: k.activeStaff, total: Math.max(k.totalStaff, 1), color: "#06b6d4" },
+            { label: "Pending Visit Reports", value: k.pendingReviews, total: Math.max(k.completedVisits || 1, 1), color: "#f59e0b" }
+          ]}
+        />
+        <DonutChart
+          title="Depot Asset & Equipment Distribution"
+          subtitle="Deployment status of scientific apparatus and laboratory kits"
+          centerLabel="Total Assets"
+          centerValue={k.equipmentTotal}
+          data={[
+            { label: "On Mobile Labs", value: k.equipmentAllocated, color: "#4f46e5" },
+            { label: "Available in Depot", value: k.equipmentAvailable, color: "#10b981" },
+            { label: "In Maintenance / Damaged", value: k.equipmentDamaged + k.equipmentMaintenance, color: "#f59e0b" }
+          ]}
+        />
+      </div>
+
+      {/* SECTION: REGIONAL VISIT SCHEDULE CALENDAR */}
+      <OperationalCalendar
+        events={schedules}
+        title="Regional School Visit Calendar"
+        subtitle="Scheduled mobile laboratory stops, timing, and assigned communicators"
+        onSelectEvent={() => navigate("/regional/schedules")}
+      />
 
       {/* TWO COLUMN DETAIL GRID: (Section B: Inventory & Section C: Visits) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

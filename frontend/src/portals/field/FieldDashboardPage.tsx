@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiClient } from "../../services/api-client";
+import { OperationalCalendar, type CalendarEvent } from "../../shared/components/OperationalCalendar";
+import { DonutChart, HorizontalBarChart } from "../../shared/components/Charts";
 
 interface DashboardData {
   user: {
@@ -61,6 +63,7 @@ interface DashboardData {
 
 export function FieldDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [fieldEvents, setFieldEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionMsg, setActionMsg] = useState("");
@@ -70,8 +73,25 @@ export function FieldDashboardPage() {
     try {
       setLoading(true);
       setError("");
-      const res = await apiClient<DashboardData>("/field/dashboard");
+      const [res, eventsRes] = await Promise.all([
+        apiClient<DashboardData>("/field/dashboard"),
+        apiClient<{ rows: any[] }>("/field/events").catch(() => ({ rows: [] }))
+      ]);
       setData(res);
+      setFieldEvents(
+        (eventsRes.rows || []).map((ev: any) => ({
+          id: ev.id,
+          eventCode: ev.eventCode,
+          title: ev.School?.name || ev.eventCode || "School Visit",
+          schoolName: ev.School?.name || "School Visit",
+          eventDate: ev.eventDate,
+          startTime: ev.startTime,
+          endTime: ev.endTime,
+          busCode: ev.Bus?.registrationNumber || ev.Bus?.busCode,
+          status: ev.status,
+          location: ev.School?.address
+        }))
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load field dashboard");
     } finally {
@@ -221,6 +241,41 @@ export function FieldDashboardPage() {
             <span className="text-xs text-charcoal-subtle">⚠️</span>
           </div>
         </div>
+      </div>
+
+      {/* Visual Charts & Performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <HorizontalBarChart
+          title="Field Delivery & Visit Progress"
+          subtitle="Your on-site science demonstrations and visit completion rate"
+          data={[
+            { label: "Completed Visits", value: data.kpis.completedToday, total: Math.max(data.kpis.todayVisits || 1, 1), color: "#10b981", detail: "Today" },
+            { label: "Upcoming Schedule (14d)", value: data.kpis.upcomingVisits, color: "#4f46e5" },
+            { label: "Pending Visit Reports", value: data.kpis.pendingReports, color: "#f59e0b" },
+            { label: "Bus Equipment Checked", value: data.assignedBus?.equipmentCount || 0, color: "#06b6d4", detail: "Reusable kits" }
+          ]}
+        />
+        <DonutChart
+          title="Visit Execution Distribution"
+          subtitle="Overview of assigned visits and pending documentation"
+          centerLabel="Assigned"
+          centerValue={data.kpis.todayVisits + data.kpis.upcomingVisits}
+          data={[
+            { label: "Completed", value: data.kpis.completedToday, color: "#10b981" },
+            { label: "Scheduled", value: data.kpis.upcomingVisits, color: "#4f46e5" },
+            { label: "Pending Report", value: data.kpis.pendingReports, color: "#f59e0b" }
+          ]}
+        />
+      </div>
+
+      {/* Interactive Operational Schedule Calendar */}
+      <div>
+        <OperationalCalendar
+          events={fieldEvents}
+          title="My Field Visit Calendar"
+          subtitle="Interactive schedule of your assigned mobile science lab stops and schools"
+          onSelectEvent={() => navigate("/field/visits")}
+        />
       </div>
 
       {/* Main Content Columns */}
