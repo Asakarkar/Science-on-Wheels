@@ -79,7 +79,6 @@ export function resolveSchoolCsvPath(): string {
     path.resolve(__dirname, "../../../School.csv"),
     path.resolve(__dirname, "../../School.csv"),
     path.resolve(__dirname, "../../../../School.csv"),
-    "D:\\Aditya Sakarkar\\Project\\science-on-wheels-project\\science-on-wheels-project\\science-on-wheels\\School.csv",
   ];
 
   for (const candidate of candidates) {

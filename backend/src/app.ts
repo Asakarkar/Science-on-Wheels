@@ -7,28 +7,48 @@ import { meRouter } from "./routes/me";
 import { superAdminRouter } from "./routes/superAdmin";
 import { regionalAdminRouter } from "./routes/regionalAdmin";
 import { fieldRouter } from "./routes/field";
+import { prisma } from "./lib/prisma";
 
 export const app = express();
 
-const allowedOrigins = new Set([
-  env.FRONTEND_URL,
+const configuredOrigins = new Set(
+  [env.FRONTEND_URL, env.ALLOWED_ORIGINS]
+    .filter((entry): entry is string => Boolean(entry))
+    .flatMap((entry) => entry.split(","))
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+);
+
+const localDevelopmentOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
   "http://127.0.0.1:5175",
-]);
+];
+
+if (env.NODE_ENV !== "production") {
+  localDevelopmentOrigins.forEach((origin) => configuredOrigins.add(origin));
+}
 
 const localOriginRegex = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin) || localOriginRegex.test(origin)) {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) {
         return callback(null, true);
       }
-      return callback(new Error("CORS origin not allowed: " + origin));
+      const normalizedOrigin = origin.replace(/\/+$/, "");
+      if (
+        configuredOrigins.has(normalizedOrigin) ||
+        (env.NODE_ENV !== "production" && localOriginRegex.test(normalizedOrigin))
+      ) {
+        return callback(null, true);
+      }
+      console.warn(`[CORS] Blocked request from origin: ${origin}`);
+      return callback(null, false);
     },
     credentials: true,
   })
@@ -45,7 +65,15 @@ app.use((_req, res, next) => {
 app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 
-app.get("/api/health", (_req, res) => res.json({ ok: true, service: "science-on-wheels-api" }));
+app.get("/api/health", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ ok: true, service: "science-on-wheels-api" });
+  } catch (error) {
+    console.error("[Health] Database check failed:", error);
+    res.status(503).json({ ok: false, service: "science-on-wheels-api" });
+  }
+});
 app.use("/api/auth", authRouter);
 app.use("/api/me", meRouter);
 app.use("/api/super-admin", superAdminRouter);

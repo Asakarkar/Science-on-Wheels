@@ -4,12 +4,40 @@ import { z } from "zod";
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(5000),
-  FRONTEND_URL: z.string().url(),
-  DATABASE_URL: z.string().min(1),
+  FRONTEND_URL: z
+    .string()
+    .url()
+    .refine((value) => {
+      const url = new URL(value);
+      return url.origin === value.replace(/\/+$/, "");
+    }, "must be an origin URL"),
+  ALLOWED_ORIGINS: z
+    .string()
+    .optional()
+    .refine(
+      (value) =>
+        !value ||
+        value.split(",").every((origin) => {
+          const trimmedOrigin = origin.trim();
+          try {
+            const url = new URL(trimmedOrigin);
+            return (
+              ["http:", "https:"].includes(url.protocol) &&
+              url.origin === trimmedOrigin.replace(/\/+$/, "")
+            );
+          } catch {
+            return false;
+          }
+        }),
+      "must be a comma-separated list of origin URLs"
+    ),
+  DATABASE_URL: z.string().url(),
+  DIRECT_URL: z.string().url().optional(),
   SESSION_SECRET: z.string().min(32),
   BOOTSTRAP_ADMIN_NAME: z.string().min(2),
   BOOTSTRAP_ADMIN_EMAIL: z.string().email(),
   BOOTSTRAP_ADMIN_PASSWORD: z.string().min(12),
+  SEED_DEMO_DATA: z.enum(["true", "false"]).default("false"),
   RESEND_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   SENTRY_DSN: z.string().optional(),

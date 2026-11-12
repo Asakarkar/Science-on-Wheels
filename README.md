@@ -1,7 +1,7 @@
 # Science on Wheels — Mobile STEM Operations & Fleet Platform
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6+-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.19-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
@@ -27,9 +27,8 @@ To maintain laboratory grade custody across mobile buses, field operators execut
 3. **Step C – Reusable Equipment Inspection:** Digital asset health check (Operational, Maintenance Required, Damaged, Lost) for microscopes, robotics kits, and telescopes before and after school sessions.
 4. **Step D – Post-Visit Closing Reconciliation:** Formula-enforced reconciliation ($\text{Opening} - \text{Consumed} = \text{Closing}$) detecting unrecorded shrinkage or field loss.
 
-### 📊 Real-World Data Ingestion Pipelines
-- **Schools Ingestion (`School.csv`):** Ingestion pipeline (`schoolImporter.ts`) parsing authentic school networks, U-DISE identifiers, administrative blocks, student counts, and calendar itineraries.
-- **Master Catalogue Ingestion (`Inventory.csv`):** Real-world inventory pipeline (`inventoryImporter.ts`) registering scientific equipment, serialized asset tags, chemical consumables, minimum thresholds, and initial unit valuations.
+### 📊 Optional CSV Data Ingestion
+- Optional school and inventory importers accept CSV paths through `SCHOOL_CSV_PATH` and `INVENTORY_CSV_PATH`; operational datasets are not bundled with production deployments.
 
 ### 🎨 Refined UI & Interactive Visual Design
 - **Unified Typography:** The entire platform exclusively utilizes the **Roboto** font family for clean readability across data tables, equipment asset matrices, and audit logs.
@@ -67,7 +66,8 @@ science-on-wheels/
 │   │   └── server.ts             # Server entrypoint
 │   ├── prisma/                   # Database schema, migrations & seed pipeline
 │   │   ├── schema.prisma         # Multi-model relational schema with high-cardinality indexes
-│   │   └── seed.ts               # Database seed pipeline with real CSV ingestion
+│   │   ├── migrations/            # Versioned PostgreSQL migrations
+│   │   └── seed.ts               # Admin bootstrap and optional development demo seed
 │   └── tests/                    # Specialized automated test suites
 │       ├── test-regional-admin.js       # Regional operations & custody test suite
 │       ├── test-field-staff.js          # Field execution & reconciliation test suite
@@ -89,26 +89,22 @@ science-on-wheels/
 │   ├── index.html                # HTML5 entrypoint with Google Fonts (Roboto)
 │   └── vite.config.ts            # Vite bundler configuration
 │
-├── Inventory.csv                 # Master scientific inventory & consumable records
-├── School.csv                    # Educational network & scheduled visit dataset
 └── package.json                  # Root monorepo workspace configuration
 ```
 
 ---
 
-## 3. Role-Based Access Control (RBAC) & Default Credentials
+## 3. Role-Based Access Control (RBAC)
 
 Authentication derives regional scope and operational boundaries strictly from the authenticated database session identity. Client-supplied IDs are never trusted.
 
-| Role | Primary Portal Route | Operational Scope | Default Email | Default Password |
-|---|---|---|---|---|
-| `SUPER_ADMIN` | `/admin/dashboard` | Organization-wide administration, global master catalogue, state/district geography, user lifecycle, global immutable audit logs. | `admin@scienceonwheels.com` | `Admin@123456` |
-| `REGIONAL_ADMIN` | `/regional/dashboard` | Scoped regional fleet administration (max 5 buses), school onboarding, staff assignments, visit scheduling, inventory depot custody, report review. | `regional@scienceonwheels.com` | `RegionalAdmin@123456` |
-| `SCIENCE_COMMUNICATOR` | `/field/dashboard` | Mobile laboratory execution, 4-step bus inventory reconciliation, session attendance logging, visit report drafting, operational incident escalation. | `field@scienceonwheels.com` | `FieldOperator@123456` |
+| Role | Primary Portal Route | Operational Scope |
+|---|---|---|
+| `SUPER_ADMIN` | `/admin/dashboard` | Organization-wide administration, global master catalogue, state/district geography, user lifecycle, global immutable audit logs. |
+| `REGIONAL_ADMIN` | `/regional/dashboard` | Scoped regional fleet administration (max 5 buses), school onboarding, staff assignments, visit scheduling, inventory depot custody, report review. |
+| `SCIENCE_COMMUNICATOR` | `/field/dashboard` | Mobile laboratory execution, 4-step bus inventory reconciliation, session attendance logging, visit report drafting, operational incident escalation. |
 
-*Additional concurrent test accounts seeded:*
-- Regional Admin 2: `regional2@scienceonwheels.com` (`RegionalAdmin2@123456`)
-- Field Operator 2: `field2@scienceonwheels.com` (`FieldOperator2@123456`)
+There are no default production credentials. The bootstrap Super Admin is created from the backend environment variables.
 
 ---
 
@@ -150,7 +146,7 @@ Authentication derives regional scope and operational boundaries strictly from t
 ## 5. Getting Started
 
 ### Prerequisites
-- **Node.js**: v20.x or higher
+- **Node.js**: v22.x
 - **npm**: v10.x or higher
 - **PostgreSQL**: v15.x or higher (Supabase transaction pooler on port 6543 supported)
 
@@ -177,7 +173,7 @@ SESSION_SECRET=your-secure-random-session-secret-at-least-32-characters
 # Initial Super Admin
 BOOTSTRAP_ADMIN_NAME="Super Admin"
 BOOTSTRAP_ADMIN_EMAIL=admin@scienceonwheels.com
-BOOTSTRAP_ADMIN_PASSWORD=Admin@123456
+BOOTSTRAP_ADMIN_PASSWORD=replace-with-a-private-password-at-least-12-characters
 ```
 
 #### Frontend Configuration
@@ -190,10 +186,17 @@ Key frontend variables:
 VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
-### 2. Database Migration & CSV Seeding
+Install the frontend dependencies from its workspace directory:
+```bash
+cd frontend
+npm ci --workspaces=false
+cd ..
+```
+
+### 2. Database Migration & Bootstrap
 ```bash
 cd backend
-npm install
+npm ci --workspaces=false
 
 # Generate Prisma Client
 npm run prisma:generate
@@ -201,9 +204,12 @@ npm run prisma:generate
 # Execute database migrations
 npm run prisma:migrate
 
-# Seed permissions, roles, users, mobile labs, School.csv and Inventory.csv
+# Create roles, permissions, and the configured bootstrap Super Admin
 npm run seed
+cd ..
 ```
+
+For local demo data, set `SEED_DEMO_DATA=true` and provide both CSV files using `SCHOOL_CSV_PATH` and `INVENTORY_CSV_PATH` before running the seed. Production seeding intentionally excludes demo accounts and CSV imports. See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for the production migration and seed commands.
 
 ### 3. Running Development Servers
 

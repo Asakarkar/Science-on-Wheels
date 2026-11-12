@@ -30,6 +30,8 @@ const permissionKeys = [
 
 async function main() {
   console.log("Starting Science on Wheels database seed...");
+  const seedDemoData =
+    env.NODE_ENV === "development" && env.SEED_DEMO_DATA === "true";
 
   // --------------------------------------------------
   // 1. Create permissions (parallel)
@@ -152,17 +154,6 @@ async function main() {
   });
 
   // --------------------------------------------------
-  // 6. Get other roles
-  // --------------------------------------------------
-  const regionalRole = await prisma.role.findUniqueOrThrow({
-    where: { name: "REGIONAL_ADMIN" },
-  });
-
-  const fieldRole = await prisma.role.findUniqueOrThrow({
-    where: { name: "SCIENCE_COMMUNICATOR" },
-  });
-
-  // --------------------------------------------------
   // 7. Create / update bootstrap Super Admin
   // --------------------------------------------------
   const email = env.BOOTSTRAP_ADMIN_EMAIL.toLowerCase();
@@ -189,7 +180,6 @@ async function main() {
         roleId: adminRole.id,
         isActive: true,
         status: "ACTIVE",
-        passwordHash,
       },
     });
 
@@ -209,6 +199,20 @@ async function main() {
 
     console.log(`Super Admin created: ${admin.email}`);
   }
+
+  if (!seedDemoData) {
+    console.log(`Bootstrap Super Admin ready: ${admin.email}`);
+    console.log("Demo data seeded: false");
+    return;
+  }
+
+  const regionalRole = await prisma.role.findUniqueOrThrow({
+    where: { name: "REGIONAL_ADMIN" },
+  });
+
+  const fieldRole = await prisma.role.findUniqueOrThrow({
+    where: { name: "SCIENCE_COMMUNICATOR" },
+  });
 
   // --------------------------------------------------
   // 8. Create / update Regional Administrator
@@ -425,10 +429,8 @@ async function main() {
   console.log("========================================");
   console.log("Science on Wheels RBAC bootstrap complete");
   console.log("========================================");
-  console.log(`1. Super Admin: ${admin.email} (password: ${env.BOOTSTRAP_ADMIN_PASSWORD})`);
-  console.log(`2. Regional Admin: ${regionalAdmin.email} (password: RegionalAdmin@123456)`);
-  console.log(`3. Field Operator: ${fieldOperator.email} (password: FieldOperator@123456)`);
-  console.log("========================================");
+  console.log(`Bootstrap Super Admin ready: ${admin.email}`);
+  console.log("Demo data seeded: true");
 }
 
 main()

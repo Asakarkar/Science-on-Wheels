@@ -1,4 +1,5 @@
 import type { ResourceConfig } from "../../shared/types/admin";
+import { API_BASE_URL } from "../../services/api-client";
 
 export const configs: Record<string, ResourceConfig> = {
   regions: {
@@ -465,6 +466,6 @@ export const analyticsResource: Record<string, string> = {
 };
 
 export function csvDownload(resource: string) {
-  const url = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/super-admin/reports/${resource}.csv`;
+  const url = `${API_BASE_URL}/super-admin/reports/${resource}.csv`;
   window.open(url, "_blank");
 }

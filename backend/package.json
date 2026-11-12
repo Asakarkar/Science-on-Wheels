@@ -1,11 +1,13 @@
 {
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/src/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
     "seed": "tsx prisma/seed.ts",
+    "seed:prod": "node dist/prisma/seed.js",
     "test:regional": "node --env-file=.env tests/test-regional-admin.js",
     "test:field": "node --env-file=.env tests/test-field-staff.js",
     "test:rbac": "node --env-file=.env tests/test-rbac.js",
