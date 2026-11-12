@@ -37,15 +37,16 @@ Only baseline a database after confirming its schema exactly matches the initial
 
 1. Import the same Git repository into Vercel.
 2. Set **Root Directory** to `frontend`. Keep the project as a Vite app; [`frontend/vercel.json`](./frontend/vercel.json) configures clean installation, build, `dist` output, and SPA route rewrites.
-3. Set **Production** environment variable `VITE_API_BASE_URL` to the Render API URL plus `/api`, for example `https://science-on-wheels-api.onrender.com/api`.
+3. Set **Production** environment variable `VITE_API_BASE_URL` to `https://science-on-wheels.onrender.com/api`.
 4. Keep Node.js at `22.x` (already set in `frontend/package.json`).
-5. Add the production Vercel domain in the Render service's `FRONTEND_URL`. Add any other trusted production domains to `ALLOWED_ORIGINS`.
+5. Add the exact production Vercel origin (scheme and hostname only, no path or trailing slash) in the Render service's `FRONTEND_URL`. Add any other trusted production origins to `ALLOWED_ORIGINS`. The API does not allow arbitrary origins when credentials are enabled.
 
 Vercel builds a preview deployment for each branch. Preview origins are not automatically allowed by the API. For preview testing, use a stable, explicitly configured preview domain and a staging API/database rather than opening CORS to all Vercel preview URLs.
 
 ## 3. Release checks
 
 - Wait for the Render service health check to pass and verify `https://<render-service>.onrender.com/api/health` returns `200`.
+- Verify `https://science-on-wheels.onrender.com/` returns the API's healthy status JSON.
 - Open the Vercel URL, sign in with the configured bootstrap administrator, and refresh a nested route to verify SPA rewrites.
 - Back up PostgreSQL before the first release and verify that backups can be restored.
 - Render's automatic deployment uses the connected Git branch; Vercel also deploys pushed commits. Commit and push the intended changes before expecting either provider to build them.

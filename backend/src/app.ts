@@ -51,6 +51,14 @@ app.use(
       return callback(null, false);
     },
     credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Authorization",
+      "Content-Type",
+      "X-Refresh-Token",
+      "X-Session-Token",
+    ],
+    maxAge: 600,
   })
 );
 
@@ -65,13 +73,33 @@ app.use((_req, res, next) => {
 app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 
+app.get("/", (_req, res) => {
+  res.json({
+    success: true,
+    message: "Science on Wheels API is running",
+    status: "healthy",
+  });
+});
+
 app.get("/api/health", async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ ok: true, service: "science-on-wheels-api" });
+    res.json({
+      ok: true,
+      service: "science-on-wheels-api",
+      success: true,
+      message: "Science on Wheels API and database are healthy",
+      status: "healthy",
+    });
   } catch (error) {
     console.error("[Health] Database check failed:", error);
-    res.status(503).json({ ok: false, service: "science-on-wheels-api" });
+    res.status(503).json({
+      ok: false,
+      service: "science-on-wheels-api",
+      success: false,
+      message: "Science on Wheels API database is unavailable",
+      status: "unhealthy",
+    });
   }
 });
 app.use("/api/auth", authRouter);

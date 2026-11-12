@@ -1,5 +1,13 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const defaultApiUrl = import.meta.env.PROD
+  ? "https://science-on-wheels.onrender.com/api"
+  : "http://localhost:5000/api";
+const normalizedApiUrl = (configuredApiUrl || defaultApiUrl).replace(/\/+$/, "");
+
+export const API_BASE_URL = /\/api$/i.test(normalizedApiUrl)
+  ? normalizedApiUrl
+  : `${normalizedApiUrl}/api`;
+const baseUrl = API_BASE_URL;
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
@@ -78,6 +86,7 @@ async function attemptTokenRefresh(): Promise<string | null> {
     try {
       const response = await fetch(`${baseUrl}/auth/refresh`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
@@ -113,20 +122,20 @@ export async function api<T>(
   path: string,
   init?: RequestInit
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(init?.headers as Record<string, string> || {})
-  };
+  const headers = new Headers(init?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
   const token = getStoredSessionToken();
-  if (token && !headers["Authorization"]) {
-    headers["Authorization"] = `Bearer ${token}`;
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const response = await fetch(`${baseUrl}${path}`, {
+    ...init,
     credentials: "include",
     headers,
-    ...init
   });
 
   // Handle automatic token refresh on HTTP 401 Unauthorized
@@ -139,15 +148,13 @@ export async function api<T>(
     const newAccessToken = await attemptTokenRefresh();
     if (newAccessToken) {
       // Retry original request with newly issued access token
-      const retryHeaders = {
-        ...headers,
-        Authorization: `Bearer ${newAccessToken}`,
-      };
+      const retryHeaders = new Headers(headers);
+      retryHeaders.set("Authorization", `Bearer ${newAccessToken}`);
 
       const retryResponse = await fetch(`${baseUrl}${path}`, {
+        ...init,
         credentials: "include",
         headers: retryHeaders,
-        ...init,
       });
 
       if (!retryResponse.ok) {
