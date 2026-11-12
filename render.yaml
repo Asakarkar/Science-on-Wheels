@@ -1,15 +1,18 @@
 services:
   - type: web
     name: science-on-wheels-api
-    runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci --workspaces=false && npm run build
+    startCommand: npm start
     healthCheckPath: /api/health
     preDeployCommand: npx prisma migrate deploy
     initialDeployHook: npm run seed:prod
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 22.22.1
       - key: PORT
         value: "10000"
       - key: FRONTEND_URL

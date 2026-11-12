@@ -1,10 +1,10 @@
 # Deploy with Vercel and Render
 
-The React/Vite frontend is configured for Vercel. The Express/Prisma API is configured as a Docker web service on Render. PostgreSQL is managed separately; use Render Postgres or another provider.
+The React/Vite frontend is configured for Vercel. The Express/Prisma API is configured as a native Node web service on Render. PostgreSQL is managed separately; use Render Postgres or another provider.
 
 ## 1. Deploy the API on Render
 
-1. Push the project to a Git provider connected to Render. In the Render Dashboard, create a **Blueprint** from the repository root; Render reads [`render.yaml`](./render.yaml).
+1. Push the project to a Git provider connected to Render. In the Render Dashboard, create a **Blueprint** from the repository root; Render reads [`render.yaml`](./render.yaml). The service uses `backend` as its root directory, builds with the committed backend lockfile, and starts the compiled API.
 2. Select a paid web-service plan. This Blueprint runs Prisma migrations with Render's `preDeployCommand`, which requires a paid plan.
 3. Create or select a PostgreSQL database. For Render Postgres, use the internal connection URL when the database and service share a region. Set both `DATABASE_URL` and `DIRECT_URL` to that URL unless your provider supplies separate pooled and direct URLs.
 4. Enter the Blueprint's `sync: false` values in Render's environment prompt:
@@ -12,7 +12,7 @@ The React/Vite frontend is configured for Vercel. The Express/Prisma API is conf
    - `ALLOWED_ORIGINS`: exact additional browser origins, comma-separated. Keep this to trusted production domains.
    - `DATABASE_URL` and `DIRECT_URL`: valid PostgreSQL URLs reachable by the service.
    - `BOOTSTRAP_ADMIN_NAME`, `BOOTSTRAP_ADMIN_EMAIL`, and `BOOTSTRAP_ADMIN_PASSWORD`: your initial administrator. Use a unique password of at least 12 characters.
-5. Render generates `SESSION_SECRET` and sets `PORT=10000`. The service binds to `0.0.0.0` and uses `/api/health` for health checks.
+5. Render generates `SESSION_SECRET` and sets `PORT=10000`. The service uses Node.js 22, binds to `0.0.0.0`, and uses `/api/health` for health checks.
 
 On the initial successful deploy, Render applies migrations before starting the service and then runs the one-time production seed. The seed creates the configured Super Admin and required permissions; it does not create fixed-password demo users or import CSV data. It will not reset an existing administrator's password. Subsequent deploys run migrations automatically before switching traffic.
 
